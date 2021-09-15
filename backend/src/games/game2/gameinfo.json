@@ -1,0 +1,8 @@
+{
+  "altname": "Game Two",
+  "icon": "https://i.pinimg.com/originals/4f/f1/39/4ff1399596a83ae049d3575ee7ee5aba.jpg",
+  "desiredFilesInPath": [
+    "one.exe",
+    "another.cfg"
+  ]
+}

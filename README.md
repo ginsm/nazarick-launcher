@@ -1,0 +1,1 @@
+# gameserver-mod-updater

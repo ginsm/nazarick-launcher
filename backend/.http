@@ -1,0 +1,41 @@
+# REST Client for Nazarick Mod Loader
+
+# API Endpoints:
+# /games
+# /download/:game/:mods
+
+# Retrieving the list of games
+GET http://localhost:4000/games
+
+###
+
+# Retrieve modlist
+GET http://localhost:4000/game/game1/modlist
+
+###
+
+# Invalid Game
+GET http://localhost:4000/game/gamenotfound/modlist
+
+
+###
+
+# Downloading mods (valid game)
+GET http://localhost:4000/game/game1/download/mod1,mod3
+
+
+###
+
+# Download mods (invalid game)
+GET http://localhost:4000/game/gamenotfound/download/mod1,mod4
+
+
+###
+
+# Download invalid mod (valid game)
+GET http://localhost:4000/game/game1/download/mod4
+
+###
+
+# Download valid mods, ignore invalid mods
+GET http://localhost:4000/game/game1/download/mod1,mod2,mod5
