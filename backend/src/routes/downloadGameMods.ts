@@ -14,8 +14,9 @@ export default async function downloadGameMods(req, res) {
     const mods = await parseFile(modlistPath);
 
     try {
-      const requestedMods = req.params.mods.split(',')
-        .filter((mod) => hasOwnProp(mods, mod));
+      const requestedMods = Object.keys(req.body)
+          .filter((mod) => hasOwnProp(mods, mod));
+
 
       if (!requestedMods.length) {
         return res.status(400).send({
@@ -25,17 +26,23 @@ export default async function downloadGameMods(req, res) {
 
       res.writeHead(200, {
         "Content-Type": "application/zip",
-        "Content-disposition": "attachment; filename=requestedmods.zip"
+        "Content-disposition": `attachment; filename=${game}-updated-mods.zip`
       });
 
       const zip = Archiver("zip", { zlib: { level: 9 } });
       zip.pipe(res);
 
       for (let mod of requestedMods) {
-        zip.glob("**/*", {
-          cwd: path.join(gamesDirectory, game, "mods", mod),
-          ignore: ["modinfo.json"]
-        });
+        const files = mods[mod].files.map(({trace}) => trace);
+
+        for (let id of req.body[mod]) {
+          if (files.length - 1 >= Number(id)) { // Ensure the index is within bounds
+            zip.file(
+              path.join(gamesDirectory, game, "mods", mod, ...files[id].split("/")),
+              { name: files[id] }
+            );
+          }
+        }
       }
 
       return zip.finalize();
@@ -44,7 +51,7 @@ export default async function downloadGameMods(req, res) {
     catch (error) {
       return res.status(500).send({ error: 'Error occured while trying to zip requested mods.' });
     }
-  }
+  } 
 
   res.status(400).send({ error: "Invalid game ID supplied; check /games endpoint" });
 }

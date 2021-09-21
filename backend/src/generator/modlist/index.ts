@@ -23,7 +23,6 @@ export default async function generateModList(gamePath: string = "", game: strin
 
       const files = await indexMod(
         path.join(pathTo.mods, name), // path to the mod
-        name, // used for trace, i.e. modName/dir/file.ext
       );
 
       // Establish when files were last updated

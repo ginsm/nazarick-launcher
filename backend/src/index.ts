@@ -43,11 +43,13 @@ const morganTokens = '[:date[web]] (:remote-addr) :method :url (:status) "HTTP/:
 app.use(Morgan(morganTokens)); // log to console
 app.use(Morgan(morganTokens, { stream: accessLogStream })); // save to access.log
 
+app.use(Express.json());
+
 
 // SECTION - Routes
 app.get('/games', getGamelist);
 app.get('/game/:id/modlist', getGameModlist);
-app.get('/game/:id/download/:mods', downloadGameMods);
+app.get('/game/:id/download/', downloadGameMods);
 
 
 // SECTION - Start the server! :)
