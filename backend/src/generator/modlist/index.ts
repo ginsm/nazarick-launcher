@@ -27,24 +27,23 @@ export default async function generateModList(gamePath: string = "", game: strin
       );
 
       // Establish when files were last updated
-      let lastUpdated = null;
-
+      let lastModified = null;
+      
       if (hasOwnProp(oldMods, name)) {
         const filesRemoved = oldMods[name].files.length > files.length;
-        lastUpdated = filesRemoved ? Date.now() : oldMods[name].lastUpdated;
+        lastModified = filesRemoved ? Date.now() : oldMods[name].lastModified;
       }
 
       for (let file of files) {
-        const stats = await fs.stat(path.join(pathTo.mods, file));
-        if (stats.mtimeMs > lastUpdated) {
-          lastUpdated = stats.mtimeMs;
+        if (file.lastModified > lastModified) {
+          lastModified = file.lastModified;
         }
       }
 
-      // Add the mod to mods
+      // Add to the mod object
       mods[name] = {
         ...modinfo,
-        lastUpdated,
+        lastModified,
         files,
       };
     }

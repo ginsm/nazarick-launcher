@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 
 
@@ -9,19 +9,26 @@ export default async function indexMod(root: string = "", trace: string = "", ar
   // iterate over the directory's files
   for (let file of files) {
     const name = file.name;
+    const filePath = path.join(root, name);
+    const output = {
+      trace: path.join(trace, name),
+      lastModified: 0,
+    };
 
     if (name === "modinfo.json") continue;
 
     if (file.isDirectory()) {
       arr.concat(await indexMod(
-        path.join(root, name),
-        path.join(trace, name),
+        filePath,
+        output.trace,
         arr
       ));
       continue;
     }
 
-    arr.push(path.join(trace, name));
+    output.lastModified = (await fs.stat(filePath)).mtimeMs;
+
+    arr.push(output);
   }
 
   // return the result

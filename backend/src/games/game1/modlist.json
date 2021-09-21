@@ -2,28 +2,49 @@
   "mod1": {
     "required": false,
     "link": "#some-external-site",
-    "lastUpdated": 1631224640000,
+    "lastModified": 1631224640000,
     "files": [
-      "mod1/mods/mod1.cfg",
-      "mod1/mods/mod1.mod"
+      {
+        "trace": "mod1/mods/mod1.cfg",
+        "lastModified": 1631224640000
+      },
+      {
+        "trace": "mod1/mods/mod1.mod",
+        "lastModified": 1631224640000
+      }
     ]
   },
   "mod2": {
     "required": true,
-    "lastUpdated": 1631224640000,
+    "lastModified": 1631224640000,
     "files": [
-      "mod2/config/mod2.cfg",
-      "mod2/mods/mod2.mod"
+      {
+        "trace": "mod2/config/mod2.cfg",
+        "lastModified": 1631224640000
+      },
+      {
+        "trace": "mod2/mods/mod2.mod",
+        "lastModified": 1631224640000
+      }
     ]
   },
   "mod3": {
     "required": true,
     "link": "https://google.com",
-    "lastUpdated": 1631224640000,
+    "lastModified": 1631224640000,
     "files": [
-      "mod3/config/mod3.cfg",
-      "mod3/mods/mod3.mod",
-      "mod3/patches/mod3.patch"
+      {
+        "trace": "mod3/config/mod3.cfg",
+        "lastModified": 1631224640000
+      },
+      {
+        "trace": "mod3/mods/mod3.mod",
+        "lastModified": 1631224640000
+      },
+      {
+        "trace": "mod3/patches/mod3.patch",
+        "lastModified": 1631224640000
+      }
     ]
   }
 }
