@@ -34,12 +34,12 @@ export default async function downloadGameMods(req, res) {
 
       for (let mod of requestedMods) {
         const files = mods[mod].files.map(({trace}) => trace);
-
+        
         for (let id of req.body[mod]) {
           if (files.length - 1 >= Number(id)) { // Ensure the index is within bounds
             zip.file(
-              path.join(gamesDirectory, game, "mods", mod, ...files[id].split("/")),
-              { name: files[id] }
+              path.join(gamesDirectory, game, "mods", mod, ...files[id]),
+              { name: files[id].join("/") }
             );
           }
         }

@@ -4,11 +4,17 @@
     "lastModified": 1632190414433.7397,
     "files": [
       {
-        "trace": "config/mod1.cfg",
+        "trace": [
+          "config",
+          "mod1.cfg"
+        ],
         "lastModified": 1632190414433.7397
       },
       {
-        "trace": "mods/mod1.mod",
+        "trace": [
+          "mods",
+          "mod1.mod"
+        ],
         "lastModified": 1632190414433.7397
       }
     ]
@@ -19,19 +25,31 @@
     "lastModified": 1632193239800.4258,
     "files": [
       {
-        "trace": "config/mod2.cfg",
+        "trace": [
+          "config",
+          "mod2.cfg"
+        ],
         "lastModified": 1632190414433.7397
       },
       {
-        "trace": "mods/mod2-extra.mod",
+        "trace": [
+          "mods",
+          "mod2-extra.mod"
+        ],
         "lastModified": 1632193239800.4258
       },
       {
-        "trace": "mods/mod2.mod",
+        "trace": [
+          "mods",
+          "mod2.mod"
+        ],
         "lastModified": 1632190414433.7397
       },
       {
-        "trace": "patches/mod2.patch",
+        "trace": [
+          "patches",
+          "mod2.patch"
+        ],
         "lastModified": 1632190414433.7397
       }
     ]

@@ -2,7 +2,7 @@ import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 
 
-export default async function indexMod(root: string = "", trace: string = "", arr: Array<any> = []) {
+export default async function indexMod(root: string = "", trace: Array<string> = [], arr: Array<any> = []) {
   // retrieve the files
   const files = await fs.readdir(root, { withFileTypes: true });
 
@@ -11,7 +11,7 @@ export default async function indexMod(root: string = "", trace: string = "", ar
     const name = file.name;
     const filePath = path.join(root, name);
     const output = {
-      trace: path.join(trace, name),
+      trace: trace.concat(name),
       lastModified: 0,
     };
 
