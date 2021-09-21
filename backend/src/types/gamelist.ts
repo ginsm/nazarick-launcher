@@ -5,7 +5,7 @@ export interface GameInfo {
 }
 
 export interface Game extends GameInfo {
-  lastUpdated: number,
+  lastModified: number,
 };
 
 export type GameList = Record<string, Game>;

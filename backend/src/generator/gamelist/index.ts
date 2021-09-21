@@ -21,16 +21,16 @@ export default async function generateGameList(gamesDirectory: string = "") {
 
       // Helps the initializer determine whether it should check for
       // updated mods
-      const lastUpdated: number = Object.values(modlist).reduce((latest: number, mod: Mod) => {
-        if (hasOwnProp(mod, 'lastUpdated')) {
-          return latest > mod.lastUpdated ? latest : mod.lastUpdated;
+      const lastModified: number = Object.values(modlist).reduce((latest: number, mod: Mod) => {
+        if (hasOwnProp(mod, 'lastModified')) {
+          return latest > mod.lastModified ? latest : mod.lastModified;
         }
         return latest;
       }, 0);
 
       games[name] = {
         ...gameinfo,
-        lastUpdated: lastUpdated,
+        lastModified: lastModified,
       };
     }
   }

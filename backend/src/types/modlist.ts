@@ -6,7 +6,8 @@ export interface ModInfo {
 };
 
 export interface Mod extends ModInfo {
-  lastUpdated: number | null,
+  lastModified
+  : number | null,
   files: Array<string>,
 };
 
