@@ -8,4 +8,5 @@ export interface Game extends GameInfo {
   lastModified: number,
 };
 
-export type GameList = Record<string, Game>;
+export type GameName = string;
+export type GameList = Record<GameName, Game>;
