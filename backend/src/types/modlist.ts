@@ -11,8 +11,7 @@ export interface File {
 }
 
 export interface Mod extends ModInfo {
-  lastModified
-  : number | null,
+  lastModified: number | null,
   files: Array<File>,
 };
 
