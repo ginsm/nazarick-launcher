@@ -3,9 +3,9 @@ import * as path from 'path';
 
 
 import generateModList from '../modlist';
-import { parseFile, hasOwnProp } from '@utilities';
-import { Mod } from '@type/modlist';
-import { GameList, GameInfo } from '@type/gamelist';
+import { parseFile, hasOwnProp } from 'src/utilities';
+import { Mod } from 'src/types/modlist';
+import { GameList, GameInfo } from 'src/types/gamelist';
 
 
 export default async function generateGameList(gamesDirectory: string = "") {

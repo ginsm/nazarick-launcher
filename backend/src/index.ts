@@ -35,13 +35,15 @@ app.use(RateLimit({
 }));
 
 // Set up morgan (logger)
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'access.log'), { flags: 'a' }
-);
-const morganTokens = '[:date[web]] (:remote-addr) :method :url (:status) "HTTP/:http-version - :user-agent"';
-
-app.use(Morgan(morganTokens)); // log to console
-app.use(Morgan(morganTokens, { stream: accessLogStream })); // save to access.log
+if (process.env.NODE_ENV !== "test") {
+  const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'), { flags: 'a' }
+  );
+  const morganTokens = '[:date[web]] (:remote-addr) :method :url (:status) "HTTP/:http-version - :user-agent"';
+  
+  app.use(Morgan(morganTokens)); // log to console
+  app.use(Morgan(morganTokens, { stream: accessLogStream })); // save to access.log
+}
 
 app.use(Express.json());
 
@@ -56,3 +58,5 @@ app.get('/game/:id/download/', downloadGameMods);
 app.listen(PORT, () => {
   console.log(`Express: Listening on port ${PORT}`);
 });
+
+export default app; // for testing purposes

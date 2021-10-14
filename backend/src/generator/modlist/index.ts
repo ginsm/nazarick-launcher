@@ -2,8 +2,8 @@ import { Dirent, promises as fs } from 'fs';
 import * as path from 'path';
 
 import indexMod from './indexMod';
-import { parseFile, hasOwnProp } from '@utilities';
-import { ModList, ModInfo } from '@type/modlist';
+import { parseFile, hasOwnProp } from 'src/utilities';
+import { ModList, ModInfo } from 'src/types/modlist';
 
 export default async function generateModList(gamePath: string = "", game: string = "") {
   const pathTo = {

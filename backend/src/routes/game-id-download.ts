@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import Archiver from 'archiver';
 
-import { parseFile, isValidGame, hasOwnProp } from '@utilities';
+import { parseFile, isValidGame, hasOwnProp } from 'src/utilities';
 
 
 export default async function downloadGameMods(req, res) {
@@ -19,14 +19,14 @@ export default async function downloadGameMods(req, res) {
 
 
       if (!requestedMods.length) {
-        return res.status(400).send({
+        return res.status(400).json({
           error: `No valid mod names supplied; check /game/${game}/modlist endpoint`
         });
       }
 
       res.writeHead(200, {
         "Content-Type": "application/zip",
-        "Content-disposition": `attachment; filename=${game}-updated-mods.zip`
+        "Content-disposition": `attachment; filename=${game}-requested-mods.zip`
       });
 
       const zip = Archiver("zip", { zlib: { level: 9 } });
@@ -34,8 +34,9 @@ export default async function downloadGameMods(req, res) {
 
       for (let mod of requestedMods) {
         const files = mods[mod].files.map(({trace}) => trace);
+        const sanitizer = (val: number) => typeof val === 'number';
         
-        for (let id of req.body[mod].filter(Number)) {
+        for (let id of req.body[mod].filter(sanitizer)) {
           if (files.length - 1 >= Number(id)) { // Ensure the index is within bounds
             zip.file(
               path.join(gamesDirectory, game, "mods", mod, ...files[id]),
@@ -49,9 +50,9 @@ export default async function downloadGameMods(req, res) {
     }
 
     catch (error) {
-      return res.status(500).send({ error: 'Error occured while trying to zip requested mods.' });
+      return res.status(500).json({ error: 'Error occured while trying to zip requested mods.' });
     }
   } 
 
-  res.status(400).send({ error: "Invalid game ID supplied; check /games endpoint" });
+  res.status(400).json({ error: "Invalid game ID supplied; check /games endpoint" });
 }
