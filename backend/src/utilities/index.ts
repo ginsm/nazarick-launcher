@@ -14,14 +14,6 @@ export function hasOwnProp(obj: Record<string, any> = {}, prop: string = ''): bo
 }
 
 
-export function hasProperties(obj: Record<string, any> = {}) {
-  if (isObject(obj)) {
-    return Object.keys(obj).length;
-  }
-  return false;
-}
-
-
 async function fileParser(filePath: string = '') {
   try {
     return JSON.parse((await fs.readFile(filePath)).toString());
