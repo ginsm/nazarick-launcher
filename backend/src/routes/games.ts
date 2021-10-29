@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { parseFile, hasProperties } from 'src/utilities';
+import { parseFile } from 'src/utilities';
 
 export default async function getGamelist(req, res) {
   const gamesDirectory = process.env.GAMES_ROOT;
