@@ -18,9 +18,10 @@ const {
 } = require('./routes');
 
 // SECTION - Generate gameslist & modlists
-const gamesDirectory = process.env.GAMES_ROOT;
-generateGameList(gamesDirectory)
-  .catch(console.error);
+if (!process.env.PREVENT_LIST_GENERATION) {
+  generateGameList(process.env.GAMES_ROOT)
+    .catch(console.error);
+}
 
 
 // SECTION - Initialize Express
