@@ -11,18 +11,17 @@ import Morgan from 'morgan';
 import Helmet from 'helmet';
 
 import generateGameList from './generator/gamelist';
-const {
+import {
   getGamelist,
   getGameModlist,
   downloadGameMods,
-} = require('./routes');
+} from './routes/index';
 
 // SECTION - Generate gameslist & modlists
 if (!process.env.PREVENT_LIST_GENERATION) {
   generateGameList(process.env.GAMES_ROOT)
     .catch(console.error);
 }
-
 
 // SECTION - Initialize Express
 const app = Express();
