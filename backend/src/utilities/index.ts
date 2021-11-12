@@ -1,3 +1,7 @@
+// FIXME
+// This file doesn't have access to the .env variables at runtime.
+// I'll look into why at a later point.
+require('dotenv').config();
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
@@ -9,14 +13,6 @@ export function isObject(obj: Record<string, any> = {}): boolean {
 export function hasOwnProp(obj: Record<string, any> = {}, prop: string = ''): boolean {
   if (isObject(obj)) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
-  }
-  return false;
-}
-
-
-export function hasProperties(obj: Record<string, any> = {}) {
-  if (isObject(obj)) {
-    return Object.keys(obj).length;
   }
   return false;
 }
@@ -34,7 +30,7 @@ async function fileParser(filePath: string = '') {
 // Memoize and export fileParser as parseFile
 export const parseFile: typeof fileParser = memoize(
   fileParser,
-  parseInt(`${process.env.RECACHE_TIME}`, 10),
+  parseInt(process.env.RECACHE_TIME, 10), 
 );
 
 
@@ -47,12 +43,13 @@ export async function isValidGame(game: string = ''): Promise<boolean> {
 
 export function memoize(func: Function, maxAge: number = 0) {
   const cache = {};
+  const maximumAge = maxAge;
 
   return function () {
     const key = JSON.stringify(arguments);
 
     if (hasOwnProp(cache, key) && cache[key]) {
-      if (maxAge && (Date.now() - cache[key].age > maxAge)) {
+      if (maximumAge && (Date.now() - cache[key].age > maximumAge)) {
         cache[key].age = Date.now();
       } else {
         return cache[key].value;

@@ -1,6 +1,6 @@
-import getGamelist from './getGamelist';
-import downloadGameMods from './downloadGameMods';
-import getGameModlist from './getGameModlist';
+import getGamelist from './games';
+import downloadGameMods from './game-id-download';
+import getGameModlist from './game-id-modlist';
 
 export {
   getGamelist,

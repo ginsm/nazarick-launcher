@@ -2,8 +2,8 @@ import { Dirent, promises as fs } from 'fs';
 import * as path from 'path';
 
 import indexMod from './indexMod';
-import { parseFile, hasOwnProp } from '@utilities';
-import { ModList, ModInfo } from '@type/modlist';
+import { parseFile, hasOwnProp } from 'src/utilities';
+import { ModList, ModInfo } from 'src/types/modlist';
 
 export default async function generateModList(gamePath: string = "", game: string = "") {
   const pathTo = {
@@ -23,28 +23,26 @@ export default async function generateModList(gamePath: string = "", game: strin
 
       const files = await indexMod(
         path.join(pathTo.mods, name), // path to the mod
-        name, // used for trace, i.e. modName/dir/file.ext
       );
 
       // Establish when files were last updated
-      let lastUpdated = null;
-
+      let lastModified = null;
+      
       if (hasOwnProp(oldMods, name)) {
         const filesRemoved = oldMods[name].files.length > files.length;
-        lastUpdated = filesRemoved ? Date.now() : oldMods[name].lastUpdated;
+        lastModified = filesRemoved ? Date.now() : oldMods[name].lastModified;
       }
 
       for (let file of files) {
-        const stats = await fs.stat(path.join(pathTo.mods, file));
-        if (stats.mtimeMs > lastUpdated) {
-          lastUpdated = stats.mtimeMs;
+        if (file.lastModified > lastModified) {
+          lastModified = file.lastModified;
         }
       }
 
-      // Add the mod to mods
+      // Add to the mod object
       mods[name] = {
         ...modinfo,
-        lastUpdated,
+        lastModified,
         files,
       };
     }

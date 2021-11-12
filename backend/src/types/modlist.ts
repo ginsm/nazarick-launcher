@@ -5,10 +5,15 @@ export interface ModInfo {
   replaces?: string,
 };
 
+export interface File {
+  trace: Array<string>,
+  lastModified: number
+}
+
 export interface Mod extends ModInfo {
-  lastUpdated: number | null,
-  files: Array<string>,
+  lastModified: number | null,
+  files: Array<File>,
 };
 
-
-export type ModList = Record<string, Mod>;
+export type ModName = string;
+export type ModList = Record<ModName, Mod>;

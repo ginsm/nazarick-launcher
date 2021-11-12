@@ -22,21 +22,46 @@ GET http://localhost:4000/game/gamenotfound/modlist
 ###
 
 # Downloading mods (valid game)
-GET http://localhost:4000/game/game1/download/mod1,mod3
+GET http://localhost:4000/game/game1/download/
+Content-Type: application/json
+
+{
+  "mod1": [1],
+  "mod3": [0, 2]
+}
 
 
 ###
 
 # Download mods (invalid game)
-GET http://localhost:4000/game/gamenotfound/download/mod1,mod4
+GET http://localhost:4000/game/gamenotfound/download/
+Content-Type: application/json
+
+{
+  "mod1": [1, 4],
+  "mod4": [0, 1]
+}
 
 
 ###
 
 # Download invalid mod (valid game)
-GET http://localhost:4000/game/game1/download/mod4
+GET http://localhost:4000/game/game1/download/
+Content-Type: application/json
+
+{
+  "mod4": [0, 2]
+}
 
 ###
 
-# Download valid mods, ignore invalid mods
-GET http://localhost:4000/game/game1/download/mod1,mod2,mod5
+# Download valid mods, ignore invalid mods and files
+# mod5 doesn't exist, neither does the 6th file for mod3
+GET http://localhost:4000/game/game1/download/
+Content-Type: application/json
+
+{
+  "mod1": [0, 1],
+  "mod3": [0, 5],
+  "mod5": [0, 1, 4]
+}

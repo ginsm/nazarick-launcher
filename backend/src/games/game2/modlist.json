@@ -1,21 +1,57 @@
 {
   "mod1": {
     "required": true,
-    "lastUpdated": 1631224640000,
+    "lastModified": 1632190414433.7397,
     "files": [
-      "mod1/config/mod1.cfg",
-      "mod1/mods/mod1.mod"
+      {
+        "trace": [
+          "config",
+          "mod1.cfg"
+        ],
+        "lastModified": 1632190414433.7397
+      },
+      {
+        "trace": [
+          "mods",
+          "mod1.mod"
+        ],
+        "lastModified": 1632190414433.7397
+      }
     ]
   },
   "mod2": {
     "required": false,
     "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "lastUpdated": 1631224640000,
+    "lastModified": 1632193239800.4258,
     "files": [
-      "mod2/config/mod2.cfg",
-      "mod2/mods/mod2-extra.mod",
-      "mod2/mods/mod2.mod",
-      "mod2/patches/mod2.patch"
+      {
+        "trace": [
+          "config",
+          "mod2.cfg"
+        ],
+        "lastModified": 1632190414433.7397
+      },
+      {
+        "trace": [
+          "mods",
+          "mod2-extra.mod"
+        ],
+        "lastModified": 1632193239800.4258
+      },
+      {
+        "trace": [
+          "mods",
+          "mod2.mod"
+        ],
+        "lastModified": 1632190414433.7397
+      },
+      {
+        "trace": [
+          "patches",
+          "mod2.patch"
+        ],
+        "lastModified": 1632190414433.7397
+      }
     ]
   }
 }
