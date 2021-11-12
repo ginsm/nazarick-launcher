@@ -3,6 +3,7 @@ import * as path from 'path';
 import Archiver from 'archiver';
 
 import { parseFile, isValidGame, hasOwnProp } from 'src/utilities';
+import { ModList } from '@type/modlist';
 
 
 export default async function downloadGameMods(req, res) {
@@ -11,7 +12,7 @@ export default async function downloadGameMods(req, res) {
 
   if (await isValidGame(game)) {
     const modlistPath = path.join(gamesDirectory, game, 'modlist.json');
-    const mods = await parseFile(modlistPath);
+    const mods: ModList = await parseFile(modlistPath);
 
     try {
       const requestedMods = Object.keys(req.body)
@@ -20,13 +21,13 @@ export default async function downloadGameMods(req, res) {
 
       if (!requestedMods.length) {
         return res.status(400).json({
-          error: `No valid mod names supplied; check /game/${game}/modlist endpoint`
+          error: `No valid mod names supplied; check /game/${game}/modlist endpoint`,
         });
       }
 
       res.writeHead(200, {
         "Content-Type": "application/zip",
-        "Content-disposition": `attachment; filename=${game}-requested-mods.zip`
+        "Content-disposition": `attachment; filename=${game}-requested-mods.zip`,
       });
 
       const zip = Archiver("zip", { zlib: { level: 9 } });
@@ -34,7 +35,7 @@ export default async function downloadGameMods(req, res) {
 
       for (let mod of requestedMods) {
         const files = mods[mod].files.map(({trace}) => trace);
-        const sanitizer = (val: number) => typeof val === 'number';
+        const sanitizer = (val) => typeof val === 'number' && isFinite(val);
         
         for (let id of req.body[mod].filter(sanitizer)) {
           if (files.length - 1 >= Number(id)) { // Ensure the index is within bounds
