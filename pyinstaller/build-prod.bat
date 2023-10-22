@@ -1,4 +1,5 @@
 python -m PyInstaller^
+ --clean^
  --noconfirm^
  --icon=nazaricklauncher.ico^
  --distpath temp/dist^
