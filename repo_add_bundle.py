@@ -1,8 +1,6 @@
 import sys
-
 from tufup.repo import Repository
 from src.modules.tufupsettings import APP_VERSION
-
 from repo_settings import (
     DIST_DIR,
     OFFLINE_DIR_1,

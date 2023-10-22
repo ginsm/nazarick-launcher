@@ -1,6 +1,4 @@
-
 from tufup.repo import Repository
-
 from src.modules.tufupsettings import APP_NAME
 from repo_settings import (
     # Settings

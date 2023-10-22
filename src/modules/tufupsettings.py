@@ -1,6 +1,3 @@
-# These are settings for tufup.
-# See here: https://github.com/dennisvang/tufup
-
 import sys
 import pathlib
 import os

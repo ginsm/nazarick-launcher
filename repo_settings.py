@@ -1,6 +1,5 @@
 import pathlib
 import copy
-
 from tufup.repo import (
     DEFAULT_KEY_MAP, 
     DEFAULT_KEYS_DIR_NAME, 
