@@ -1,0 +1,12 @@
+__pycache__
+*.spec
+NazarickUpdater Shortcut.lnk
+test.bat
+data.json
+.vscode
+dist
+build
+_update_tmp
+temp
+keystore
+.tufup-repo-config
