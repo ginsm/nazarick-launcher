@@ -4,9 +4,7 @@ import copy
 from tufup.repo import (
     DEFAULT_KEY_MAP, 
     DEFAULT_KEYS_DIR_NAME, 
-    DEFAULT_REPO_DIR_NAME,
-    DEFAULT_META_DIR_NAME,
-    DEFAULT_TARGETS_DIR_NAME
+    DEFAULT_REPO_DIR_NAME
 )
 
 # App info
@@ -25,8 +23,6 @@ ONLINE_DIR = KEYS_DIR / 'online_secrets'
 OFFLINE_DIR_1 = KEYS_DIR / 'offline_secrets_1'
 OFFLINE_DIR_2 = KEYS_DIR / 'offline_secrets_2'
 REPO_DIR = DEV_DIR / DEFAULT_REPO_DIR_NAME
-META_DIR = REPO_DIR / DEFAULT_META_DIR_NAME
-TARGETS_DIR = REPO_DIR / DEFAULT_TARGETS_DIR_NAME
 
 # Key settings
 EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=7, timestamp=1)
