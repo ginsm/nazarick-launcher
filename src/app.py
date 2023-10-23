@@ -9,7 +9,7 @@ from modules.tufupsettings import (
     # App info
     APP_NAME, APP_VERSION,
     # Directories
-    BASE_DIR, DATA_DIR, METADATA_DIR, TARGET_DIR, LOCAL_METADATA_DIR,
+    BASE_DIR, INSTALL_DIR, DATA_DIR, METADATA_DIR, TARGET_DIR, LOCAL_METADATA_DIR,
     # Update server urls
     METADATA_BASE_URL, TARGET_BASE_URL
 )
@@ -65,7 +65,7 @@ def tufupClient():
     # Create update client
     client = Client(
         app_name=APP_NAME,
-        app_install_dir=BASE_DIR,
+        app_install_dir=INSTALL_DIR,
         current_version=APP_VERSION,
         metadata_dir=METADATA_DIR,
         metadata_base_url=METADATA_BASE_URL,

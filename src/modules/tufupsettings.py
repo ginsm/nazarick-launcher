@@ -13,6 +13,7 @@ FROZEN = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 
 # Get module directory path and set rootpath
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+INSTALL_DIR = BASE_DIR.parent
 
 # For development
 DEV_DIR = BASE_DIR.parent / 'pyinstaller' / 'temp'
