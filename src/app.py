@@ -76,7 +76,7 @@ def tufupClient():
 
     # Perform update
     if client.check_for_updates():
-        client.download_and_apply_update()
+        client.download_and_apply_update(skip_confirmation=True, log_file_name='update.log')
 
 # Run the script
 if __name__ == '__main__':
