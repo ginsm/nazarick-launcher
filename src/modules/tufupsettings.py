@@ -36,5 +36,9 @@ METADATA_DIR = UPDATE_CACHE_DIR / 'metadata'
 TARGET_DIR = UPDATE_CACHE_DIR / 'targets'
 
 # Update server urls
-METADATA_BASE_URL = 'http://localhost:8000/metadata/'
-TARGET_BASE_URL = 'http://localhost:8000/targets/'
+if FROZEN:
+    METADATA_BASE_URL = 'https://mgin.me/nazarick-launcher/repo/metadata/'
+    TARGET_BASE_URL = 'https://mgin.me/nazarick-launcher/repo/targets/'
+else:
+    METADATA_BASE_URL = 'http://localhost:8000/metadata/'
+    TARGET_BASE_URL = 'http://localhost:8000/targets/'
