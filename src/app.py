@@ -32,20 +32,26 @@ def main():
     app = AppWindow.create(ctk, initialState, utility.getenv("nazpath"), APP_NAME)
     AppMenu.create(ctk, app, initialState)
 
-    # Main frame and its components
+    # Create main frame and its components
     main_frame = MainFrame.create(ctk, app)
     textbox = LogBox.create(ctk, main_frame)
     instance = ExplorerSearch.create(
         name="instance", label="Instance Path", find="directory",
         placeholder="Enter the path to your Minecraft instance.",
         ctk=ctk, master=main_frame, state=initialState
-    )[-1].grid(row=1, sticky="ew", columnspan=2)
+    )
     executable = ExplorerSearch.create(
         name="executable", label="Launcher's Executable Path", find="file",
         placeholder="Enter the path to your launcher's executable.",
         ctk=ctk, master=main_frame, state=initialState
-    )[-1].grid(row=2, sticky="ew", columnspan=2)
-    UpdateButton.create(ctk, main_frame, instance, executable, textbox)
+    )
+    update = UpdateButton.create(ctk, main_frame, instance, executable, textbox)
+
+    # Position elements
+    textbox.grid(row=0, columnspan=2, pady=(20, 14), padx=10, sticky="nsew")
+    instance[-1].grid(row=1, sticky="ew", columnspan=2)
+    executable[-1].grid(row=2, sticky="ew", columnspan=2)
+    update.grid(row=3, padx=10, pady=14, columnspan=2, sticky="ew")
 
     # UI Events
     app.bind("<Configure>", lambda _ : view.resize(app)) # Handles saving the window size upon resize
