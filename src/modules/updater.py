@@ -18,7 +18,7 @@ def start(app, ctk, instance, executable, update_button, textbox, options):
 
     # Lock user input
     addText(f"[INFO] Locking user input.", textbox)
-    lock = lockElements([*instance, *executable, update_button])
+    lock = lockElements([*instance[:-1], *executable[:-1], update_button])
     lock(True)
 
     # Bundling all variables to pass them around throughout the script

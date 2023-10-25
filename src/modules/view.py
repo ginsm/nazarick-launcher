@@ -11,19 +11,6 @@ def addText(message, textbox):
     textbox.configure(state="disabled")
     textbox.see("end")
 
-def setEntry(entry, string):
-    entry.delete(first_index=0, last_index="end")
-    entry.insert(index=0, string=string)
-
-def searchForDir(entry):
-    path = filedialog.askdirectory()
-    setEntry(entry=entry, string=path)
-    setState({"instance": path})
-
-def searchForFile(entry):
-    path = filedialog.askopenfile()
-    setEntry(entry=entry, string=path.name)
-    setState({"executable": path.name})
 
 # TODO - This needs to not fire until the movement is actually finished
 @debounce(0.4)

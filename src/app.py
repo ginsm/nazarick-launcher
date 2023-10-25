@@ -4,7 +4,7 @@ from tufup.client import Client
 from modules import utility
 from modules import view
 from modules import store
-from modules.components import AppWindow, AppMenu, MainFrame, LogBox, InstanceEntry, ExecutableEntry, UpdateButton
+from modules.components import AppWindow, AppMenu, MainFrame, LogBox, UpdateButton, ExplorerSearch
 from modules.tufupsettings import (
     # App info
     APP_NAME, APP_VERSION,
@@ -35,8 +35,16 @@ def main():
     # Main frame and its components
     main_frame = MainFrame.create(ctk, app)
     textbox = LogBox.create(ctk, main_frame)
-    instance = InstanceEntry.create(ctk, main_frame, initialState)
-    executable = ExecutableEntry.create(ctk, main_frame, initialState)
+    instance = ExplorerSearch.create(
+        name="instance", label="Instance Path", find="directory",
+        placeholder="Enter the path to your Minecraft instance.",
+        ctk=ctk, master=main_frame, state=initialState
+    )[-1].grid(row=1, sticky="ew", columnspan=2)
+    executable = ExplorerSearch.create(
+        name="executable", label="Launcher's Executable Path", find="file",
+        placeholder="Enter the path to your launcher's executable.",
+        ctk=ctk, master=main_frame, state=initialState
+    )[-1].grid(row=2, sticky="ew", columnspan=2)
     UpdateButton.create(ctk, main_frame, instance, executable, textbox)
 
     # UI Events
