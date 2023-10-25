@@ -365,9 +365,8 @@ def installUpdate(vars_):
                 for name in files:
                     rootpath = os.path.join(root, name)
 
-                    # Split by slash type and pass everything past config as arguments for os.path.join
-                    split = rootpath.split("/" if "/" in rootpath else "\\")
-                    targetpath = os.path.join(configdest, *split[split.index("config") + 1:])
+                    # Pass everything after config as arguments for os.path.join
+                    targetpath = os.path.join(configdest, rootpath.replace(configtmp, "")[1:])
                     targetroot, _ = os.path.split(targetpath)
 
                     # Ensure file's root folder exists (shutil.move gets sad about nested folders not existing)
