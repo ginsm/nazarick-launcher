@@ -4,7 +4,7 @@ def create(ctk, state, root, APP_NAME):
     app = ctk.CTk()
 
     # Configure geometry and constraints
-    app.geometry(state["geometry"])
+    app.geometry(state['geometry'])
     app.minsize(height=600, width=600)
 
     # Configure grid

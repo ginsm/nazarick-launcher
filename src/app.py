@@ -48,7 +48,7 @@ def main():
     UpdateButton.create(ctk, main_frame, instance, executable, textbox)
 
     # UI Events
-    app.bind("<Configure>", lambda event : view.resize(event, app)) # Handles saving the window size upon resize
+    app.bind("<Configure>", lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
     view.addText(f"[INFO] The app has finished initializing ({APP_VERSION}).", textbox)

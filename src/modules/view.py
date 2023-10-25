@@ -11,10 +11,8 @@ def addText(message, textbox):
     textbox.configure(state="disabled")
     textbox.see("end")
 
-
-# TODO - This needs to not fire until the movement is actually finished
 @debounce(0.4)
-def resize(event, app):
+def resize(app):
     global window_width, window_height
     if (window_width != app.winfo_width() or window_height != app.winfo_height()):
         # Store new width/height in memory
