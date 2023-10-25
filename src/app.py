@@ -7,7 +7,7 @@ from modules import store
 from modules.components import AppWindow, AppMenu, MainFrame, LogBox, UpdateButton, ExplorerSearch
 from modules.tufupsettings import (
     # App info
-    APP_NAME, APP_VERSION,
+    APP_NAME, APP_VERSION, FROZEN,
     # Directories
     BASE_DIR, INSTALL_DIR, DATA_DIR, METADATA_DIR, TARGET_DIR, LOCAL_METADATA_DIR,
     # Update server urls
@@ -15,8 +15,9 @@ from modules.tufupsettings import (
 )
 
 def main():
-    # Initialize tufup and check for updates
-    tufupClient()
+    # Initialize tufup and check for updates (only if bundled)
+    if FROZEN:
+        tufupClient()
 
     # Store the mod's path in environment
     utility.setenv("nazpath", BASE_DIR.as_posix())
