@@ -194,16 +194,22 @@ def onLatestVersion(vars_):
         with open(os.path.join(instpath, "nuver"), "rb") as f:
             last_version_name = f.read().decode("UTF-8")
             if (version_name == last_version_name):
-                addText(f"[INFO] You are already on the latest version ({version_name}); skipping update.", vars_["textbox"])
+                addText(f"[INFO] You are already on the latest version ({version_name}).", vars_["textbox"])
                 return True
             
     # Handle first install
     else:
-        addText("[INFO] Sanitizing instance for initial install.", vars_["textbox"])
-        instconfigpath = os.path.join(instpath, "config")
-        if (os.path.exists(instconfigpath)):
-            shutil.rmtree(instconfigpath)
-            os.mkdir(instconfigpath)
+        addText("[INFO] Preparing instance for initial install.", vars_["textbox"])
+        configpath = os.path.join(instpath, "config")
+        modspath = os.path.join(instpath, "mods")
+
+        def moveExistingFiles(path):
+            if os.path.exists(path):
+                os.rename(path, f"{path}-old")
+
+        moveExistingFiles(configpath)
+        moveExistingFiles(modspath)
+
         return False
 
 
