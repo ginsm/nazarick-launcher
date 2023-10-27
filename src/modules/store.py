@@ -37,6 +37,11 @@ def init(path):
     state = database.table("state")
     if state.get(doc_id=1) is None:
         state.insert(default_state)
+    else:
+        updatedState = update(state.get(doc_id=1))
+        if state.get(doc_id=1) != updatedState:
+            print("Ran")
+            setStateDoc(updatedState)
 
 
 # State doc getter/setter
@@ -106,3 +111,48 @@ def setState(data={}):
 # Set menu option
 def setMenuOption(name, options):
     setState({name: options[name].get()})
+
+
+# ---- State updates ----
+def update(state):
+    state = update_107(state)
+    return state
+
+# Version 1.0.7 state updater
+def update_107(state):
+    # Check if the state is old 1.0.6 format
+    if state.get('executable'):
+        executable = state['executable']
+        instance = state['instance']
+
+        # Update data
+        stateUpdate = {
+            'game': 'minecraft',
+            'frame': 'minecraft',
+            'games': {
+                'minecraft': {
+                    'selectedpack': 'nazarick-smp',
+                    'nazarick-smp': {
+                        'instance': instance,
+                        'executable': executable
+                    }
+                },
+                'valheim': {
+                    'selectedpack': 'nazarick-smp',
+                    'nazarick-smp': {
+                        'instance': '',
+                        'executable': ''
+                    }
+                }
+            }
+        }
+
+        # Remove old unused keys
+        del state['executable']
+        del state['instance']
+
+        # Update the state
+        state.update(stateUpdate)
+
+    # Return the updated state
+    return state
