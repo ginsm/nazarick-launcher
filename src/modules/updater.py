@@ -9,7 +9,7 @@ from threading import Thread
 
 from .view import addText
 from .utility import getenv, getTime
-from store import getGameState
+from .store import getGameState
 
 # ----- Main Functions ----- #
 def start(app, ctk, instance, executable, update_button, textbox, options):
