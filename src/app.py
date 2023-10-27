@@ -49,10 +49,10 @@ def main():
     update = UpdateButton.create(ctk, main_frame, instance, executable, textbox)
 
     # Position elements
-    textbox.grid(row=0, columnspan=2, pady=(20, 14), padx=10, sticky="nsew")
+    textbox.grid(row=0, columnspan=2, pady=(20, 5), padx=10, sticky="nsew")
     instance[-1].grid(row=1, sticky="ew", columnspan=2)
     executable[-1].grid(row=2, sticky="ew", columnspan=2)
-    update.grid(row=3, padx=10, pady=14, columnspan=2, sticky="ew")
+    update.grid(row=3, padx=10, pady=(14, 15), columnspan=2, sticky="ew")
 
     # UI Events
     app.bind("<Configure>", lambda _ : view.resize(app)) # Handles saving the window size upon resize
