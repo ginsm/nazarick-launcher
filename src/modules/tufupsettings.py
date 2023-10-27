@@ -4,7 +4,7 @@ import os
 from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
 # App info
-APP_VERSION = '1.0.6'
+APP_VERSION = '1.0.7'
 APP_NAME = 'Nazarick_Launcher'
 
 # Are we running in a PyInstaller bundle?
