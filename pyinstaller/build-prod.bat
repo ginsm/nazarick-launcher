@@ -6,6 +6,7 @@ python -m PyInstaller^
  --workpath temp/build^
  --add-data %UserProfile%\AppData\Roaming\Python\Python312\site-packages\customtkinter:customkinter\^
  --add-data temp/repository/metadata/root.json:.^
+ --add-data F:\Projects\Active\nazarick-launcher\src\icons:icons\^
  --add-binary "nazaricklauncher.ico;."^
  --onedir^
  --windowed^

@@ -1,14 +1,10 @@
+import os
+import webbrowser
 from modules import store
 from modules.debounce import debounce
 from tkinter import filedialog
-
-@debounce(1)
-def handleKeyPress(entry, name):
-    stored = store.getGameState()[name]
-    value = entry.get()
-    
-    if (stored != value):
-        store.setGameState({name: value})
+from modules.tufupsettings import BASE_DIR
+from PIL import Image
 
 def create(ctk, master, label, placeholder, name, find):
     frame = ctk.CTkFrame(master=master, fg_color="transparent")
@@ -22,19 +18,48 @@ def create(ctk, master, label, placeholder, name, find):
     entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky="ew")
     entry.bind(sequence="<KeyRelease>", command=lambda _ : handleKeyPress(entry, name))
 
+    # Button variables & images
+    button_height = 36
+    icon_size = 18
+    IMAGE_DIR = BASE_DIR / 'icons'
+    searchImage = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
+    openImage = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'folder.png')), size=(icon_size, icon_size))
+
+    # Search Button
     searchFunction = getSearchFunction(find)
-    search = ctk.CTkButton(master=frame, text="Explore", command=lambda: searchFunction(entry, name), height=36)
-    search.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
+    searchButton = ctk.CTkButton(master=frame, image=searchImage, text="Search", command=lambda: searchFunction(entry, name), height=button_height, width=95)
+    searchButton.grid(row=2, column=1, padx=(0, 5), pady=5, sticky="ew")
+
+    # Open Button
+    openButton = ctk.CTkButton(master=frame, image=openImage, text="", command=lambda: openPath(entry, name), height=button_height, width=44)
+    openButton.grid(row=2, column=2, padx=(0, 10), pady=5, sticky="ew")
+
 
     # Get entry state from storage and set it
     state = store.getGameState()
     if bool(state[name]):
         setEntry(entry, state[name])
 
-    return [entry, search, frame]
+    return [entry, searchButton, frame]
 
 
 # Helper Functions
+@debounce(1)
+def handleKeyPress(entry, name):
+    stored = store.getGameState()[name]
+    value = entry.get()
+    
+    if (stored != value):
+        store.setGameState({name: value})
+
+def openPath(entry, name):
+    path = entry.get()
+    if (name == 'executable'):
+        path = os.path.split(path)[0]
+
+    if (os.path.isdir(path)):
+        webbrowser.open(path)
+
 def getSearchFunction(find):
     match find:
         case 'directory':
