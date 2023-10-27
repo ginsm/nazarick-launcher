@@ -39,12 +39,12 @@ def main():
     instance = ExplorerSearch.create(
         name="instance", label="Instance Path", find="directory",
         placeholder="Enter the path to your Minecraft instance.",
-        ctk=ctk, master=main_frame, state=initialState
+        ctk=ctk, master=main_frame
     )
     executable = ExplorerSearch.create(
         name="executable", label="Launcher's Executable Path", find="file",
         placeholder="Enter the path to your launcher's executable.",
-        ctk=ctk, master=main_frame, state=initialState
+        ctk=ctk, master=main_frame
     )
     update = UpdateButton.create(ctk, main_frame, instance, executable, textbox)
 

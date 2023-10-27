@@ -1,17 +1,28 @@
 import os
 from tinydb import TinyDB
-from .utility import destructure, getenv
+from .utility import destructure
 
 # The default state for the store
 default_state={
     "autoclose": False,
-    "executable": "",
+    "game": "minecraft",
+    "frame": "minecraft",
+    "games": {
+        "minecraft": {
+            "selectedpack": "nazarick-smp",
+            "nazarick-smp": { "instance": "", "executable": "" }
+        },
+        "valheim": {
+            "selectedpack": "nazarick-smp",
+            "nazarick-smp": { "instance": "", "executable": "" }
+        }
+    },
     "geometry": "1280x720",
-    "instance": "",
     "logging": True,
     "theme": "System",
     "debug": False,
 }
+
 
 def init(path):
     # Make the path
@@ -27,17 +38,71 @@ def init(path):
     if state.get(doc_id=1) is None:
         state.insert(default_state)
 
-def setState(data={}):
-    global database
-    state = database.table("state")
-    if bool(data):
-        state.update(data, doc_ids=[1])
 
-def getState(*args):
+# State doc getter/setter
+def getStateDoc():
     global database
-    state = database.table("state").get(doc_id=1)
+    return database.table('state')
+
+def setStateDoc(data):
+    if bool(data):
+        state = getStateDoc()
+        state.remove(doc_ids=[1])
+        state.insert(data)
+
+
+# Game getter/setter
+def getGame():
+    state = getState()
+    return state['game']
+
+def setGame(game):
+    if bool(game):
+        setState({'game': game})
+
+
+# Pack getter/setter
+def getSelectedPack():
+    state = getState()
+    game = getGame()
+    return state['games'][game]['selectedpack']
+
+def setSelectedPack(pack):
+    if bool(pack):
+        game = getGame()
+        state = getState()
+        state['games'][game].update({'selectedpack': pack})
+        setState(state)
+
+
+# Game state getter/setter
+def getGameState():
+    game = getGame()
+    pack = getSelectedPack()
+    state = getState()
+    return state['games'][game][pack]
+
+def setGameState(obj):
+    if bool(obj):
+        game = getGame()
+        pack = getSelectedPack()
+        state = getState()
+        state['games'][game][pack].update(obj)
+        setState(state)
+
+
+# Generic state getter/setter
+def getState(*args):
+    state = getStateDoc().get(doc_id=1)
     output = destructure(state, args=args)
     return output if bool(output) else state
 
+def setState(data={}):
+    state = getStateDoc()
+    if bool(data):
+        state.update(data, doc_ids=[1])
+
+
+# Set menu option
 def setMenuOption(name, options):
     setState({name: options[name].get()})

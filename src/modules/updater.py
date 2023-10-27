@@ -4,12 +4,12 @@ import requests
 import json
 import zipfile
 import shutil
-from multiprocessing import cpu_count
 from queue import Queue
 from threading import Thread
 
 from .view import addText
 from .utility import getenv, getTime
+from store import getGameState
 
 # ----- Main Functions ----- #
 def start(app, ctk, instance, executable, update_button, textbox, options):
@@ -22,11 +22,12 @@ def start(app, ctk, instance, executable, update_button, textbox, options):
     lock(True)
 
     # Bundling all variables to pass them around throughout the script
+    gameState = getGameState()
     variables = {
         "app": app,
         "ctk": ctk,
-        "exepath": executable[0].get(),
-        "instpath": instance[0].get(),
+        "exepath": gameState['executable'],
+        "instpath": gameState['instance'],
         "options": options,
         "root": getenv("nazpath"),
         "tmp": os.path.join(getenv("nazpath"), "_update_tmp"),
