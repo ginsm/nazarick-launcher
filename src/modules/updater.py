@@ -85,6 +85,10 @@ def finalize(vars_):
         vars_["app"]
     ]
 
+    # Unlock the program
+    addText(f"[INFO] Unlocking user input.", textbox)
+    lock(False)
+
     # Debug mode stops exe from launching
     if (not options["debug"]):
         executed = executeLauncher(textbox=textbox, exepath=exepath)
@@ -93,8 +97,6 @@ def finalize(vars_):
     else:
         addText("[INFO] The executable is not launched whilst in debug mode.", textbox)
 
-    addText(f"[INFO] Unlocking user input.", textbox)
-    lock(False)
                     
     addText(f"[INFO] Finished process at {getTime()}.", textbox)
 
