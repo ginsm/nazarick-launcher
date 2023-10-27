@@ -12,13 +12,13 @@ from .utility import getenv, getTime
 from .store import getGameState
 
 # ----- Main Functions ----- #
-def start(app, ctk, instance, executable, update_button, textbox, options):
+def start(app, ctk, lockable, textbox, options):
     addText(f"", textbox)
     addText(f"[INFO] Beginning process at {getTime()}.", textbox)
 
     # Lock user input
     addText(f"[INFO] Locking user input.", textbox)
-    lock = lockElements([*instance[:-1], *executable[:-1], update_button])
+    lock = lockElements(lockable)
     lock(True)
 
     # Bundling all variables to pass them around throughout the script
