@@ -1,5 +1,5 @@
-import customtkinter as ctk
 import shutil
+import customtkinter as ctk
 from tufup.client import Client
 from modules import utility
 from modules import view
@@ -18,35 +18,35 @@ from modules.tufupsettings import (
 def main():
     # Initialize tufup and check for updates (only if bundled)
     if FROZEN:
-        tufupClient()
+        tufup_client()
 
     # Store the mod's path in environment
-    utility.setenv("nazpath", BASE_DIR.as_posix())
+    utility.set_env('nazpath', BASE_DIR.as_posix())
 
     # Initialize the store
     store.init(DATA_DIR.as_posix())
-    initialState = store.getState()
-    ctk.set_appearance_mode(initialState.get("theme"))
+    initial_state = store.get_state()
+    ctk.set_appearance_mode(initial_state.get('theme'))
 
     # Top level components
-    app = AppWindow.create(ctk, initialState, utility.getenv("nazpath"), APP_NAME)
-    AppMenu.create(ctk, app, initialState)
+    app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), APP_NAME)
+    AppMenu.create(ctk, app, initial_state)
 
     # Create frames
     [mc_frame, mc_logbox] = MinecraftFrame.create(ctk, app)
 
     # UI Events
-    app.bind("<Configure>", lambda _ : view.resize(app)) # Handles saving the window size upon resize
+    app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    view.addText(f"[INFO] The app has finished initializing ({APP_VERSION}).", mc_logbox)
+    view.log(f'[INFO] The app has finished initializing ({APP_VERSION}).', mc_logbox)
 
     # Main loop
     app.mainloop()
 
 
 # Set up tufup client
-def tufupClient():
+def tufup_client():
     # The app must ensure dirs exist
     for dir_path in [BASE_DIR, METADATA_DIR, TARGET_DIR]:
         dir_path.mkdir(exist_ok=True, parents=True)
@@ -56,7 +56,7 @@ def tufupClient():
     destination_path = METADATA_DIR / 'root.json'
     if not destination_path.exists():
         shutil.copy(src=source_path, dst=destination_path)
-        print("Trusted root metadata copied to cache.")
+        print('Trusted root metadata copied to cache.')
 
     # Create update client
     client = Client(

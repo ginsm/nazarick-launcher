@@ -1,1 +1,1 @@
-__all__ = ["components", "debounce", "store", "tufupsettings", "utility", "view"]
+__all__ = ['components', 'debounce', 'store', 'tufupsettings', 'utility', 'view']

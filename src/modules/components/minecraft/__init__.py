@@ -1,1 +1,1 @@
-__all__ = ["MinecraftFrame", "updater"]
+__all__ = ['MinecraftFrame', 'updater']

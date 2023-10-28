@@ -1,13 +1,10 @@
 import os
 from datetime import datetime
 
-def absdir(file):
-    return os.path.dirname(os.path.realpath(file))
-
-def setenv(name, value):
+def set_env(name, value):
     os.environ[name] = value
 
-def getenv(name):
+def get_env(name):
     return os.environ.get(name)
 
 def destructure(obj={}, args=[]):
@@ -20,5 +17,5 @@ def destructure(obj={}, args=[]):
 
     return output
 
-def getTime():
-    return datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+def get_time():
+    return datetime.now().strftime('%m/%d/%Y %H:%M:%S')

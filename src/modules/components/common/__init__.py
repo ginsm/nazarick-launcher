@@ -1,1 +1,1 @@
-__all__ = ["ExplorerSearch", "LogBox", "UpdateButton"]
+__all__ = ['ExplorerSearch', 'LogBox', 'UpdateButton']

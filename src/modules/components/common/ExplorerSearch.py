@@ -1,63 +1,65 @@
 import os
 import webbrowser
+from PIL import Image
+from tkinter import filedialog
+from tktooltip import ToolTip
 from modules import store
 from modules.debounce import debounce
-from tkinter import filedialog
 from modules.tufupsettings import BASE_DIR
-from PIL import Image
-from tktooltip import ToolTip
 
 def create(ctk, master, label, placeholder, name, find):
-    frame = ctk.CTkFrame(master=master, fg_color="transparent")
+    frame = ctk.CTkFrame(master=master, fg_color='transparent')
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
 
     label = ctk.CTkLabel(master=frame, text=label)
-    label.grid(row=1, column=0, padx=10, pady=(5, 0), sticky="w")
+    label.grid(row=1, column=0, padx=10, pady=(5, 0), sticky='w')
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36)
-    entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky="ew")
-    entry.bind(sequence="<KeyRelease>", command=lambda _ : handleKeyPress(entry, name))
+    entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky='ew')
+    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(entry, name))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
-    # Button variables & images
+    # Button variables
     button_height = 36
     button_width = 44
     icon_size = 18
+
+    # Images
     IMAGE_DIR = BASE_DIR / 'icons'
-    searchImage = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
-    openImage = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'folder.png')), size=(icon_size, icon_size))
+    search_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
+    open_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'folder.png')), size=(icon_size, icon_size))
 
     # Search Button
-    searchFunction = getSearchFunction(find)
-    searchButton = ctk.CTkButton(master=frame, image=searchImage, text="", command=lambda: searchFunction(entry, name), height=button_height, width=button_width)
-    searchButton.grid(row=2, column=1, padx=(0, 5), pady=5, sticky="ew")
-    ToolTip(searchButton, msg=f"Search for the {name} path.", delay=0.01, follow=True)
+    search_function = get_search_function(find)
+    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name), height=button_height, width=button_width)
+    search_button.grid(row=2, column=1, padx=(0, 5), pady=5, sticky='ew')
+    ToolTip(search_button, msg=f'Search for the {name} path.', delay=0.01, follow=True)
 
     # Open Button
-    openButton = ctk.CTkButton(master=frame, image=openImage, text="", command=lambda: openPath(entry, name), height=button_height, width=button_width)
-    openButton.grid(row=2, column=2, padx=(0, 10), pady=5, sticky="ew")
-    ToolTip(openButton, msg=f"Open the {name} path.", delay=0.01, follow=True)
+    open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width)
+    open_button.grid(row=2, column=2, padx=(0, 10), pady=5, sticky='ew')
+    ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
 
 
     # Get entry state from storage and set it
-    state = store.getGameState()
+    state = store.get_game_state()
     if bool(state[name]):
-        setEntry(entry, state[name])
+        set_entry(entry, state[name])
 
-    return [entry, searchButton, frame]
+    return [entry, search_button, frame]
 
 
 # Helper Functions
 @debounce(1)
-def handleKeyPress(entry, name):
-    stored = store.getGameState()[name]
+def handle_key_press(entry, name):
+    stored = store.get_game_state()[name]
     value = entry.get()
     
     if (stored != value):
-        store.setGameState({name: value})
+        store.set_game_state({name: value})
 
-def openPath(entry, name):
+def open_path(entry, name):
     path = entry.get()
     if (name == 'executable'):
         path = os.path.split(path)[0]
@@ -65,27 +67,27 @@ def openPath(entry, name):
     if (os.path.isdir(path)):
         webbrowser.open(path)
 
-def getSearchFunction(find):
+def get_search_function(find):
     match find:
         case 'directory':
-            return searchForDir
+            return search_for_dir
         case 'file':
-            return searchForFile
+            return search_for_file
         case _:
-            return searchForFile
+            return search_for_file
 
-def setEntry(entry, string):
-    entry.delete(first_index=0, last_index="end")
+def set_entry(entry, string):
+    entry.delete(first_index=0, last_index='end')
     entry.insert(index=0, string=string)
 
-def searchForDir(entry, name):
+def search_for_dir(entry, name):
     path = filedialog.askdirectory()
-    if (path is not None and path != ""):
-        setEntry(entry=entry, string=path)
-        store.setGameState({name: path})
+    if (path is not None and path != ''):
+        set_entry(entry=entry, string=path)
+        store.set_game_state({name: path})
 
-def searchForFile(entry, name):
+def search_for_file(entry, name):
     path = filedialog.askopenfile()
     if (path is not None):
-        setEntry(entry=entry, string=path.name)
-        store.setGameState({name: path.name})
+        set_entry(entry=entry, string=path.name)
+        store.set_game_state({name: path.name})

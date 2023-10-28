@@ -1,74 +1,73 @@
 import os
 import subprocess
-import requests
 import json
 import zipfile
 import shutil
 from queue import Queue
 from threading import Thread
-
-from ...view import addText
-from ...utility import getenv, getTime
-from ...store import getGameState
+import requests
+from modules.view import log
+from modules.utility import get_env, get_time
+from modules.store import get_game_state
 
 # ----- Main Functions ----- #
 def start(app, ctk, lockable, textbox, options):
-    addText(f"", textbox)
-    addText(f"[INFO] Beginning process at {getTime()}.", textbox)
+    log(f'', textbox)
+    log(f'[INFO] Beginning process at {get_time()}.', textbox)
 
     # Lock user input
-    addText(f"[INFO] Locking user input.", textbox)
-    lock = lockElements(lockable)
+    log(f'[INFO] Locking user input.', textbox)
+    lock = lock_elements(lockable)
     lock(True)
 
     # Bundling all variables to pass them around throughout the script
-    gameState = getGameState()
+    game_state = get_game_state()
     variables = {
-        "app": app,
-        "ctk": ctk,
-        "exepath": gameState['executable'],
-        "instpath": gameState['instance'],
-        "options": options,
-        "root": getenv("nazpath"),
-        "tmp": os.path.join(getenv("nazpath"), "_update_tmp"),
-        "textbox": textbox,
-        "version": getLatestVersion("1.20.1"),
-        "lock": lock,
+        'app': app,
+        'ctk': ctk,
+        'exepath': game_state['executable'],
+        'instpath': game_state['instance'],
+        'options': options,
+        'root': get_env('nazpath'),
+        'tmp': os.path.join(get_env('nazpath'), '_update_tmp'),
+        'textbox': textbox,
+        'version': get_latest_version('1.20.1'),
+        'lock': lock,
     }
 
     # Error Handling
-    if (handleErrors(variables)):
-        addText(f"[INFO] Unlocking user input.", textbox)
+    if (handle_errors(variables)):
+        log(f'[INFO] Unlocking user input.', textbox)
         lock(False)
-        addText(f"[INFO] Finished process at {getTime()}.", textbox)
+        log(f'[INFO] Finished process at {get_time()}.', textbox)
         return
     
     # Skip updating process if nuver is equal to latest ver
-    if (onLatestVersion(variables)):
+    if (on_latest_version(variables)):
         finalize(variables)
         return
 
     # Clean up temp directory
-    cleanUpdateDirectories(variables)
+    clean_update_directories(variables)
 
     # Download latest modpack version
-    downloadModpack(variables)
+    download_modpack(variables)
 
     # Unzip update to temp directory
-    extractModpack(variables)
+    extract_modpack(variables)
 
     # Retrieve all of the mod files
-    retrieveMods(variables)
+    retrieve_mods(variables)
 
 
 # The update is split into multiple functions to allow for all of the mods to be retrieved
 # before installing the actual update.
 def resume_update(variables):
     # Install the update into the instance
-    installUpdate(variables)
+    install_update(variables)
 
     # Store update's version number
-    storeVersionNumber(variables)
+    store_version_number(variables)
 
     # Run the final bit of code
     finalize(variables)
@@ -77,190 +76,190 @@ def resume_update(variables):
 # This is split so that it can be ran after resume_update finishes or before updating (if nuver is equal to
 # latest ver)
 def finalize(vars_):
-    options, textbox, lock, exepath, app = [
-        vars_["options"],
-        vars_["textbox"],
-        vars_["lock"],
-        vars_["exepath"],
-        vars_["app"]
+    options, textbox, lock, exe_path, app = [
+        vars_['options'],
+        vars_['textbox'],
+        vars_['lock'],
+        vars_['exepath'],
+        vars_['app']
     ]
 
     # Unlock the program
-    addText(f"[INFO] Unlocking user input.", textbox)
+    log(f'[INFO] Unlocking user input.', textbox)
     lock(False)
 
     # Debug mode stops exe from launching
-    if (not options["debug"]):
-        executed = executeLauncher(textbox=textbox, exepath=exepath)
+    if (not options['debug']):
+        executed = execute_launcher(textbox=textbox, exe_path=exe_path)
         if (not executed):
             return
     else:
-        addText("[INFO] The executable is not launched whilst in debug mode.", textbox)
+        log('[INFO] The executable is not launched whilst in debug mode.', textbox)
 
                     
-    addText(f"[INFO] Finished process at {getTime()}.", textbox)
+    log(f'[INFO] Finished process at {get_time()}.', textbox)
 
     # Check if auto close is enabled; close if so
-    if (options["autoclose"]):
-        addText("[INFO] Auto close is enabled; closing app.", textbox)
+    if (options['autoclose']):
+        log('[INFO] Auto close is enabled; closing app.', textbox)
         app.quit()
 
 
 # ----- Helper Functions ----- #
-def lockElements(elements):
+def lock_elements(elements):
     def lock(lock):
         if lock:
             for element in elements:
-                element.configure(state="disabled")
+                element.configure(state='disabled')
         else:
             for element in elements:
-                element.configure(state="normal")
+                element.configure(state='normal')
 
     return lock
 
 
-def handleErrors(vars_):
-    textbox, exepath, instpath = [
-        vars_["textbox"],
-        vars_["exepath"],
-        vars_["instpath"]
+def handle_errors(vars_):
+    textbox, exe_path, inst_path = [
+        vars_['textbox'],
+        vars_['exepath'],
+        vars_['instpath']
     ]
     error = False
 
-    addText("[INFO] Validating the provided executable and instance paths.", textbox)
+    log('[INFO] Validating the provided executable and instance paths.', textbox)
 
     # Ensure the path was provided.
-    if instpath == "":
-        addText("[ERROR] Please provide a path to your Minecraft instance.", textbox)
+    if inst_path == '':
+        log('[ERROR] Please provide a path to your Minecraft instance.', textbox)
         error = True
     else:
         # Ensure the path is valid.
-        if not os.path.exists(instpath):
-            addText("[ERROR] The provided path to your Minecraft instance doesn't exist.", textbox)
+        if not os.path.exists(inst_path):
+            log("[ERROR] The provided path to your Minecraft instance doesn't exist.", textbox)
             error = True
 
     # Ensure the path was provided.
-    if exepath == "":
-        addText("[ERROR] Please provide a path to your launcher's executable.", textbox)
+    if exe_path == '':
+        log("[ERROR] Please provide a path to your launcher's executable.", textbox)
         error= True
     else:
         # Ensure the path is valid.
-        if not os.path.isfile(exepath):
-            addText("[ERROR] The provided path to your launcher doesn't exist.", textbox)
+        if not os.path.isfile(exe_path):
+            log("[ERROR] The provided path to your launcher doesn't exist.", textbox)
             error =  True
         
     
     return error
 
 
-def cleanUpdateDirectories(vars_):
+def clean_update_directories(vars_):
     tmp, textbox = [
-        vars_["tmp"],
-        vars_["textbox"]
+        vars_['tmp'],
+        vars_['textbox']
     ]
     # Delete any existing tmp directory
     if os.path.exists(tmp):
-        addText("[INFO] Pruning old tmp directory.", textbox)
+        log('[INFO] Pruning old tmp directory.', textbox)
         shutil.rmtree(tmp)
     else:
-        addText("[INFO] Creating tmp directory.", textbox)
+        log('[INFO] Creating tmp directory.', textbox)
 
     # Create clean tmp directory
     os.mkdir(tmp)
 
 
-def getLatestVersion(version):
-    def parseJson(obj):
+def get_latest_version(version):
+    def parse_json(obj):
         return {
-            "name": obj["name"],
-            "url": obj["files"][0]["url"]
+            'name': obj['name'],
+            'url': obj['files'][0]['url']
         }
     
-    req = requests.get(f"https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=[\"{version}\"]")
+    req = requests.get(f'https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=["{version}"]')
     data = json.loads(req.text)
-    parsed = list(map(parseJson, data))
+    parsed = list(map(parse_json, data))
     return parsed[0]
 
 
-def onLatestVersion(vars_):
-    version_name, instpath = [
-        vars_["version"]["name"],
-        vars_["instpath"]
+def on_latest_version(vars_):
+    version_name, inst_path = [
+        vars_['version']['name'],
+        vars_['instpath']
     ]
-    nuver_path = os.path.join(instpath, "nuver")
+    nuver_path = os.path.join(inst_path, 'nuver')
 
     # Handle existing install
     if (os.path.exists(nuver_path)):
-        with open(os.path.join(instpath, "nuver"), "rb") as f:
-            last_version_name = f.read().decode("UTF-8")
+        with open(os.path.join(inst_path, 'nuver'), 'rb') as f:
+            last_version_name = f.read().decode('UTF-8')
             if (version_name == last_version_name):
-                addText(f"[INFO] You are already on the latest version ({version_name}).", vars_["textbox"])
+                log(f'[INFO] You are already on the latest version ({version_name}).', vars_['textbox'])
                 return True
             
     # Handle first install
     else:
-        addText("[INFO] Preparing instance for initial install.", vars_["textbox"])
-        configpath = os.path.join(instpath, "config")
-        modspath = os.path.join(instpath, "mods")
+        log('[INFO] Preparing instance for initial install.', vars_['textbox'])
+        configpath = os.path.join(inst_path, 'config')
+        modspath = os.path.join(inst_path, 'mods')
 
-        def moveExistingFiles(path):
+        def move_existing_files(path):
             if os.path.exists(path):
-                os.rename(path, f"{path}-old")
+                os.rename(path, f'{path}-old')
 
-        moveExistingFiles(configpath)
-        moveExistingFiles(modspath)
+        move_existing_files(configpath)
+        move_existing_files(modspath)
 
         return False
 
 
-def storeVersionNumber(vars_):
-    version_name, textbox, instpath = [
-        vars_["version"]["name"],
-        vars_["textbox"],
-        vars_["instpath"]
+def store_version_number(vars_):
+    version_name, textbox, inst_path = [
+        vars_['version']['name'],
+        vars_['textbox'],
+        vars_['instpath']
     ]
 
-    addText(f"[INFO] Storing new version ID for future ref: {version_name}.", textbox)
-    open(os.path.join(instpath, "nuver"), "w").write(version_name)
+    log(f'[INFO] Storing new version ID for future ref: {version_name}.', textbox)
+    open(os.path.join(inst_path, 'nuver'), 'w').write(version_name)
 
 
-def downloadModpack(vars_):
+def download_modpack(vars_):
     textbox, tmp, version = [
-        vars_["textbox"],
-        vars_["tmp"],
-        vars_["version"]
+        vars_['textbox'],
+        vars_['tmp'],
+        vars_['version']
     ]
 
-    addText(f"[INFO] Downloading latest version: {version['name']}.", textbox)
+    log(f'[INFO] Downloading latest version: {version['name']}.', textbox)
 
     # Download the mrpack as .zip
-    req = requests.get(version["url"], allow_redirects=True)
-    open(os.path.join(tmp, "update.zip"), "wb").write(req.content)
+    req = requests.get(version['url'], allow_redirects=True)
+    open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
 
 
-def extractModpack(vars_):
+def extract_modpack(vars_):
     textbox, tmp = [
-        vars_["textbox"],
-        vars_["tmp"]
+        vars_['textbox'],
+        vars_['tmp']
     ]
 
-    addText("[INFO] Extracting the modpack zip.", textbox)
-    with zipfile.ZipFile(os.path.join(tmp, "update.zip"), "r") as ref:
+    log('[INFO] Extracting the modpack zip.', textbox)
+    with zipfile.ZipFile(os.path.join(tmp, 'update.zip'), 'r') as ref:
         ref.extractall(tmp)
 
 
-def retrieveMods(vars_):
+def retrieve_mods(vars_):
     tmp, textbox, debug = [
-        vars_["tmp"],
-        vars_["textbox"],
-        vars_["options"]["debug"]
+        vars_['tmp'],
+        vars_['textbox'],
+        vars_['options']['debug']
     ]
 
     # read modrinth.index.json
-    with open(os.path.join(tmp, "modrinth.index.json"), "rb") as f:
-        mods = json.loads(f.read().decode("UTF-8"))["files"]
+    with open(os.path.join(tmp, 'modrinth.index.json'), 'rb') as f:
+        mods = json.loads(f.read().decode('UTF-8'))['files']
 
-        addText("[INFO] Retrieving any mods not present in the modpack zip:", textbox)
+        log('[INFO] Retrieving any mods not present in the modpack zip:', textbox)
 
         # Create a queue and set max amount of threads
         queue = Queue(maxsize=0)
@@ -286,7 +285,7 @@ def retrieveMods(vars_):
         # Initialize the threads
         for i in range(num_threads):
             if (debug):
-                addText(f"[INFO] Creating thread #{i + 1}.", textbox)
+                log(f'[INFO] Creating thread #{i + 1}.', textbox)
             worker = Thread(target=keep_alive, args=(queue, lambda: stop_threads))
             worker.setDaemon(True)
             worker.start()
@@ -302,12 +301,12 @@ def retrieveMods(vars_):
 
             # Stop threads
             if (debug):
-                addText("[INFO] Stopping all threads.", textbox)
+                log('[INFO] Stopping all threads.', textbox)
             nonlocal stop_threads
             stop_threads = True
 
             # Continue updating
-            addText("[INFO] Finished retrieving missing mods.", textbox)
+            log('[INFO] Finished retrieving missing mods.', textbox)
             resume_update(variables)
             return
 
@@ -318,86 +317,89 @@ def retrieveMods(vars_):
 
 
 def retrieve(mod, vars_):
-    _, name = os.path.split(mod["path"])
-    textbox, instpath, tmp = [
-        vars_["textbox"],
-        vars_["instpath"],
-        vars_["tmp"]
+    _, name = os.path.split(mod['path'])
+    textbox, inst_path, tmp = [
+        vars_['textbox'],
+        vars_['instpath'],
+        vars_['tmp']
     ]
 
     # Split path to get mod name and join with instpath
-    localpath = os.path.join(instpath, "mods", name)
-    destination = os.path.join(tmp, "overrides", "mods", name)
+    local_path = os.path.join(inst_path, 'mods', name)
+    local_path_old = os.path.join(inst_path, 'mods-old', name)
+    destination = os.path.join(tmp, 'overrides', 'mods', name)
 
-    # Copy file if it exists locally; otherwise, download it.
-    if os.path.isfile(localpath):
-        addText(f"[INFO] (C) {name.split('.jar')[0]}.", textbox)
-        shutil.copyfile(localpath, destination)
+    # Copy file if it exists locally
+    if os.path.isfile(local_path):
+        log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
+        shutil.copyfile(local_path, destination)
+    # Copy file if it exists locally (initial install)
+    elif os.path.isfile(local_path_old):
+        log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
+        shutil.copyfile(local_path_old, destination)
+    # Download mod
     else:
-        addText(f"[INFO] (D) {name.split('.jar')[0]}.", textbox)
-        req = requests.get(mod["downloads"][0], allow_redirects=True)
-        open(destination, "wb").write(req.content)
+        log(f'[INFO] (D) {name.split('.jar')[0]}.', textbox)
+        req = requests.get(mod['downloads'][0], allow_redirects=True)
+        open(destination, 'wb').write(req.content)
 
 
-def installUpdate(vars_):
-    instpath, tmp, textbox = [
-        vars_["instpath"],
-        vars_["tmp"],
-        vars_["textbox"]
+def install_update(vars_):
+    inst_path, tmp, textbox = [
+        vars_['instpath'],
+        vars_['tmp'],
+        vars_['textbox']
     ]
 
     # Paths
-    modsdest = os.path.join(instpath, "mods")
-    configdest = os.path.join(instpath, "config")
-    yosbrpath = os.path.join(instpath, "config", "yosbr")
-
-    modstmp = os.path.join(tmp, "overrides", "mods")
-    configtmp = os.path.join(tmp, "overrides", "config")
+    mods_dest = os.path.join(inst_path, 'mods')
+    config_dest = os.path.join(inst_path, 'config')
+    yosbr_path = os.path.join(inst_path, 'config', 'yosbr')
+    mods_tmp = os.path.join(tmp, 'overrides', 'mods')
+    config_tmp = os.path.join(tmp, 'overrides', 'config')
 
     # Remove old mods path and move updated mods to instance
-    addText("[INFO] Moving updated mods into the provided instance location.", textbox)
-    if (os.path.exists(modsdest)):
-        shutil.rmtree(modsdest)
-    shutil.move(modstmp, modsdest)
+    log('[INFO] Moving updated mods into the provided instance location.', textbox)
+    if (os.path.exists(mods_dest)):
+        shutil.rmtree(mods_dest)
+    shutil.move(mods_tmp, mods_dest)
 
     # Remove yosbr and move updated configs to instance
-    addText("[INFO] Moving updated configs into the provided instance location.", textbox)
-    if (os.path.exists(yosbrpath)):
-        shutil.rmtree(yosbrpath)
+    log('[INFO] Moving updated configs into the provided instance location.', textbox)
+    if (os.path.exists(yosbr_path)):
+        shutil.rmtree(yosbr_path)
 
-    for file_ in os.listdir(configtmp):
-        filepath = os.path.join(configtmp, file_)
+    for file_ in os.listdir(config_tmp):
+        file_path = os.path.join(config_tmp, file_)
 
         # Handle directories recursively (if they're not yosbr)
-        if (os.path.isdir(filepath) and file_ != "yosbr"):
-            for root, _, files in os.walk(filepath):
+        if (os.path.isdir(file_path) and file_ != 'yosbr'):
+            for root, _, files in os.walk(file_path):
                 for name in files:
-                    rootpath = os.path.join(root, name)
+                    root_path = os.path.join(root, name)
 
                     # Pass everything after config as arguments for os.path.join
-                    targetpath = os.path.join(configdest, rootpath.replace(configtmp, "")[1:])
-                    targetroot, _ = os.path.split(targetpath)
+                    target_path = os.path.join(config_dest, root_path.replace(config_tmp, '')[1:])
+                    target_root, _ = os.path.split(target_path)
 
                     # Ensure file's root folder exists (shutil.move gets sad about nested folders not existing)
-                    if (not os.path.exists(targetroot)):
-                        os.makedirs(targetroot)
+                    if (not os.path.exists(target_root)):
+                        os.makedirs(target_root)
 
-                    shutil.move(rootpath, targetpath)
+                    shutil.move(root_path, target_path)
 
         # Handle top-level files by simply moving them (overwrites if it exists)
         else:
-            targetpath = os.path.join(configdest, file_)
-            shutil.move(filepath, targetpath)
-
-    return
+            target_path = os.path.join(config_dest, file_)
+            shutil.move(file_path, target_path)
 
 
-def executeLauncher(textbox, exepath):
-    _, exe_name = os.path.split(exepath)
-    addText(f"[INFO] Launching {exe_name}.", textbox)
+def execute_launcher(textbox, exe_path):
+    _, exe_name = os.path.split(exe_path)
+    log(f'[INFO] Launching {exe_name}.', textbox)
     try:
-        subprocess.check_call([exepath])
+        subprocess.check_call([exe_path])
         return True
     except Exception as error:
-        addText(f"[ERROR] {error.strerror.replace('%1', exepath)}.", textbox)
+        log(f'[ERROR] {error.strerror.replace('%1', exe_path)}.', textbox)
         return False

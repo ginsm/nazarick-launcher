@@ -1,26 +1,26 @@
 import os
 from tinydb import TinyDB
-from .utility import destructure
+from modules.utility import destructure
 
 # The default state for the store
 default_state={
-    "autoclose": False,
-    "game": "minecraft",
-    "frame": "minecraft",
-    "games": {
-        "minecraft": {
-            "selectedpack": "nazarick-smp",
-            "nazarick-smp": { "instance": "", "executable": "" }
+    'autoclose': False,
+    'game': 'minecraft',
+    'frame': 'minecraft',
+    'games': {
+        'minecraft': {
+            'selectedpack': 'nazarick-smp',
+            'nazarick-smp': { 'instance': '', 'executable': '' }
         },
-        "valheim": {
-            "selectedpack": "nazarick-smp",
-            "nazarick-smp": { "instance": "", "executable": "" }
+        'valheim': {
+            'selectedpack': 'nazarick-smp',
+            'nazarick-smp': { 'instance': '', 'executable': '' }
         }
     },
-    "geometry": "1280x720",
-    "logging": True,
-    "theme": "System",
-    "debug": False,
+    'geometry': '1280x720',
+    'logging': True,
+    'theme': 'System',
+    'debug': False,
 }
 
 
@@ -31,86 +31,85 @@ def init(path):
 
     # Assign database variable globally (module scope)
     global database
-    database = TinyDB(os.path.join(path, "state.json"))
+    database = TinyDB(os.path.join(path, 'state.json'))
     
     # Initialize the state
-    state = database.table("state")
+    state = database.table('state')
     if state.get(doc_id=1) is None:
         state.insert(default_state)
     else:
-        updatedState = update(state.get(doc_id=1))
-        if state.get(doc_id=1) != updatedState:
-            print("Ran")
-            setStateDoc(updatedState)
+        updated_state = update(state.get(doc_id=1))
+        if state.get(doc_id=1) != updated_state:
+            set_state_doc(updated_state)
 
 
 # State doc getter/setter
-def getStateDoc():
+def get_state_doc():
     global database
     return database.table('state')
 
-def setStateDoc(data):
+def set_state_doc(data):
     if bool(data):
-        state = getStateDoc()
+        state = get_state_doc()
         state.remove(doc_ids=[1])
         state.insert(data)
 
 
 # Game getter/setter
-def getGame():
-    state = getState()
+def get_game():
+    state = get_state()
     return state['game']
 
-def setGame(game):
+def set_game(game):
     if bool(game):
-        setState({'game': game})
+        set_state({'game': game})
 
 
 # Pack getter/setter
-def getSelectedPack():
-    state = getState()
-    game = getGame()
+def get_selected_pack():
+    state = get_state()
+    game = get_game()
     return state['games'][game]['selectedpack']
 
-def setSelectedPack(pack):
+def set_selected_pack(pack):
     if bool(pack):
-        game = getGame()
-        state = getState()
+        game = get_game()
+        state = get_state()
         state['games'][game].update({'selectedpack': pack})
-        setState(state)
+        set_state(state)
 
 
 # Game state getter/setter
-def getGameState():
-    game = getGame()
-    pack = getSelectedPack()
-    state = getState()
+def get_game_state():
+    game = get_game()
+    pack = get_selected_pack()
+    state = get_state()
     return state['games'][game][pack]
 
-def setGameState(obj):
+def set_game_state(obj):
     if bool(obj):
-        game = getGame()
-        pack = getSelectedPack()
-        state = getState()
+        game = get_game()
+        pack = get_selected_pack()
+        state = get_state()
         state['games'][game][pack].update(obj)
-        setState(state)
+        set_state(state)
 
 
 # Generic state getter/setter
-def getState(*args):
-    state = getStateDoc().get(doc_id=1)
+def get_state(*args):
+    state = get_state_doc().get(doc_id=1)
     output = destructure(state, args=args)
     return output if bool(output) else state
 
-def setState(data={}):
-    state = getStateDoc()
+def set_state(data={}):
+    state = get_state_doc()
     if bool(data):
         state.update(data, doc_ids=[1])
 
 
 # Set menu option
-def setMenuOption(name, options):
-    setState({name: options[name].get()})
+def set_menu_option(name, options):
+    set_state({name: options[name].get()})
 
 
 # ---- State updates ----

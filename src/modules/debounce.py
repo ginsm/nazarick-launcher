@@ -16,7 +16,7 @@ class Debouncer:
             self._timer.start()
 
 
-VoidFunction = TypeVar("VoidFunction", bound=Callable[..., None])
+VoidFunction = TypeVar('VoidFunction', bound=Callable[..., None])
 
 
 def debounce(interval: float):
