@@ -1,0 +1,9 @@
+# pip install -r requirements.txt --upgrade
+
+# latest from git repo (https://pip.pypa.io/en/stable/topics/vcs-support/#git)
+tufup @ git+https://github.com/dennisvang/tufup.git@master
+customtkinter=5.2.0
+Pillow=10.1.0
+requests=2.31.0
+tinydb=4.8.0
+tkinter-tooltip=2.1.0
