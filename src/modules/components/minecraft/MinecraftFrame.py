@@ -5,21 +5,41 @@ def create(ctk, master):
     frame = ctk.CTkFrame(master=master)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
-    frame.pack(anchor='center', fill='both', expand=True)
+    frame.pack(anchor='center', fill='both', expand=True) #TODO swap to grid
 
     # Create components
-    textbox = LogBox.create(ctk, frame)
+    textbox = LogBox.create(
+        ctk=ctk,
+        master=frame
+    )
+
     instance = ExplorerSearch.create(
-        name='instance', label='Instance Path', find='directory',
+        ctk=ctk,
+        master=frame,
+        game='minecraft',
+        label='Instance Path',
         placeholder='Enter the path to your Minecraft instance.',
-        ctk=ctk, master=frame
+        name='instance',
+        find='directory'
     )
+
     executable = ExplorerSearch.create(
-        name='executable', label="Launcher's Executable Path", find='file',
+        ctk=ctk,
+        master=frame,
+        game='minecraft',
+        label="Launcher's Executable Path",
         placeholder="Enter the path to your launcher's executable.",
-        ctk=ctk, master=frame
+        name='executable',
+        find='file'
     )
-    update = UpdateButton.create(ctk, frame, instance, executable, textbox, updater.start)
+
+    update = UpdateButton.create(
+        ctk=ctk,
+        master=frame, 
+        lockable=[*instance[:-1], *executable[:-1]], 
+        textbox=textbox, 
+        update_fn=updater.start
+    )
 
     # Position components
     textbox.grid(row=0, columnspan=2, pady=(20, 5), padx=10, sticky='nsew')
