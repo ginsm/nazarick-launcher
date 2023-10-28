@@ -5,6 +5,7 @@ from modules.debounce import debounce
 from tkinter import filedialog
 from modules.tufupsettings import BASE_DIR
 from PIL import Image
+from tktooltip import ToolTip
 
 def create(ctk, master, label, placeholder, name, find):
     frame = ctk.CTkFrame(master=master, fg_color="transparent")
@@ -20,6 +21,7 @@ def create(ctk, master, label, placeholder, name, find):
 
     # Button variables & images
     button_height = 36
+    button_width = 44
     icon_size = 18
     IMAGE_DIR = BASE_DIR / 'icons'
     searchImage = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
@@ -27,12 +29,14 @@ def create(ctk, master, label, placeholder, name, find):
 
     # Search Button
     searchFunction = getSearchFunction(find)
-    searchButton = ctk.CTkButton(master=frame, image=searchImage, text="Search", command=lambda: searchFunction(entry, name), height=button_height, width=95)
+    searchButton = ctk.CTkButton(master=frame, image=searchImage, text="", command=lambda: searchFunction(entry, name), height=button_height, width=button_width)
     searchButton.grid(row=2, column=1, padx=(0, 5), pady=5, sticky="ew")
+    ToolTip(searchButton, msg=f"Search for the {name} path.", delay=0.01, follow=True)
 
     # Open Button
-    openButton = ctk.CTkButton(master=frame, image=openImage, text="", command=lambda: openPath(entry, name), height=button_height, width=44)
+    openButton = ctk.CTkButton(master=frame, image=openImage, text="", command=lambda: openPath(entry, name), height=button_height, width=button_width)
     openButton.grid(row=2, column=2, padx=(0, 10), pady=5, sticky="ew")
+    ToolTip(openButton, msg=f"Open the {name} path.", delay=0.01, follow=True)
 
 
     # Get entry state from storage and set it
