@@ -18,6 +18,7 @@ def create(ctk, master, label, placeholder, name, find):
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36)
     entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky="ew")
     entry.bind(sequence="<KeyRelease>", command=lambda _ : handleKeyPress(entry, name))
+    ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables & images
     button_height = 36
