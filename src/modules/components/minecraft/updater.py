@@ -7,9 +7,9 @@ import shutil
 from queue import Queue
 from threading import Thread
 
-from .view import addText
-from .utility import getenv, getTime
-from .store import getGameState
+from ...view import addText
+from ...utility import getenv, getTime
+from ...store import getGameState
 
 # ----- Main Functions ----- #
 def start(app, ctk, lockable, textbox, options):

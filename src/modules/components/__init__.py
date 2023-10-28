@@ -1,1 +1,1 @@
-__all__ = ["versionselector", "AppWindow", "AppMenu", "ExecutableEntry", "InstanceEntry", "LogBox", "MainFrame", "UpdateButton"]
+__all__ = ["AppMenu", "AppWindow"]

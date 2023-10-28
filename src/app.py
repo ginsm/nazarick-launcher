@@ -4,7 +4,8 @@ from tufup.client import Client
 from modules import utility
 from modules import view
 from modules import store
-from modules.components import AppWindow, AppMenu, MainFrame, LogBox, UpdateButton, ExplorerSearch
+from modules.components import AppMenu, AppWindow
+from modules.components.minecraft import MinecraftFrame
 from modules.tufupsettings import (
     # App info
     APP_NAME, APP_VERSION, FROZEN,
@@ -24,8 +25,6 @@ def main():
 
     # Initialize the store
     store.init(DATA_DIR.as_posix())
-
-    # Get state to configure the app with persistent data
     initialState = store.getState()
     ctk.set_appearance_mode(initialState.get("theme"))
 
@@ -33,32 +32,14 @@ def main():
     app = AppWindow.create(ctk, initialState, utility.getenv("nazpath"), APP_NAME)
     AppMenu.create(ctk, app, initialState)
 
-    # Create main frame and its components
-    main_frame = MainFrame.create(ctk, app)
-    textbox = LogBox.create(ctk, main_frame)
-    instance = ExplorerSearch.create(
-        name="instance", label="Instance Path", find="directory",
-        placeholder="Enter the path to your Minecraft instance.",
-        ctk=ctk, master=main_frame
-    )
-    executable = ExplorerSearch.create(
-        name="executable", label="Launcher's Executable Path", find="file",
-        placeholder="Enter the path to your launcher's executable.",
-        ctk=ctk, master=main_frame
-    )
-    update = UpdateButton.create(ctk, main_frame, instance, executable, textbox)
-
-    # Position elements
-    textbox.grid(row=0, columnspan=2, pady=(20, 5), padx=10, sticky="nsew")
-    instance[-1].grid(row=1, sticky="ew", columnspan=2)
-    executable[-1].grid(row=2, sticky="ew", columnspan=2)
-    update.grid(row=3, padx=10, pady=(14, 15), columnspan=2, sticky="ew")
+    # Create frames
+    [mc_frame, mc_logbox] = MinecraftFrame.create(ctk, app)
 
     # UI Events
     app.bind("<Configure>", lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    view.addText(f"[INFO] The app has finished initializing ({APP_VERSION}).", textbox)
+    view.addText(f"[INFO] The app has finished initializing ({APP_VERSION}).", mc_logbox)
 
     # Main loop
     app.mainloop()

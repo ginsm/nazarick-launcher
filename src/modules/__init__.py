@@ -1,1 +1,1 @@
-__all__ = ["debounce", "store", "updater", "utility", "view", "tufupsettings"]
+__all__ = ["components", "debounce", "store", "tufupsettings", "utility", "view"]
