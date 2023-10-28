@@ -1,6 +1,6 @@
 from modules import store
 
-def create(ctk, master, instance, executable, textbox, update_fn):
+def create(ctk, master, lockable, textbox, update_fn):
     update = ctk.CTkButton(
         master=master,
         text='Start Game',
@@ -10,7 +10,7 @@ def create(ctk, master, instance, executable, textbox, update_fn):
             ctk=ctk,
             textbox=textbox,
             options=store.get_state(),
-            lockable=[*instance[:-1], *executable[:-1], update],
+            lockable=[*lockable, update],
         )
     )
 
