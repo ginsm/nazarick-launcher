@@ -5,7 +5,7 @@ from tkinter import filedialog
 from tktooltip import ToolTip
 from modules import store
 from modules.debounce import debounce
-from modules.tufupsettings import BASE_DIR
+from modules.tufup_settings import BASE_DIR
 
 def create(ctk, master, label, placeholder, name, find):
     frame = ctk.CTkFrame(master=master, fg_color='transparent')

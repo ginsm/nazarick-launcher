@@ -6,7 +6,7 @@ from modules import view
 from modules import store
 from modules.components import AppMenu, AppWindow
 from modules.components.minecraft import MinecraftFrame
-from modules.tufupsettings import (
+from modules.tufup_settings import (
     # App info
     APP_NAME, APP_VERSION, FROZEN,
     # Directories
