@@ -1,20 +1,13 @@
 import sys
-from tufup.repo import Repository
-from src.modules.tufup_settings import APP_NAME, APP_VERSION
-from repository_settings import (
-    # Settings
-    ENCRYPTED_KEYS,
-    EXPIRATION_DAYS,
-    KEY_MAP,
-    THRESHOLDS,
-    # Directories
-    DIST_DIR,
-    KEYS_DIR,
-    REPO_DIR,
-    OFFLINE_DIR_1,
-    OFFLINE_DIR_2,
-    ONLINE_DIR
+import pathlib
+import copy
+from tufup.repo import (
+    Repository,
+    DEFAULT_KEY_MAP, 
+    DEFAULT_KEYS_DIR_NAME, 
+    DEFAULT_REPO_DIR_NAME
 )
+from src.modules.tufup_settings import APP_NAME, APP_VERSION
 
 def run_operation():
     # Get operation and run accompanying function
@@ -30,6 +23,29 @@ def run_operation():
         case _:
             print('Usage: python repository.py <operation>\nOperations: bundle, init, sign')
 
+# SETTINGS
+# Path to directory containing current module
+BASE_DIR = pathlib.Path(__file__).resolve().parent
+
+# For development
+DEV_DIR = BASE_DIR / 'pyinstaller' / 'temp'
+DIST_DIR = DEV_DIR / 'dist'
+
+# Local repo path and keys path (would normally be offline)
+KEYS_DIR = BASE_DIR / DEFAULT_KEYS_DIR_NAME
+ONLINE_DIR = KEYS_DIR / 'online_secrets'
+OFFLINE_DIR_1 = KEYS_DIR / 'offline_secrets_1'
+OFFLINE_DIR_2 = KEYS_DIR / 'offline_secrets_2'
+REPO_DIR = DEV_DIR / DEFAULT_REPO_DIR_NAME
+
+# Key settings
+EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=7, timestamp=1)
+THRESHOLDS = dict(root=2, targets=1, snapshot=1, timestamp=1)
+KEY_MAP = copy.deepcopy(DEFAULT_KEY_MAP)
+KEY_MAP['root'].append('root_two') # use two keys for root
+ENCRYPTED_KEYS=['root', 'root_two', 'targets']
+
+# OPERATIONS
 def init():
     # Create repository instance
     repo = Repository(
@@ -61,6 +77,8 @@ def init():
         if private_key_path.exists():
             dst_dir.mkdir(exist_ok=True)
             private_key_path.rename(dst_dir / private_key_name)
+            
+    print("Done.")
 
 def bundle():
     # Create archive from latest pyinstaller bundle (assuming we have already
@@ -91,5 +109,7 @@ def sign():
     # Re-sign expired roles (downstream roles are refreshed automatically)
     repo.refresh_expiration_date(role_name='snapshot', days=9)
     repo.publish_changes(private_key_dirs=[ONLINE_DIR])
+
+    print("Done.")
 
 run_operation()
