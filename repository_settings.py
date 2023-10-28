@@ -6,9 +6,6 @@ from tufup.repo import (
     DEFAULT_REPO_DIR_NAME
 )
 
-# App info
-APP_NAME="NazarickLauncher"
-
 # Path to directory containing current module
 BASE_DIR = pathlib.Path(__file__).resolve().parent
 
