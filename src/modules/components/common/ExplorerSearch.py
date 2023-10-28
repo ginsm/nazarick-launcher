@@ -7,7 +7,7 @@ from modules import store
 from modules.debounce import debounce
 from modules.tufup_settings import BASE_DIR
 
-def create(ctk, master, label, placeholder, name, find):
+def create(ctk, master, label, placeholder, name, find, game=''):
     frame = ctk.CTkFrame(master=master, fg_color='transparent')
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
@@ -43,7 +43,7 @@ def create(ctk, master, label, placeholder, name, find):
 
 
     # Get entry state from storage and set it
-    state = store.get_game_state()
+    state = store.get_game_state(game)
     if bool(state[name]):
         set_entry(entry, state[name])
 
