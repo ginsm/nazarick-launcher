@@ -1,5 +1,5 @@
 from modules.components.common import LogBox, ExplorerSearch, UpdateButton
-from modules.components.minecraft import updater
+from modules.minecraft import updater
 
 def create(ctk, master):
     frame = ctk.CTkFrame(master=master)
