@@ -1,6 +1,5 @@
 import os
 from PIL import Image
-from tktooltip import ToolTip
 from modules.tufup_settings import BASE_DIR
 from modules import view
 from modules import store
@@ -9,10 +8,10 @@ game_buttons = []
 
 def create(ctk, master, games):
     icon_size=54
-    pad=14
+    pad=10
 
     # Create frame
-    frame = ctk.CTkFrame(master=master, width=icon_size + pad, fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
+    frame = ctk.CTkFrame(master=master, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
 
     # Create buttons
     for game in games:
@@ -26,8 +25,7 @@ def create(ctk, master, games):
             frame=game['frame'],
             size=icon_size
         )
-        button.grid(column=0, row=len(game_buttons), sticky='n', ipady=pad, ipadx=pad)
-        ToolTip(button, msg=game['name'], delay=0.01, follow=True)
+        button.grid(column=0, row=len(game_buttons), sticky='n', ipady=pad, ipadx=pad * 2)
 
         # Add button to global game_buttons
         game_buttons.append({'name': game['name'], 'button': button})
@@ -52,7 +50,8 @@ def GameButton(ctk, master, game, frame, size):
     return ctk.CTkButton(
         master=master,
         image=game_image,
-        text='',
+        text=game,
+        compound='top',
         command=lambda: select_game(game, frame),
         height=size,
         width=size,
@@ -63,15 +62,20 @@ def GameButton(ctk, master, game, frame, size):
 def color_buttons(selected_game):
     global game_buttons
     
-    normal='#1d1e1e'
-    dark_selected='#2b2b2b'
-    light_selected='#dbdbdb'
+    normal=('#1d1e1e', '#1d1e1e')
+    normal_text=("#ffffff", "#ffffff")
+    selected=('#dbdbdb', '#2b2b2b')
+    selected_text=("#1a1a1a", "#ffffff")
 
     for game_button in game_buttons:
+        button = game_button['button']
+        
         if game_button['name'] == selected_game:
-            game_button['button'].configure(fg_color=(light_selected, dark_selected))
+            button.configure(fg_color=selected)
+            button.configure(text_color=selected_text)
         else:
-            game_button['button'].configure(fg_color=(normal, normal))
+            button.configure(fg_color=normal)
+            button.configure(text_color=normal_text)
 
 
 def select_game(game, frame):
