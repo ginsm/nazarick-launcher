@@ -1,4 +1,4 @@
-from modules.components.common import GameTitleBar, LogBox, ExplorerSearch, UpdateButton
+from modules.components.common import LogBox, ExplorerSearch, UpdateButton
 from modules import view
 
 def create(ctk, master, pool):

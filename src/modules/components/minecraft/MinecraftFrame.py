@@ -1,4 +1,4 @@
-from modules.components.common import GameTitleBar, LogBox, ExplorerSearch, UpdateButton
+from modules.components.common import LogBox, ExplorerSearch, UpdateButton
 from modules.minecraft import updater
 from modules import view
 
