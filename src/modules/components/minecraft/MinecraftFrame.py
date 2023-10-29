@@ -3,12 +3,9 @@ from modules.minecraft import updater
 from modules import view
 
 def create(ctk, master, pool):
-    frame = ctk.CTkFrame(master=master)
+    frame = ctk.CTkFrame(master=master, corner_radius=0)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(1, weight=1)
-
-    # Create components
-    [title] = GameTitleBar.create(ctk=ctk, master=frame, game='Minecraft')
 
     textbox = LogBox.create(
         ctk=ctk,
@@ -47,8 +44,7 @@ def create(ctk, master, pool):
     view.add_lockable([*instance[:-1], *executable[:-1]])
 
     # Position components
-    title.grid(row=0, sticky='w')
-    textbox.grid(row=1, columnspan=2, pady=(10, 5), padx=10, sticky='nsew')
+    textbox.grid(row=1, columnspan=2, pady=(15, 5), padx=10, sticky='nsew')
     instance[-1].grid(row=2, sticky='ew', columnspan=2)
     executable[-1].grid(row=3, sticky='ew', columnspan=2)
     update.grid(row=4, padx=10, pady=(14, 15), columnspan=2, sticky='ew')
