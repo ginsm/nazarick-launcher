@@ -4,7 +4,7 @@ from tufup.client import Client
 from modules import utility
 from modules import view
 from modules import store
-from modules.components import AppMenu, AppWindow
+from modules.components import AppMenu, AppWindow, AppSideBar
 from modules.components.minecraft import MinecraftFrame
 from modules.components.valheim import ValheimFrame
 from modules.tufup_settings import (
@@ -37,9 +37,23 @@ def main():
     [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app)
     [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app)
 
+    games = [
+        {'name': 'Minecraft', 'frame': mc_frame},
+        {'name': 'Valheim', 'frame': vh_frame},
+    ]
+
     # Position frames
-    vh_frame.grid(row=0, column=1, sticky='nsew')
-    mc_frame.grid(row=0, column=1, sticky='nsew')
+    vh_frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
+    mc_frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
+
+    # Raise selected game
+    for game in games:
+        if game['name'].lower() == store.get_game():
+            game['frame'].tkraise()
+
+    # Add side bar
+    sidebar = AppSideBar.create(ctk, app, games)
+    sidebar.grid(row=0, column=0, sticky='ns')
 
     # UI Events
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
