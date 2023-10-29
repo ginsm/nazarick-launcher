@@ -6,7 +6,7 @@ import shutil
 from queue import Queue
 from threading import Thread
 import requests
-from modules.view import log, lock
+from modules.view import log, lock, lockable_elements
 from modules.utility import get_env, get_time
 from modules.store import get_game_state
 

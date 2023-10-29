@@ -13,7 +13,6 @@ def create(ctk, master, games):
 
     # Create frame
     frame = ctk.CTkFrame(master=master, width=icon_size + pad, fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
-    # frame.grid_rowconfigure((0, 1), weight=1)
 
     # Create buttons
     for game in games:
@@ -35,9 +34,6 @@ def create(ctk, master, games):
 
         # Add button to lockable
         view.add_lockable(button)
-
-    # Add buttons to lockables
-    view.add_lockable(game_buttons)
 
     return frame
 
@@ -63,9 +59,9 @@ def GameButton(ctk, master, game, frame, size):
         corner_radius=0
     )
 
+
 def color_buttons(selected_game):
     global game_buttons
-
     
     normal='#1d1e1e'
     dark_selected='#2b2b2b'
@@ -76,6 +72,7 @@ def color_buttons(selected_game):
             game_button['button'].configure(fg_color=(light_selected, dark_selected))
         else:
             game_button['button'].configure(fg_color=(normal, normal))
+
 
 def select_game(game, frame):
     # Raise the frame in the app

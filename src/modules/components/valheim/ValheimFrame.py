@@ -28,7 +28,7 @@ def create(ctk, master):
         ctk=ctk,
         master=frame,
         textbox=textbox,
-        update_fn=lambda app, ctk, textbox, options: print('Reached')
+        update_fn=lambda app, ctk, textbox, options: view.log("[INFO] That feature has not been implemented yet.", textbox)
     )
 
     # Add lockable elements to array
