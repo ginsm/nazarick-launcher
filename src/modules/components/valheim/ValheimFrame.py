@@ -20,7 +20,7 @@ def create(ctk, master):
         game='valheim',
         label='Install Path',
         placeholder='Enter the path to your Valheim install.',
-        name='instance',
+        name='install',
         find='directory'
     )
 

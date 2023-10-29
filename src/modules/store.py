@@ -14,7 +14,7 @@ default_state={
         },
         'valheim': {
             'selectedpack': 'nazarick-smp',
-            'nazarick-smp': { 'instance': '' }
+            'nazarick-smp': { 'install': '' }
         }
     },
     'geometry': '1280x720',
@@ -139,8 +139,7 @@ def update_107(state):
                 'valheim': {
                     'selectedpack': 'nazarick-smp',
                     'nazarick-smp': {
-                        'instance': '',
-                        'executable': ''
+                        'install': ''
                     }
                 }
             }

@@ -44,7 +44,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     # Get entry state from storage and set it
     state = store.get_game_state(game)
-    if bool(state[name]):
+    if bool(state.get(name)):
         set_entry(entry, state[name])
 
     return [entry, search_button, frame]
