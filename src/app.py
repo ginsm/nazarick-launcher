@@ -46,14 +46,17 @@ def main():
     vh_frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
     mc_frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
 
-    # Raise selected game
-    for game in games:
-        if game['name'].lower() == store.get_game():
-            game['frame'].tkraise()
-
     # Add side bar
     sidebar = AppSideBar.create(ctk, app, games)
     sidebar.grid(row=0, column=0, sticky='ns')
+
+    # Raise selected game and set color
+    selected_game = store.get_game()
+    for game in games:
+        [name, frame] = utility.destructure(game, ['name', 'frame'])
+        if name.lower() == selected_game:
+            frame.tkraise()
+            AppSideBar.color_buttons(name)
 
     # UI Events
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize

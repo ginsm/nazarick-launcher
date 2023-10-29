@@ -28,7 +28,7 @@ def create(ctk, master):
         ctk=ctk,
         master=frame,
         textbox=textbox,
-        update_fn=lambda: print('Reached')
+        update_fn=lambda app, ctk, textbox, options: print('Reached')
     )
 
     # Add lockable elements to array
