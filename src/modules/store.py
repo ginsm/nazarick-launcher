@@ -66,9 +66,9 @@ def set_game(game):
 
 
 # Pack getter/setter
-def get_selected_pack():
+def get_selected_pack(game=""):
     state = get_state()
-    game = get_game()
+    game = game or get_game()
     return state['games'][game]['selectedpack']
 
 def set_selected_pack(pack):
@@ -82,7 +82,7 @@ def set_selected_pack(pack):
 # Game state getter/setter
 def get_game_state(game=""):
     game = game or get_game()
-    pack = get_selected_pack()
+    pack = get_selected_pack(game)
     state = get_state()
     return state['games'][game][pack]
 
