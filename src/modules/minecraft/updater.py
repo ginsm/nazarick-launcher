@@ -3,24 +3,24 @@ import subprocess
 import json
 import zipfile
 import shutil
-from queue import Queue
-from threading import Thread
+from concurrent.futures import wait
 import requests
-from modules.view import log, lock, lockable_elements
+from modules import view
 from modules.utility import get_env, get_time
-from modules.store import get_game_state
+from modules import store
 
 # ----- Main Functions ----- #
-def start(app, ctk, textbox, options):
-    log(f'', textbox)
-    log(f'[INFO] Beginning process at {get_time()}.', textbox)
+def start(app, ctk, textbox, pool):
+    view.log(f'', textbox)
+    view.log(f'[INFO] Beginning process at {get_time()}.', textbox)
 
     # Lock user input
-    log(f'[INFO] Locking user input.', textbox)
-    lock(True)
+    view.log(f'[INFO] Locking user input.', textbox)
+    view.lock(True)
 
     # Bundling all variables to pass them around throughout the script
-    game_state = get_game_state()
+    game_state = store.get_game_state()
+    options = store.get_state()
     variables = {
         'app': app,
         'ctk': ctk,
@@ -35,9 +35,9 @@ def start(app, ctk, textbox, options):
 
     # Error Handling
     if (handle_errors(variables)):
-        log(f'[INFO] Unlocking user input.', textbox)
-        lock(False)
-        log(f'[INFO] Finished process at {get_time()}.', textbox)
+        view.log(f'[INFO] Unlocking user input.', textbox)
+        view.lock(False)
+        view.log(f'[INFO] Finished process at {get_time()}.', textbox)
         return
     
     # Skip updating process if nuver is equal to latest ver
@@ -55,12 +55,8 @@ def start(app, ctk, textbox, options):
     extract_modpack(variables)
 
     # Retrieve all of the mod files
-    retrieve_mods(variables)
+    retrieve_mods(variables, pool)
 
-
-# The update is split into multiple functions to allow for all of the mods to be retrieved
-# before installing the actual update.
-def resume_update(variables):
     # Install the update into the instance
     install_update(variables)
 
@@ -82,8 +78,8 @@ def finalize(vars_):
     ]
 
     # Unlock the program
-    log(f'[INFO] Unlocking user input.', textbox)
-    lock(False)
+    view.log(f'[INFO] Unlocking user input.', textbox)
+    view.lock(False)
 
     # Debug mode stops exe from launching
     if (not options['debug']):
@@ -91,14 +87,14 @@ def finalize(vars_):
         if (not executed):
             return
     else:
-        log('[INFO] The executable is not launched whilst in debug mode.', textbox)
+        view.log('[INFO] The executable is not launched whilst in debug mode.', textbox)
 
                     
-    log(f'[INFO] Finished process at {get_time()}.', textbox)
+    view.log(f'[INFO] Finished process at {get_time()}.', textbox)
 
     # Check if auto close is enabled; close if so
     if (options['autoclose']):
-        log('[INFO] Auto close is enabled; closing app.', textbox)
+        view.log('[INFO] Auto close is enabled; closing app.', textbox)
         app.quit()
 
 
@@ -111,26 +107,26 @@ def handle_errors(vars_):
     ]
     error = False
 
-    log('[INFO] Validating the provided executable and instance paths.', textbox)
+    view.log('[INFO] Validating the provided executable and instance paths.', textbox)
 
     # Ensure the path was provided.
     if inst_path == '':
-        log('[ERROR] Please provide a path to your Minecraft instance.', textbox)
+        view.log('[ERROR] Please provide a path to your Minecraft instance.', textbox)
         error = True
     else:
         # Ensure the path is valid.
         if not os.path.exists(inst_path):
-            log("[ERROR] The provided path to your Minecraft instance doesn't exist.", textbox)
+            view.log("[ERROR] The provided path to your Minecraft instance doesn't exist.", textbox)
             error = True
 
     # Ensure the path was provided.
     if exe_path == '':
-        log("[ERROR] Please provide a path to your launcher's executable.", textbox)
+        view.log("[ERROR] Please provide a path to your launcher's executable.", textbox)
         error= True
     else:
         # Ensure the path is valid.
         if not os.path.isfile(exe_path):
-            log("[ERROR] The provided path to your launcher doesn't exist.", textbox)
+            view.log("[ERROR] The provided path to your launcher doesn't exist.", textbox)
             error =  True
         
     
@@ -144,10 +140,10 @@ def clean_update_directories(vars_):
     ]
     # Delete any existing tmp directory
     if os.path.exists(tmp):
-        log('[INFO] Pruning old tmp directory.', textbox)
+        view.log('[INFO] Pruning old tmp directory.', textbox)
         shutil.rmtree(tmp)
     else:
-        log('[INFO] Creating tmp directory.', textbox)
+        view.log('[INFO] Creating tmp directory.', textbox)
 
     # Create clean tmp directory
     os.mkdir(tmp)
@@ -178,12 +174,12 @@ def on_latest_version(vars_):
         with open(os.path.join(inst_path, 'nuver'), 'rb') as f:
             last_version_name = f.read().decode('UTF-8')
             if (version_name == last_version_name):
-                log(f'[INFO] You are already on the latest version ({version_name}).', vars_['textbox'])
+                view.log(f'[INFO] You are already on the latest version ({version_name}).', vars_['textbox'])
                 return True
             
     # Handle first install
     else:
-        log('[INFO] Preparing instance for initial install.', vars_['textbox'])
+        view.log('[INFO] Preparing instance for initial install.', vars_['textbox'])
         configpath = os.path.join(inst_path, 'config')
         modspath = os.path.join(inst_path, 'mods')
 
@@ -204,7 +200,7 @@ def store_version_number(vars_):
         vars_['instpath']
     ]
 
-    log(f'[INFO] Storing new version ID for future ref: {version_name}.', textbox)
+    view.log(f'[INFO] Storing new version ID for future ref: {version_name}.', textbox)
     open(os.path.join(inst_path, 'nuver'), 'w').write(version_name)
 
 
@@ -215,7 +211,7 @@ def download_modpack(vars_):
         vars_['version']
     ]
 
-    log(f'[INFO] Downloading latest version: {version['name']}.', textbox)
+    view.log(f'[INFO] Downloading latest version: {version['name']}.', textbox)
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
@@ -228,12 +224,12 @@ def extract_modpack(vars_):
         vars_['tmp']
     ]
 
-    log('[INFO] Extracting the modpack zip.', textbox)
+    view.log('[INFO] Extracting the modpack zip.', textbox)
     with zipfile.ZipFile(os.path.join(tmp, 'update.zip'), 'r') as ref:
         ref.extractall(tmp)
 
 
-def retrieve_mods(vars_):
+def retrieve_mods(vars_, pool):
     tmp, textbox, debug = [
         vars_['tmp'],
         vars_['textbox'],
@@ -243,62 +239,14 @@ def retrieve_mods(vars_):
     # read modrinth.index.json
     with open(os.path.join(tmp, 'modrinth.index.json'), 'rb') as f:
         mods = json.loads(f.read().decode('UTF-8'))['files']
+        futures = []
 
-        log('[INFO] Retrieving any mods not present in the modpack zip:', textbox)
+        view.log('[INFO] Retrieving any mods not present in the modpack zip:', textbox)
 
-        # Create a queue and set max amount of threads
-        queue = Queue(maxsize=0)
-        num_threads = 2
-        stop_threads = False
-
-        # Keeps the thread alive while they do work
-        def keep_alive(queue, stop):
-          while True:
-            # Kill thread flag handling
-            if stop():
-                break
-
-            # Get the values for the task
-            items = queue.get()
-            func = items[0]
-            args = items[1:]
-
-            # Run the task and mark it as done
-            func(*args)
-            queue.task_done()
-            
-        # Initialize the threads
-        for i in range(num_threads):
-            if (debug):
-                log(f'[INFO] Creating thread #{i + 1}.', textbox)
-            worker = Thread(target=keep_alive, args=(queue, lambda: stop_threads))
-            worker.setDaemon(True)
-            worker.start()
-
-        # Populate the queue with tasks
         for mod in mods:
-            queue.put([retrieve, mod, vars_])
+            futures.append(pool.submit(retrieve, mod, vars_))
 
-        # This allows for joining all the threads in a non-blocking manner (so the GUI can
-        # update). It signifies the end of the queue.
-        def join(queue, variables):
-            queue.join()
-
-            # Stop threads
-            if (debug):
-                log('[INFO] Stopping all threads.', textbox)
-            nonlocal stop_threads
-            stop_threads = True
-
-            # Continue updating
-            log('[INFO] Finished retrieving missing mods.', textbox)
-            resume_update(variables)
-            return
-
-        # Start up queue.join monitoring thread
-        joiner = Thread(target=join, args=(queue, vars_))
-        joiner.setDaemon(True)
-        joiner.start()
+        wait(futures)
 
 
 def retrieve(mod, vars_):
@@ -316,15 +264,15 @@ def retrieve(mod, vars_):
 
     # Copy file if it exists locally
     if os.path.isfile(local_path):
-        log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
+        view.log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
         shutil.copyfile(local_path, destination)
     # Copy file if it exists locally (initial install)
     elif os.path.isfile(local_path_old):
-        log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
+        view.log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
         shutil.copyfile(local_path_old, destination)
     # Download mod
     else:
-        log(f'[INFO] (D) {name.split('.jar')[0]}.', textbox)
+        view.log(f'[INFO] (D) {name.split('.jar')[0]}.', textbox)
         req = requests.get(mod['downloads'][0], allow_redirects=True)
         open(destination, 'wb').write(req.content)
 
@@ -344,13 +292,13 @@ def install_update(vars_):
     config_tmp = os.path.join(tmp, 'overrides', 'config')
 
     # Remove old mods path and move updated mods to instance
-    log('[INFO] Moving updated mods into the provided instance location.', textbox)
+    view.log('[INFO] Moving updated mods into the provided instance location.', textbox)
     if (os.path.exists(mods_dest)):
         shutil.rmtree(mods_dest)
     shutil.move(mods_tmp, mods_dest)
 
     # Remove yosbr and move updated configs to instance
-    log('[INFO] Moving updated configs into the provided instance location.', textbox)
+    view.log('[INFO] Moving updated configs into the provided instance location.', textbox)
     if (os.path.exists(yosbr_path)):
         shutil.rmtree(yosbr_path)
 
@@ -381,10 +329,10 @@ def install_update(vars_):
 
 def execute_launcher(textbox, exe_path):
     _, exe_name = os.path.split(exe_path)
-    log(f'[INFO] Launching {exe_name}.', textbox)
+    view.log(f'[INFO] Launching {exe_name}.', textbox)
     try:
         subprocess.check_call([exe_path])
         return True
     except Exception as error:
-        log(f'[ERROR] {error.strerror.replace('%1', exe_path)}.', textbox)
+        view.log(f'[ERROR] {error.strerror.replace('%1', exe_path)}.', textbox)
         return False

@@ -2,7 +2,7 @@ from modules.components.common import GameTitleBar, LogBox, ExplorerSearch, Upda
 from modules.minecraft import updater
 from modules import view
 
-def create(ctk, master):
+def create(ctk, master, pool):
     frame = ctk.CTkFrame(master=master)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(1, weight=1)
@@ -37,8 +37,9 @@ def create(ctk, master):
 
     update = UpdateButton.create(
         ctk=ctk,
-        master=frame, 
-        textbox=textbox, 
+        master=frame,
+        textbox=textbox,
+        pool=pool,
         update_fn=updater.start
     )
 

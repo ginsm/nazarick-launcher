@@ -1,7 +1,7 @@
 from modules.components.common import GameTitleBar, LogBox, ExplorerSearch, UpdateButton
 from modules import view
 
-def create(ctk, master):
+def create(ctk, master, pool):
     frame = ctk.CTkFrame(master=master)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(1, weight=1)
@@ -28,7 +28,8 @@ def create(ctk, master):
         ctk=ctk,
         master=frame,
         textbox=textbox,
-        update_fn=lambda app, ctk, textbox, options: view.log("[INFO] That feature has not been implemented yet.", textbox)
+        pool=pool,
+        update_fn=lambda app, ctk, textbox, pool: view.log("[INFO] That feature has not been implemented yet.", textbox)
     )
 
     # Add lockable elements to array

@@ -1,6 +1,7 @@
 import shutil
 import customtkinter as ctk
 from tufup.client import Client
+from concurrent.futures import ThreadPoolExecutor
 from modules import utility
 from modules import view
 from modules import store
@@ -29,13 +30,16 @@ def main():
     initial_state = store.get_state()
     ctk.set_appearance_mode(initial_state.get('theme'))
 
+    # Initialize the thread pool executor
+    pool = ThreadPoolExecutor(max_workers=3)
+
     # Top level components
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), APP_NAME)
     AppMenu.create(ctk, app, initial_state)
 
     # Create frames
-    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app)
-    [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app)
+    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app, pool)
+    [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app, pool)
 
     games = [
         {'name': 'Minecraft', 'frame': mc_frame},

@@ -1,17 +1,11 @@
-from modules import store
 from modules import view
 
-def create(ctk, master, textbox, update_fn):
+def create(ctk, master, textbox, pool, update_fn):
     update = ctk.CTkButton(
         master=master,
         text='Start Game',
         height=36,
-        command=lambda: update_fn(
-            app=master,
-            ctk=ctk,
-            textbox=textbox,
-            options=store.get_state(),
-        )
+        command=lambda: pool.submit(update_fn, master, ctk, textbox, pool)
     )
 
     view.add_lockable(update)
