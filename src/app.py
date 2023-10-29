@@ -6,6 +6,7 @@ from modules import view
 from modules import store
 from modules.components import AppMenu, AppWindow
 from modules.components.minecraft import MinecraftFrame
+from modules.components.valheim import ValheimFrame
 from modules.tufup_settings import (
     # App info
     APP_NAME, APP_VERSION, FROZEN,
@@ -33,13 +34,19 @@ def main():
     AppMenu.create(ctk, app, initial_state)
 
     # Create frames
-    [mc_frame, mc_logbox] = MinecraftFrame.create(ctk, app)
+    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app)
+    [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app)
+
+    # Position frames
+    vh_frame.grid(row=0, column=1, sticky='nsew')
+    mc_frame.grid(row=0, column=1, sticky='nsew')
 
     # UI Events
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    view.log(f'[INFO] The app has finished initializing ({APP_VERSION}).', mc_logbox)
+    for textbox in [vh_textbox, mc_textbox]:
+        view.log(f'[INFO] The app has finished initializing ({APP_VERSION}).', textbox)
 
     # Main loop
     app.mainloop()
