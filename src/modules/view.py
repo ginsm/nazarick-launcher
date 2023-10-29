@@ -3,12 +3,32 @@ from modules.debounce import debounce
 
 window_width = 0
 window_height = 0
+lockable_elements = []
 
 def log(message, textbox):
     textbox.configure(state='normal')
     textbox.insert(index='end', text=message + '\n')
     textbox.configure(state='disabled')
     textbox.see('end')
+
+def add_lockable(lockable):
+    global lockable_elements
+
+    if type(lockable) is list:
+        for element in lockable:
+            lockable_elements.append(element)
+    else:
+        lockable_elements.append(lockable)
+
+def lock(should_lock):
+    global lockable_elements
+
+    if should_lock:
+        for element in lockable_elements:
+            element.configure(state='disabled')
+    else:
+        for element in lockable_elements:
+            element.configure(state='normal')
 
 @debounce(0.4)
 def resize(app):

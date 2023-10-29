@@ -36,10 +36,12 @@ def create(ctk, master):
     update = UpdateButton.create(
         ctk=ctk,
         master=frame, 
-        lockable=[*instance[:-1], *executable[:-1]], 
         textbox=textbox, 
         update_fn=updater.start
     )
+
+    # Add lockable elements to array
+    view.add_lockable([*instance[:-1], *executable[:-1]])
 
     # Position components
     textbox.grid(row=0, columnspan=2, pady=(20, 5), padx=10, sticky='nsew')

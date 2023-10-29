@@ -1,6 +1,7 @@
 from modules import store
+from modules import view
 
-def create(ctk, master, lockable, textbox, update_fn):
+def create(ctk, master, textbox, update_fn):
     update = ctk.CTkButton(
         master=master,
         text='Start Game',
@@ -10,8 +11,9 @@ def create(ctk, master, lockable, textbox, update_fn):
             ctk=ctk,
             textbox=textbox,
             options=store.get_state(),
-            lockable=[*lockable, update],
         )
     )
+
+    view.add_lockable(update)
 
     return update

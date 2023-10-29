@@ -6,18 +6,17 @@ import shutil
 from queue import Queue
 from threading import Thread
 import requests
-from modules.view import log
+from modules.view import log, lock
 from modules.utility import get_env, get_time
 from modules.store import get_game_state
 
 # ----- Main Functions ----- #
-def start(app, ctk, lockable, textbox, options):
+def start(app, ctk, textbox, options):
     log(f'', textbox)
     log(f'[INFO] Beginning process at {get_time()}.', textbox)
 
     # Lock user input
     log(f'[INFO] Locking user input.', textbox)
-    lock = lock_elements(lockable)
     lock(True)
 
     # Bundling all variables to pass them around throughout the script
@@ -32,7 +31,6 @@ def start(app, ctk, lockable, textbox, options):
         'tmp': os.path.join(get_env('nazpath'), '_update_tmp'),
         'textbox': textbox,
         'version': get_latest_version('1.20.1'),
-        'lock': lock,
     }
 
     # Error Handling
@@ -76,10 +74,9 @@ def resume_update(variables):
 # This is split so that it can be ran after resume_update finishes or before updating (if nuver is equal to
 # latest ver)
 def finalize(vars_):
-    options, textbox, lock, exe_path, app = [
+    options, textbox, exe_path, app = [
         vars_['options'],
         vars_['textbox'],
-        vars_['lock'],
         vars_['exepath'],
         vars_['app']
     ]
@@ -106,18 +103,6 @@ def finalize(vars_):
 
 
 # ----- Helper Functions ----- #
-def lock_elements(elements):
-    def lock(lock):
-        if lock:
-            for element in elements:
-                element.configure(state='disabled')
-        else:
-            for element in elements:
-                element.configure(state='normal')
-
-    return lock
-
-
 def handle_errors(vars_):
     textbox, exe_path, inst_path = [
         vars_['textbox'],
