@@ -19,7 +19,7 @@ def start(app, ctk, textbox, pool):
     view.lock(True)
 
     # Bundling all variables to pass them around throughout the script
-    game_state = store.get_game_state()
+    game_state = store.get_game_state('minecraft')
     options = store.get_state()
     variables = {
         'app': app,

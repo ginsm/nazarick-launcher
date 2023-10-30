@@ -30,9 +30,6 @@ def create(ctk, master, games):
         # Add button to global game_buttons
         game_buttons.append({'name': game['name'], 'button': button})
 
-        # Add button to lockable
-        view.add_lockable(button)
-
     return frame
 
 
