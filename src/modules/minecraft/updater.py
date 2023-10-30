@@ -262,14 +262,16 @@ def retrieve(mod, vars_):
     local_path_old = os.path.join(inst_path, 'mods-old', name)
     destination = os.path.join(tmp, 'overrides', 'mods', name)
 
-    # Copy file if it exists locally
+    # Move file if it exists locally
     if os.path.isfile(local_path):
-        view.log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
-        shutil.copyfile(local_path, destination)
-    # Copy file if it exists locally (initial install)
+        view.log(f'[INFO] (M) {name.split('.jar')[0]}.', textbox)
+        if not os.path.isfile(destination):
+            shutil.move(local_path, destination)
+    # Move file if it exists locally (initial install)
     elif os.path.isfile(local_path_old):
         view.log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
-        shutil.copyfile(local_path_old, destination)
+        if not os.path.isfile(destination):
+            shutil.copyfile(local_path_old, destination)
     # Download mod
     else:
         view.log(f'[INFO] (D) {name.split('.jar')[0]}.', textbox)
