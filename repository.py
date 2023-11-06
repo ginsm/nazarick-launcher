@@ -11,7 +11,7 @@ from src.modules.tufup_settings import APP_NAME, APP_VERSION
 
 def run_operation():
     # Get operation and run accompanying function
-    operation = sys.argv[1]
+    operation = sys.argv[1] if len(sys.argv) > 1 else ''
 
     match operation:
         case 'bundle':
