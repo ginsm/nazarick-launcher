@@ -39,7 +39,7 @@ OFFLINE_DIR_2 = KEYS_DIR / 'offline_secrets_2'
 REPO_DIR = DEV_DIR / DEFAULT_REPO_DIR_NAME
 
 # Key settings
-EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=7, timestamp=1)
+EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=7, timestamp=7)
 THRESHOLDS = dict(root=2, targets=1, snapshot=1, timestamp=1)
 KEY_MAP = copy.deepcopy(DEFAULT_KEY_MAP)
 KEY_MAP['root'].append('root_two') # use two keys for root
