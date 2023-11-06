@@ -6,7 +6,7 @@ import shutil
 from concurrent.futures import wait
 import requests
 from modules import view
-from modules.utility import get_env, get_time
+from modules.utility import get_env, get_time, can_delete_path
 from modules import store
 
 # ----- Main Functions ----- #
@@ -53,6 +53,9 @@ def start(app, ctk, textbox, pool):
 
     # Unzip update to temp directory
     extract_modpack(variables)
+
+    # Purge any files as instructed from modpack archive
+    purge_files(variables, pool)
 
     # Retrieve all of the mod files
     retrieve_mods(variables, pool)
@@ -229,11 +232,50 @@ def extract_modpack(vars_):
         ref.extractall(tmp)
 
 
+def purge_files(vars_, pool):
+    textbox, inst_path, tmp = [
+        vars_['textbox'],
+        vars_['instpath'],
+        vars_['tmp']
+    ]
+
+    json_path = os.path.join(tmp, 'launcher.json')
+
+    # Ensure the path exists
+    if os.path.exists(json_path):
+        with open(json_path, 'rb') as f:
+            # Get delete information
+            obj = json.loads(f.read().decode('UTF-8'))
+            delete = obj.get('purge')
+
+            if bool(delete):
+                view.log('[INFO] Purging obsolete files:', textbox)
+                futures = []
+                # Ensures only files from these directories will be purged
+                whitelist = ['config', 'shaderpacks']
+
+                for file_ in delete:
+                    path = os.path.join(inst_path, file_)
+                    futures.append(pool.submit(delete_path, inst_path, path, whitelist, textbox))
+
+                wait(futures)
+
+
+def delete_path(base_path, path, whitelist, textbox):
+    if can_delete_path(base_path, path, whitelist):
+        # Determine if path is a file or not
+        if os.path.isfile(path):
+            os.remove(path)
+        else:
+            shutil.rmtree(path)
+
+        view.log(f'[INFO] (R) {path.replace(base_path, "")[1:]}', textbox)
+
+
 def retrieve_mods(vars_, pool):
-    tmp, textbox, debug = [
+    tmp, textbox = [
         vars_['tmp'],
         vars_['textbox'],
-        vars_['options']['debug']
     ]
 
     # read modrinth.index.json
