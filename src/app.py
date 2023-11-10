@@ -1,11 +1,10 @@
-import shutil
 import customtkinter as ctk
-from tufup.client import Client
 from concurrent.futures import ThreadPoolExecutor
 from modules import utility
 from modules import view
 from modules import store
 from modules import tufup
+from modules import version_upgrader
 from modules.components import AppMenu, AppWindow, AppSideBar
 from modules.components.minecraft import MinecraftFrame
 from modules.components.valheim import ValheimFrame
@@ -17,6 +16,9 @@ def main():
 
     # Store the mod's path in environment
     utility.set_env('nazpath', tufup.BASE_DIR.as_posix())
+
+    # Upgrade the app (converts old version conventions to newer ones)
+    version_upgrader.run()
 
     # Initialize the store
     store.init(tufup.DATA_DIR.as_posix())

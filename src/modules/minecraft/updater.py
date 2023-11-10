@@ -28,7 +28,7 @@ def start(app, ctk, textbox, pool):
         'instpath': game_state['instance'],
         'options': options,
         'root': get_env('nazpath'),
-        'tmp': os.path.join(get_env('nazpath'), '_update_tmp'),
+        'tmp': os.path.join(get_env('nazpath'), '_update_tmp', 'minecraft'),
         'textbox': textbox,
         'version': get_latest_version('1.20.1'),
     }
