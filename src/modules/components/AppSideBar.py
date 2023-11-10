@@ -1,6 +1,6 @@
 import os
 from PIL import Image
-from modules.tufup_settings import BASE_DIR
+from modules.tufup import BASE_DIR
 from modules import view
 from modules import store
 
