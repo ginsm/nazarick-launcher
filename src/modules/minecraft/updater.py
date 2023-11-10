@@ -143,10 +143,10 @@ def clean_update_directories(vars_):
     ]
     # Delete any existing tmp directory
     if os.path.exists(tmp):
-        view.log('[INFO] Pruning old tmp directory.', textbox)
+        view.log('[INFO] Cleaning the tmp directory.', textbox)
         shutil.rmtree(tmp)
     else:
-        view.log('[INFO] Creating tmp directory.', textbox)
+        view.log('[INFO] Creating the tmp directory.', textbox)
 
     # Create clean tmp directory
     os.mkdir(tmp)
@@ -227,9 +227,14 @@ def extract_modpack(vars_):
         vars_['tmp']
     ]
 
+    zip_file = os.path.join(tmp, 'update.zip')
+
     view.log('[INFO] Extracting the modpack zip.', textbox)
-    with zipfile.ZipFile(os.path.join(tmp, 'update.zip'), 'r') as ref:
+    with zipfile.ZipFile(zip_file, 'r') as ref:
         ref.extractall(tmp)
+    
+    # Remove update.zip
+    os.remove(zip_file)
 
 
 def purge_files(vars_, pool):
