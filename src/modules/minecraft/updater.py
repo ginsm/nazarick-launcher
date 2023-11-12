@@ -73,25 +73,11 @@ def finalize(vars_):
         vars_['app']
     ]
 
-    # Unlock the program
     view.log(f'[INFO] Unlocking user input.', textbox)
     view.lock(False)
-
-    # Debug mode stops exe from launching
-    if (not options['debug']):
-        executed = execute_launcher(textbox=textbox, exe_path=exe_path)
-        if (not executed):
-            return
-    else:
-        view.log('[INFO] The executable is not launched whilst in debug mode.', textbox)
-
-                    
+    run_executable(os.path.split(exe_path)[-1], options['debug'], textbox, [exe_path])    
     view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
-
-    # Check if auto close is enabled; close if so
-    if (options['autoclose']):
-        view.log('[INFO] Auto close is enabled; closing app.', textbox)
-        app.quit()
+    autoclose_app(vars_)
 
 
 # ----- Helper Functions ----- #

@@ -1,4 +1,4 @@
-import os, shutil, json
+import os, shutil, json, subprocess
 from concurrent.futures import wait
 from modules import view, utility
 
@@ -170,3 +170,27 @@ def clean_update_directories(vars_):
 
     # Create clean tmp directory
     os.mkdir(tmp)
+
+
+# ---- Finalize Methods ---- #
+def run_executable(exe_name, debug, textbox, command):
+    # Debug mode stops exe from launching
+    if not debug:
+        view.log(f'[INFO] Launching {exe_name}.', textbox)
+        try:
+            subprocess.check_call(command)
+        except Exception as error:
+            view.log(f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.', textbox)
+    else:
+        view.log('[INFO] The executable is not launched whilst in debug mode.', textbox)
+
+def autoclose_app(vars_):
+    options, textbox, app = [
+        vars_['options'],
+        vars_['textbox'],
+        vars_['app']
+    ]
+
+    if options['autoclose']:
+        view.log('[INFO] Auto close is enabled; closing app.', textbox)
+        app.quit()
