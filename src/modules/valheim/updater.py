@@ -224,8 +224,6 @@ def install_update(vars_, pool):
                         if not os.path.exists(loc_root):
                             os.makedirs(loc_root)
 
-                        print("Moving config:", config)
-
                         shutil.move(config_path_tmp, config_path_loc)
                 else:
                     overwrite(bf_path_tmp, bf_path_loc)
