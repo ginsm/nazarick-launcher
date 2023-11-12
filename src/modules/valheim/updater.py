@@ -31,7 +31,9 @@ def start(app, ctk, textbox, pool):
         view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
         return
     
-    # TODO: Check if on latest update and skip if so
+    if (on_latest_version(variables, initial_install)):
+        finalize(variables)
+        return
 
     clean_update_directories(variables)
 
@@ -51,10 +53,17 @@ def start(app, ctk, textbox, pool):
 
 
 def finalize(vars_):
-    textbox = vars_['textbox']
+    options, textbox = [
+        vars_['options'],
+        vars_['textbox']
+    ]
+
     view.log(f'[INFO] Unlocking user input.', textbox)
     view.lock(False)
+    # TODO - Support launching with mac as well
+    run_executable('valheim.exe', options['debug'], textbox, ['cmd', '/c', 'start', 'steam://run/892970'])
     view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
+    autoclose_app(vars_)
 
 
 # ----- Helper Functions ----- #
@@ -78,7 +87,6 @@ def handle_errors(vars_):
 
     return error
 
-
 # Get latest version from thunderstore.io API
 def get_latest_version():
     req = requests.get('https://thunderstore.io/api/experimental/package/Syh/Nazarick_Core/')
@@ -88,6 +96,10 @@ def get_latest_version():
         'version': data['latest']['version_number'],
         'url': data['latest']['download_url']
     }
+
+
+def initial_install(vars_):
+    return
 
 
 def download_modpack(vars_):
