@@ -1,18 +1,12 @@
-import os
-import subprocess
-import json
-import zipfile
-import shutil
+import os, subprocess, json, zipfile, shutil, requests
 from concurrent.futures import wait
-import requests
-from modules import view
-from modules.utility import get_env, get_time, can_delete_path
-from modules import store
+from modules import view, store, utility
+from modules.updater_common import *
 
 # ----- Main Functions ----- #
 def start(app, ctk, textbox, pool):
     view.log(f'', textbox)
-    view.log(f'[INFO] Beginning process at {get_time()}.', textbox)
+    view.log(f'[INFO] Beginning process at {utility.get_time()}.', textbox)
 
     # Lock user input
     view.log(f'[INFO] Locking user input.', textbox)
@@ -27,8 +21,8 @@ def start(app, ctk, textbox, pool):
         'exepath': game_state['executable'],
         'instpath': game_state['instance'],
         'options': options,
-        'root': get_env('nazpath'),
-        'tmp': os.path.join(get_env('nazpath'), '_update_tmp', 'minecraft'),
+        'root': utility.get_env('nazpath'),
+        'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
         'textbox': textbox,
         'version': get_latest_version('1.20.1'),
     }
@@ -37,11 +31,11 @@ def start(app, ctk, textbox, pool):
     if (handle_errors(variables)):
         view.log(f'[INFO] Unlocking user input.', textbox)
         view.lock(False)
-        view.log(f'[INFO] Finished process at {get_time()}.', textbox)
+        view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
         return
     
     # Skip updating process if nuver is equal to latest ver
-    if (on_latest_version(variables)):
+    if (on_latest_version(variables, initial_install)):
         finalize(variables)
         return
 
@@ -70,8 +64,7 @@ def start(app, ctk, textbox, pool):
     finalize(variables)
 
 
-# This is split so that it can be ran after resume_update finishes or before updating (if nuver is equal to
-# latest ver)
+# This is split so that it can be ran at multiple points in the main function
 def finalize(vars_):
     options, textbox, exe_path, app = [
         vars_['options'],
@@ -93,7 +86,7 @@ def finalize(vars_):
         view.log('[INFO] The executable is not launched whilst in debug mode.', textbox)
 
                     
-    view.log(f'[INFO] Finished process at {get_time()}.', textbox)
+    view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
 
     # Check if auto close is enabled; close if so
     if (options['autoclose']):
@@ -136,27 +129,12 @@ def handle_errors(vars_):
     return error
 
 
-def clean_update_directories(vars_):
-    tmp, textbox = [
-        vars_['tmp'],
-        vars_['textbox']
-    ]
-    # Delete any existing tmp directory
-    if os.path.exists(tmp):
-        view.log('[INFO] Cleaning the tmp directory.', textbox)
-        shutil.rmtree(tmp)
-    else:
-        view.log('[INFO] Creating the tmp directory.', textbox)
-
-    # Create clean tmp directory
-    os.mkdir(tmp)
-
-
 def get_latest_version(version):
     def parse_json(obj):
         return {
-            'name': obj['name'],
-            'url': obj['files'][0]['url']
+            'name': ' '.join(obj['name'].split(" ")[:-1]),
+            'url': obj['files'][0]['url'],
+            'version': obj['version_number']
         }
     
     req = requests.get(f'https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=["{version}"]')
@@ -165,46 +143,17 @@ def get_latest_version(version):
     return parsed[0]
 
 
-def on_latest_version(vars_):
-    version_name, inst_path = [
-        vars_['version']['name'],
-        vars_['instpath']
-    ]
-    nuver_path = os.path.join(inst_path, 'nuver')
+def initial_install(vars_):
+    inst_path = vars_['instpath']
+    configpath = os.path.join(inst_path, 'config')
+    modspath = os.path.join(inst_path, 'mods')
 
-    # Handle existing install
-    if (os.path.exists(nuver_path)):
-        with open(os.path.join(inst_path, 'nuver'), 'rb') as f:
-            last_version_name = f.read().decode('UTF-8')
-            if (version_name == last_version_name):
-                view.log(f'[INFO] You are already on the latest version ({version_name}).', vars_['textbox'])
-                return True
-            
-    # Handle first install
-    else:
-        view.log('[INFO] Preparing instance for initial install.', vars_['textbox'])
-        configpath = os.path.join(inst_path, 'config')
-        modspath = os.path.join(inst_path, 'mods')
+    def move_existing_files(path):
+        if os.path.exists(path):
+            os.rename(path, f'{path}-old')
 
-        def move_existing_files(path):
-            if os.path.exists(path):
-                os.rename(path, f'{path}-old')
-
-        move_existing_files(configpath)
-        move_existing_files(modspath)
-
-        return False
-
-
-def store_version_number(vars_):
-    version_name, textbox, inst_path = [
-        vars_['version']['name'],
-        vars_['textbox'],
-        vars_['instpath']
-    ]
-
-    view.log(f'[INFO] Storing new version ID for future ref: {version_name}.', textbox)
-    open(os.path.join(inst_path, 'nuver'), 'w').write(version_name)
+    move_existing_files(configpath)
+    move_existing_files(modspath)
 
 
 def download_modpack(vars_):
@@ -214,7 +163,7 @@ def download_modpack(vars_):
         vars_['version']
     ]
 
-    view.log(f'[INFO] Downloading latest version: {version['name']}.', textbox)
+    view.log(f'[INFO] Downloading latest version: {version['name']} v{version['version']}.', textbox)
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
@@ -235,46 +184,6 @@ def extract_modpack(vars_):
     
     # Remove update.zip
     os.remove(zip_file)
-
-
-def purge_files(vars_, pool):
-    textbox, inst_path, tmp = [
-        vars_['textbox'],
-        vars_['instpath'],
-        vars_['tmp']
-    ]
-
-    json_path = os.path.join(tmp, 'launcher.json')
-
-    # Ensure the path exists
-    if os.path.exists(json_path):
-        with open(json_path, 'rb') as f:
-            # Get delete information
-            obj = json.loads(f.read().decode('UTF-8'))
-            delete = obj.get('purge')
-
-            if bool(delete):
-                view.log('[INFO] Purging obsolete files:', textbox)
-                futures = []
-                # Ensures only files from these directories will be purged
-                whitelist = ['config', 'shaderpacks']
-
-                for file_ in delete:
-                    path = os.path.join(inst_path, file_)
-                    futures.append(pool.submit(delete_path, inst_path, path, whitelist, textbox))
-
-                wait(futures)
-
-
-def delete_path(base_path, path, whitelist, textbox):
-    if can_delete_path(base_path, path, whitelist):
-        # Determine if path is a file or not
-        if os.path.isfile(path):
-            os.remove(path)
-        else:
-            shutil.rmtree(path)
-
-        view.log(f'[INFO] (R) {path.replace(base_path, "")[1:]}', textbox)
 
 
 def retrieve_mods(vars_, pool):
