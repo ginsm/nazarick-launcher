@@ -1,4 +1,5 @@
 from modules.components.common import LogBox, ExplorerSearch, UpdateButton
+from modules.valheim import updater
 from modules import view
 
 def create(ctk, master, pool):
@@ -27,7 +28,7 @@ def create(ctk, master, pool):
         master=frame,
         textbox=textbox,
         pool=pool,
-        update_fn=lambda app, ctk, textbox, pool: view.log("[INFO] That feature has not been implemented yet.", textbox)
+        update_fn=updater.start
     )
 
     # Add lockable elements to array
