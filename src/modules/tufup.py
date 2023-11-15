@@ -1,12 +1,9 @@
-import sys
-import pathlib
-import os
-import shutil
+import sys, pathlib, os, shutil
 from tufup.client import Client
 from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
 # App info
-APP_VERSION = '1.1.1'
+APP_VERSION = '1.2.0'
 APP_NAME = 'Nazarick_Launcher'
 
 # Are we running in a PyInstaller bundle?
