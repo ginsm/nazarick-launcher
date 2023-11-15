@@ -10,10 +10,6 @@ from modules.components.minecraft import MinecraftFrame
 from modules.components.valheim import ValheimFrame
 
 def main():
-    # Initialize tufup and check for updates (only if bundled)
-    if tufup.FROZEN:
-        tufup.init()
-
     # Store the mod's path in environment
     utility.set_env('nazpath', tufup.BASE_DIR.as_posix())
 
@@ -24,6 +20,10 @@ def main():
     store.init(tufup.DATA_DIR.as_posix())
     initial_state = store.get_state()
     ctk.set_appearance_mode(initial_state.get('theme'))
+
+    # Initialize tufup and check for updates (only if bundled)
+    if tufup.FROZEN:
+        tufup.init(initial_state)
 
     # Initialize the thread pool executor
     pool = ThreadPoolExecutor(max_workers=3)

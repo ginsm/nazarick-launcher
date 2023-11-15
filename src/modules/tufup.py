@@ -46,7 +46,7 @@ else:
     TARGET_BASE_URL = 'http://localhost:8000/targets/'
 
 # Set up tufup client
-def init():
+def init(initial_state):
     # The app must ensure dirs exist
     for dir_path in [BASE_DIR, METADATA_DIR, TARGET_DIR]:
         dir_path.mkdir(exist_ok=True, parents=True)
@@ -72,4 +72,25 @@ def init():
 
     # Perform update
     if client.check_for_updates():
-        client.download_and_apply_update(skip_confirmation=True, log_file_name='update.log')
+        if initial_state.get('autorestart'):
+            custom_batch_template = """@echo off
+            {log_lines}
+            echo Moving app files...
+            robocopy "{src_dir}" "{dst_dir}" {robocopy_options}
+            echo Done.
+            echo Restarting app
+            start "" "{app_exe_path}"
+            {delete_self}
+            """
+
+            client.download_and_apply_update(
+                skip_confirmation=True,
+                log_file_name='update.log',
+                batch_template=custom_batch_template,
+                batch_template_extra_kwargs=dict(app_exe_path=sys.executable),
+            )
+        else:
+            client.download_and_apply_update(
+                skip_confirmation=True,
+                log_file_name='update.log'
+            )

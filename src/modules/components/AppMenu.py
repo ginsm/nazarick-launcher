@@ -17,6 +17,7 @@ def create(ctk, master, state):
     # ----- Options submenu ----- #
     options_submenu = Menu(master=menu, tearoff=0)
     options={
+        'autorestart': ctk.BooleanVar(value=state.get('autorestart') or False),
         'autoclose': ctk.BooleanVar(value=state['autoclose']),
         'logging': ctk.BooleanVar(value=state['logging']),
         'theme': ctk.StringVar(value=state['theme']),
@@ -30,10 +31,11 @@ def create(ctk, master, state):
     theme_submenu.add_radiobutton(label='Dark', variable=options['theme'], command=lambda: setTheme(ctk, options))
 
     # ----- Standalone options ----- #
+    options_submenu.add_checkbutton(label='Auto Restart', variable=options['autorestart'], onvalue=True, offvalue=False, command=lambda: store.set_menu_option('autorestart', options))
     options_submenu.add_checkbutton(label='Auto Close', variable=options['autoclose'], onvalue=True, offvalue=False, command=lambda: store.set_menu_option('autoclose', options))
-    options_submenu.add_checkbutton(label='Debug', variable=options['debug'], onvalue=True, offvalue=False, command=lambda: store.set_menu_option('debug', options))
     options_submenu.add_checkbutton(label='Logs', variable=options['logging'], onvalue=True, offvalue=False, command=lambda: store.set_menu_option('logging', options))
     options_submenu.add_cascade(label='Theme', menu=theme_submenu)
+    options_submenu.add_checkbutton(label='Debug', variable=options['debug'], onvalue=True, offvalue=False, command=lambda: store.set_menu_option('debug', options))
 
     # ----- Add submenus ----- #
     menu.add_cascade(label='App', menu=app_submenu)
