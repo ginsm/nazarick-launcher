@@ -3,7 +3,7 @@ from modules import store
 from customtkinter.windows.widgets.theme import ThemeManager
 
 def create(ctk, master, state):
-    frame = ctk.CTkFrame(master=master, corner_radius=0)
+    frame = ctk.CTkFrame(master=master, corner_radius=0, fg_color=('#dbdbdb', '#2b2b2b'))
     h2_size=24
 
     options = {
@@ -138,7 +138,7 @@ def create_accent_color_buttons(ctk, master, color, index, options):
         height=20,
         width=20,
         border_width=2 if selected else 0,
-        border_color=('#000000', '#ffffff') if selected else color['hex'],
+        border_color=('#1d1e1e', '#ffffff') if selected else color['hex'],
         fg_color=color['hex'],
         command=lambda: set_accent(ctk, color, options)
     )

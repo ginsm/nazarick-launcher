@@ -3,7 +3,7 @@ from modules.valheim import updater
 from modules import view
 
 def create(ctk, master, pool):
-    frame = ctk.CTkFrame(master=master, corner_radius=0)
+    frame = ctk.CTkFrame(master=master, corner_radius=0, fg_color=('#dbdbdb', '#2b2b2b'))
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(1, weight=1)
 
