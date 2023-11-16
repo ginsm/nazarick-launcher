@@ -6,8 +6,8 @@ from modules import store
 from modules import tufup
 from modules import version_upgrader
 from modules.components import AppMenu, AppWindow, AppSideBar
-from modules.components.minecraft import MinecraftFrame
-from modules.components.valheim import ValheimFrame
+from modules.components import MinecraftFrame
+from modules.components import ValheimFrame
 
 def main():
     # Store the mod's path in environment
