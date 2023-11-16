@@ -22,6 +22,7 @@ def create(ctk, master, games):
             ctk=ctk,
             master=master,
             game=game['name'],
+            games=games,
             frame=game['frame'],
             size=icon_size
         )
@@ -33,7 +34,7 @@ def create(ctk, master, games):
     return frame
 
 
-def GameButton(ctk, master, game, frame, size):
+def GameButton(ctk, master, game, games, frame, size):
     # Image directory
     IMAGE_DIR = BASE_DIR / 'icons'
 
@@ -49,7 +50,7 @@ def GameButton(ctk, master, game, frame, size):
         image=game_image,
         text=game,
         compound='top',
-        command=lambda: select_game(game, frame),
+        command=lambda: select_game(game, games, frame),
         height=size,
         width=size,
         corner_radius=0
@@ -75,9 +76,13 @@ def color_buttons(selected_game):
             button.configure(text_color=normal_text)
 
 
-def select_game(game, frame):
+def select_game(game, games, frame):
     # Raise the frame in the app
-    frame.tkraise()
+    frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
+
+    for g in games:
+        if g['name'] != game:
+            g['frame'].grid_forget()
 
     # Set the game in store
     store.set_game(game.lower())
