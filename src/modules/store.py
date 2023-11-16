@@ -5,8 +5,8 @@ from modules.utility import destructure
 # The default state for the store
 default_state={
     'autoclose': False,
+    'accent': 'blue',
     'game': 'minecraft',
-    'frame': 'minecraft',
     'games': {
         'minecraft': {
             'selectedpack': 'nazarick-smp',
@@ -20,6 +20,7 @@ default_state={
     'geometry': '1280x720',
     'logging': True,
     'theme': 'System',
+    'threadamount': 4,
     'debug': False,
 }
 
