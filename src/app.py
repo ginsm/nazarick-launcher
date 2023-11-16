@@ -21,7 +21,7 @@ def main():
         tufup.init(initial_state)
 
     # Initialize the thread pool executor
-    pool = ThreadPoolExecutor(max_workers=initial_state['threadamount'] - 1)
+    pool = ThreadPoolExecutor(max_workers=(initial_state.get('threadamount') or 4) - 1)
 
     # Top level components
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), tufup.APP_NAME)
