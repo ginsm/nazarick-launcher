@@ -1,15 +1,15 @@
 import os
 from app import reload_widgets
-from modules import store
+from modules import store, theme_list, utility
 from customtkinter.windows.widgets.theme import ThemeManager
 
 def create(ctk, master, pool, state):
-    frame = ctk.CTkFrame(master=master, corner_radius=0, fg_color=('#dbdbdb', '#2b2b2b'))
+    frame = ctk.CTkFrame(master=master, corner_radius=0, border_width=0)
     h2_size=24
 
     options = {
-        'theme': ctk.StringVar(value=state.get('theme') or 'System'),        
-        'accent': ctk.StringVar(value=state.get('accent') or 'blue'),
+        'mode': ctk.StringVar(value=state.get('mode') or 'System'),        
+        'theme': ctk.StringVar(value=state.get('theme') or 'blue'),
         'autoclose': ctk.BooleanVar(value=state.get('autoclose') or False),
         'autorestart': ctk.BooleanVar(value=state.get('autorestart') or False),
         'threadamount': ctk.IntVar(value=state.get('threadamount') or 4),
@@ -21,27 +21,27 @@ def create(ctk, master, pool, state):
     appearance_label = ctk.CTkLabel(master=frame, text='Appearance')
     appearance_label.cget('font').configure(size=h2_size)
 
-    # Theme
-    theme_label = ctk.CTkLabel(master=frame, text="Theme")
-    theme = ctk.CTkOptionMenu(
+    # Mode
+    mode_label = ctk.CTkLabel(master=frame, text="Mode")
+    mode_dropdown = ctk.CTkOptionMenu(
         master=frame, 
         values=['System', 'Dark', 'Light'],
-        command=lambda _: set_theme(ctk, options),
-        variable=options['theme'],
+        command=lambda _: set_mode(ctk, options),
+        variable=options['mode'],
         width=200,
     )
 
-    # Accent Color
-    colors = [
-        {'name': 'blue', 'title': 'Blue', 'hex': '#1f6aa5'},
-        {'name': 'dark-blue', 'title': 'Dark Blue', 'hex': '#1f538d'},
-        {'name': 'green', 'title': 'Green', 'hex': '#2fa572'},
-    ]
+    # Theme
+    themes = theme_list.get_themes()
 
-    accent_label = ctk.CTkLabel(master=frame, text="Accent Color")
-    accent_frame = ctk.CTkFrame(master=frame, fg_color='transparent')
-    for index, color in enumerate(colors):
-        create_accent_color_buttons(ctk, master, accent_frame, pool, color, index, options)
+    theme_label = ctk.CTkLabel(master=frame, text="Theme")
+    theme_dropdown = ctk.CTkOptionMenu(
+        master=frame,
+        values=list(map(lambda theme: theme['title'], themes)),
+        command=lambda theme: set_theme(ctk, master, utility.get_theme_from_title(theme, themes), options, pool),
+        variable=options['theme'],
+        width=200
+    )
 
 
     # ---- Functionality ---- #
@@ -85,6 +85,7 @@ def create(ctk, master, pool, state):
         )
         thread_slider.set(options['threadamount'].get())
 
+
     # ---- Debugging ---- #
     developer_label = ctk.CTkLabel(master=frame, text="Developer")
     developer_label.cget('font').configure(size=h2_size)
@@ -112,10 +113,10 @@ def create(ctk, master, pool, state):
 
 
     appearance_label.grid(row=0, column=0, padx=15, pady=(20, 5), sticky='w')
-    theme_label.grid(row=1, column=0, padx=15, pady=(5, 0), sticky='w')
-    theme.grid(row=2, column=0, padx=15, pady=5, sticky='w')
-    accent_label.grid(row=3, column=0, padx=15, pady=(10, 0), sticky='w')
-    accent_frame.grid(row=4, column=0, padx=15, pady=(5, 0), sticky='w')
+    mode_label.grid(row=1, column=0, padx=15, pady=(5, 0), sticky='w')
+    mode_dropdown.grid(row=2, column=0, padx=15, pady=5, sticky='w')
+    theme_label.grid(row=3, column=0, padx=15, pady=(10, 0), sticky='w')
+    theme_dropdown.grid(row=4, column=0, padx=15, pady=(5, 0), sticky='w')
 
     functionality_label.grid(row=5, column=0, padx=15, pady=(35, 5), sticky='w')
     automation_label.grid(row=6, column=0, padx=15, pady=(5, 0), sticky='w')
@@ -131,38 +132,23 @@ def create(ctk, master, pool, state):
     return frame
 
 
-def create_accent_color_buttons(ctk, app, master, pool, color, index, options):
-    current_theme = ThemeManager._currently_loaded_theme
-    selected = current_theme == color['name']
-
-    button = ctk.CTkButton(
-        master=master,
-        text='',
-        height=20,
-        width=20,
-        border_width=2 if selected else 0,
-        border_color=('#1d1e1e', '#ffffff') if selected else color['hex'],
-        fg_color=color['hex'],
-        hover=False,
-        command=lambda: set_accent(ctk, app, color, options, pool)
-    )
-
-    button.grid(row=0, column=index, padx=2 if index != 0 else (0, 2))
+def set_mode(ctk, options):
+    ctk.set_appearance_mode(options['mode'].get())
+    store.set_menu_option('mode', options)
 
 
-def set_accent(ctk, app, color, options, pool):
-    # Store new accent color
-    options['accent'] = ctk.StringVar(value=color['name'])
-    store.set_menu_option('accent', options)
+def set_theme(ctk, app, theme, options, pool):
+    # Store new theme
+    options['theme'] = ctk.StringVar(value=theme['title'])
+    store.set_menu_option('theme', options)
 
-    # Set color and reload widgets
-    ctk.set_default_color_theme(color['name'])
+    # Set theme and reload widgets
+    ctk.set_default_color_theme(theme['name'])
     reload_widgets(ctk, app, pool, store.get_state())
 
+    # Set app background
+    app.configure(fg_color=ThemeManager.theme.get('CTk').get('fg_color'))
 
-def set_theme(ctk, options):
-    ctk.set_appearance_mode(options['theme'].get())
-    store.set_menu_option('theme', options)
 
 
 def set_thread_count(options, value, label):

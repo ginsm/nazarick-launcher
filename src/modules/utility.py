@@ -34,3 +34,10 @@ def path_is_relative(base, path):
     if abs_path[0:base_len] != base_path:
         return False
     return True
+
+
+def get_theme_from_title(title, themes):
+    for theme in themes:
+        if theme['title'] == title:
+            return theme
+    return False

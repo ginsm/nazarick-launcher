@@ -19,7 +19,7 @@ default_state={
     },
     'geometry': '1280x720',
     'logging': True,
-    'theme': 'System',
+    'mode': 'System',
     'threadamount': 4,
     'debug': False,
 }

@@ -1,6 +1,7 @@
 import customtkinter as ctk
+from customtkinter.windows.widgets.theme import ThemeManager
 from concurrent.futures import ThreadPoolExecutor
-from modules import utility, view, store, tufup, version_upgrader
+from modules import utility, view, store, tufup, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, MinecraftFrame, ValheimFrame, SettingsFrame
 
 frames = []
@@ -15,15 +16,24 @@ def main():
     # Initialize the store
     store.init(tufup.DATA_DIR.as_posix())
     initial_state = store.get_state()
-    ctk.set_appearance_mode(initial_state.get('theme'))
-    ctk.set_default_color_theme(initial_state.get('accent') or 'blue')
+
+    # Set mode
+    ctk.set_appearance_mode(initial_state.get('mode') or 'System')
+
+    # Set theme
+    theme = utility.get_theme_from_title(
+        initial_state.get('theme'),
+        theme_list.get_themes()
+    )
+    ctk.set_default_color_theme(theme.get('name') if theme else 'blue')
 
     # Initialize tufup and check for updates (only if bundled)
     if tufup.FROZEN:
         tufup.init(initial_state)
 
     # Initialize the thread pool executor
-    pool = ThreadPoolExecutor(max_workers=(initial_state.get('threadamount') or 4) - 1)
+    threadamount = initial_state.get('threadamount') or 4
+    pool = ThreadPoolExecutor(max_workers=threadamount - 1)
 
     # Top level components
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), tufup.APP_NAME)
@@ -35,10 +45,7 @@ def main():
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    for frame_data in frames:
-        textbox = frame_data['textbox']
-        if textbox:
-            view.log(f'[INFO] The app has finished initializing ({tufup.APP_VERSION}).', textbox)
+    broadcast(f'[INFO] The app has finished initializing ({tufup.APP_VERSION}).')
 
     # Main loop
     app.mainloop()
@@ -46,17 +53,18 @@ def main():
 
 def create_frames(ctk, app, pool, state):
     global frames
+
     # Create frames
     [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app, pool)
     [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app, pool)
     settings_frame = SettingsFrame.create(ctk, app, pool, state)
 
-    # Add frame data to frames
+    # Add data to frames
     frames.append({'name': 'Minecraft', 'frame': mc_frame, 'textbox': mc_textbox})
     frames.append({'name': 'Valheim', 'frame': vh_frame, 'textbox': vh_textbox})
     frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
 
-    # Create sidebar
+    # Create sidebar and add to frames
     sidebar = AppSideBar.create(ctk, app, frames)
     frames.append({'name': 'Sidebar', 'frame': sidebar, 'textbox': None})
 
@@ -66,7 +74,7 @@ def create_frames(ctk, app, pool, state):
     mc_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
     settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
 
-    # Raise selected game and set color
+    # Raise selected frame and set color
     raise_selected_frame(frames)
 
 
@@ -80,19 +88,26 @@ def raise_selected_frame(games):
 
 
 def reload_widgets(ctk, app, pool, state):
-    delete_all_frames()
-    AppSideBar.clear_game_Buttons()
-    create_frames(ctk, app, pool, state)
-
-
-def delete_all_frames():
     global frames
-    for game_data in frames:
-        # Remove the frame from grid
-        frame = game_data['frame']
+
+    # Delete all frames
+    for data in frames:
+        frame = data['frame']
         frame.grid_forget()
         frame.destroy()
     frames.clear()
+    AppSideBar.clear_game_Buttons()
+
+    # Recreate the frames
+    create_frames(ctk, app, pool, state)
+
+
+def broadcast(message):
+    global frames
+    for data in frames:
+        textbox = data['textbox']
+        if textbox:
+            view.log(message, textbox)
 
 
 # Run the script

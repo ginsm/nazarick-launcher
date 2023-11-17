@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+from customtkinter.windows.widgets.theme import ThemeManager
 from modules.tufup import BASE_DIR
 from modules import store
 
@@ -52,7 +53,8 @@ def GameButton(ctk, master, game, games, frame, size):
         command=lambda: select_game(game, games, frame),
         height=size,
         width=size,
-        corner_radius=0
+        corner_radius=0,
+        border_width=0
     )
 
 def clear_game_Buttons():
@@ -61,21 +63,20 @@ def clear_game_Buttons():
 
 def color_buttons(selected_game):
     global game_buttons
-    
-    normal=('#1d1e1e', '#1d1e1e')
-    normal_text=("#ffffff", "#ffffff")
-    selected=('#dbdbdb', '#2b2b2b')
-    selected_text=("#1a1a1a", "#ffffff")
+
+    normal=ThemeManager.theme.get('CTk').get('fg_color')
+    text=ThemeManager.theme.get('CTkLabel').get('text_color')
+    selected=ThemeManager.theme.get('CTkFrame').get('fg_color')
 
     for game_button in game_buttons:
         button = game_button['button']
         
         if game_button['name'] == selected_game:
             button.configure(fg_color=selected)
-            button.configure(text_color=selected_text)
+            button.configure(text_color=text)
         else:
             button.configure(fg_color=normal)
-            button.configure(text_color=normal_text)
+            button.configure(text_color=text)
 
 
 def select_game(game, games, frame):

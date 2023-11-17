@@ -8,14 +8,14 @@ from modules.debounce import debounce
 from modules.tufup import BASE_DIR
 
 def create(ctk, master, label, placeholder, name, find, game=''):
-    frame = ctk.CTkFrame(master=master, fg_color='transparent')
+    frame = ctk.CTkFrame(master=master, fg_color='transparent', border_width=0)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
 
     label = ctk.CTkLabel(master=frame, text=label)
     label.grid(row=1, column=0, padx=10, pady=(5, 0), sticky='w')
 
-    entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36)
+    entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky='ew')
     entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(entry, name))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
@@ -32,18 +32,18 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     # Search Button
     search_function = get_search_function(find)
-    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name), height=button_height, width=button_width)
+    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name), height=button_height, width=button_width, border_width=0)
     search_button.grid(row=2, column=1, padx=(0, 5), pady=5, sticky='ew')
     ToolTip(search_button, msg=f'Search for the {name} path.', delay=0.01, follow=True)
 
     # Open Button
-    open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width)
+    open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width, border_width=0)
     open_button.grid(row=2, column=2, padx=(0, 10), pady=5, sticky='ew')
     ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
 
 
     # Get entry state from storage and set it
-    state = store.get_game_state(game)
+    state = store.get_game_state(game)  
     if bool(state.get(name)):
         set_entry(entry, state[name])
 
