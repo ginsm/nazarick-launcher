@@ -1,8 +1,9 @@
 import os
+from app import reload_widgets
 from modules import store
 from customtkinter.windows.widgets.theme import ThemeManager
 
-def create(ctk, master, state):
+def create(ctk, master, pool, state):
     frame = ctk.CTkFrame(master=master, corner_radius=0, fg_color=('#dbdbdb', '#2b2b2b'))
     h2_size=24
 
@@ -32,15 +33,15 @@ def create(ctk, master, state):
 
     # Accent Color
     colors = [
-        {'name': 'blue', 'hex': '#1f6aa5'},
-        {'name': 'green', 'hex': '#2fa572'},
-        {'name': 'dark-blue', 'hex': '#1f538d'},
+        {'name': 'blue', 'title': 'Blue', 'hex': '#1f6aa5'},
+        {'name': 'dark-blue', 'title': 'Dark Blue', 'hex': '#1f538d'},
+        {'name': 'green', 'title': 'Green', 'hex': '#2fa572'},
     ]
 
-    accent_label = ctk.CTkLabel(master=frame, text="Accent Color (Requires Restart)")
+    accent_label = ctk.CTkLabel(master=frame, text="Accent Color")
     accent_frame = ctk.CTkFrame(master=frame, fg_color='transparent')
     for index, color in enumerate(colors):
-        create_accent_color_buttons(ctk, accent_frame, color, index, options)
+        create_accent_color_buttons(ctk, master, accent_frame, pool, color, index, options)
 
 
     # ---- Functionality ---- #
@@ -129,9 +130,11 @@ def create(ctk, master, state):
 
     return frame
 
-def create_accent_color_buttons(ctk, master, color, index, options):
+
+def create_accent_color_buttons(ctk, app, master, pool, color, index, options):
     current_theme = ThemeManager._currently_loaded_theme
     selected = current_theme == color['name']
+
     button = ctk.CTkButton(
         master=master,
         text='',
@@ -140,18 +143,27 @@ def create_accent_color_buttons(ctk, master, color, index, options):
         border_width=2 if selected else 0,
         border_color=('#1d1e1e', '#ffffff') if selected else color['hex'],
         fg_color=color['hex'],
-        command=lambda: set_accent(ctk, color, options)
+        hover=False,
+        command=lambda: set_accent(ctk, app, color, options, pool)
     )
 
     button.grid(row=0, column=index, padx=2 if index != 0 else (0, 2))
 
-def set_accent(ctk, color, options):
+
+def set_accent(ctk, app, color, options, pool):
+    # Store new accent color
     options['accent'] = ctk.StringVar(value=color['name'])
     store.set_menu_option('accent', options)
+
+    # Set color and reload widgets
+    ctk.set_default_color_theme(color['name'])
+    reload_widgets(ctk, app, pool, store.get_state())
+
 
 def set_theme(ctk, options):
     ctk.set_appearance_mode(options['theme'].get())
     store.set_menu_option('theme', options)
+
 
 def set_thread_count(options, value, label):
     options['threadamount'] = value

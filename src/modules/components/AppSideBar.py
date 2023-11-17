@@ -1,7 +1,6 @@
 import os
 from PIL import Image
 from modules.tufup import BASE_DIR
-from modules import view
 from modules import store
 
 game_buttons = []
@@ -56,6 +55,9 @@ def GameButton(ctk, master, game, games, frame, size):
         corner_radius=0
     )
 
+def clear_game_Buttons():
+    global game_buttons
+    game_buttons = []
 
 def color_buttons(selected_game):
     global game_buttons
