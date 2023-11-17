@@ -169,7 +169,7 @@ def clean_update_directories(vars_):
         view.log('[INFO] Creating the tmp directory.', textbox)
 
     # Create clean tmp directory
-    os.mkdir(tmp)
+    os.makedirs(tmp, exist_ok=True)
 
 
 # ---- Finalize Methods ---- #
