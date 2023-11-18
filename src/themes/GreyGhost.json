@@ -1,8 +1,14 @@
 {
+  "Sidebar": {
+    "text_color": [
+      "#2b3449",
+      "#2b3449"
+    ]
+  },
   "CTk": {
     "fg_color": [
-      "#c6ced8",
-      "#c6ced8"
+      "#a9b8c4",
+      "#a9b8c4"
     ]
   },
   "CTkToplevel": {
@@ -36,7 +42,7 @@
     ],
     "hover_color": [
       "#788a97",
-      "#000000"
+      "#788a97"
     ],
     "border_color": [
       "#405366",

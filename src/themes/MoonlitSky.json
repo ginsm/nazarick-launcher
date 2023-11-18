@@ -1,7 +1,13 @@
 {
+  "Sidebar": {
+    "text_color": [
+      "#ffffff",
+      "#ffffff"
+    ]
+  },
   "CTk": {
     "fg_color": [
-      "#505693",
+      "#39406e",
       "#39406e"
     ]
   },
