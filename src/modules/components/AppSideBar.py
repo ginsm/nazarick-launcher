@@ -65,7 +65,7 @@ def color_buttons(selected_game):
     global game_buttons
 
     normal=ThemeManager.theme.get('CTk').get('fg_color')
-    text=ThemeManager.theme.get('Sidebar').get('text_color') or "#ffffff"
+    text=ThemeManager.theme.get('Sidebar').get('text_color')
     selected=ThemeManager.theme.get('CTkFrame').get('fg_color')
 
     for game_button in game_buttons:
