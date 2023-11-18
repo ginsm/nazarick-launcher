@@ -7,6 +7,7 @@ def create(ctk, master, pool, state):
     frame = ctk.CTkFrame(master=master, corner_radius=0, border_width=0)
     h2_size=24
 
+
     options = {
         'mode': ctk.StringVar(value=state.get('mode') or 'System'),        
         'theme': ctk.StringVar(value=state.get('theme') or 'blue'),
@@ -86,7 +87,7 @@ def create(ctk, master, pool, state):
         thread_slider.set(options['threadamount'].get())
 
 
-    # ---- Debugging ---- #
+    # ---- Developer---- #
     developer_label = ctk.CTkLabel(master=frame, text="Developer")
     developer_label.cget('font').configure(size=h2_size)
 
@@ -112,22 +113,28 @@ def create(ctk, master, pool, state):
     )
 
 
-    appearance_label.grid(row=0, column=0, padx=15, pady=(20, 5), sticky='w')
-    mode_label.grid(row=1, column=0, padx=15, pady=(5, 0), sticky='w')
-    mode_dropdown.grid(row=2, column=0, padx=15, pady=5, sticky='w')
-    theme_label.grid(row=3, column=0, padx=15, pady=(10, 0), sticky='w')
-    theme_dropdown.grid(row=4, column=0, padx=15, pady=(5, 0), sticky='w')
+    # Position widgets
+    padx = 25
+    pady_h2 = (25, 5)
+    pady_h3 = (5, 0)
+    pady_widget = (2, 5)
 
-    functionality_label.grid(row=5, column=0, padx=15, pady=(35, 5), sticky='w')
-    automation_label.grid(row=6, column=0, padx=15, pady=(5, 0), sticky='w')
-    autoclose_checkbox.grid(row=7, column=0, padx=15, pady=(10, 5), sticky='w')
-    autorestart_checkbox.grid(row=8, column=0, padx=15, pady=5, sticky='w')
-    thread_label.grid(row=9, column=0, padx=15, pady=(10, 0), sticky='w')
-    thread_slider.grid(row=10, column=0, padx=15, pady=5, sticky='w')
+    appearance_label.grid(row=0, column=0, padx=padx, pady=pady_h2, sticky='w')
+    mode_label.grid(row=1, column=0, padx=padx, pady=pady_h3, sticky='w')
+    mode_dropdown.grid(row=2, column=0, padx=padx, pady=pady_widget, sticky='w')
+    theme_label.grid(row=3, column=0, padx=padx, pady=pady_h3, sticky='w')
+    theme_dropdown.grid(row=4, column=0, padx=padx, pady=pady_widget, sticky='w')
 
-    developer_label.grid(row=11, column=0, padx=15, pady=(30, 5), sticky='w')
-    logging_checkbox.grid(row=12, column=0, padx=15, pady=(10, 5), sticky='w')
-    debug_checkbox.grid(row=13, column=0, padx=15, pady=5, sticky='w')
+    functionality_label.grid(row=5, column=0, padx=padx, pady=pady_h2, sticky='w')
+    automation_label.grid(row=6, column=0, padx=padx, pady=pady_h3, sticky='w')
+    autoclose_checkbox.grid(row=7, column=0, padx=padx, pady=pady_widget, sticky='w')
+    autorestart_checkbox.grid(row=8, column=0, padx=padx, pady=pady_widget, sticky='w')
+    thread_label.grid(row=9, column=0, padx=padx, pady=pady_h3, sticky='w')
+    thread_slider.grid(row=10, column=0, padx=padx, pady=pady_widget, sticky='w')
+
+    developer_label.grid(row=11, column=0, padx=padx, pady=pady_h2, sticky='w')
+    logging_checkbox.grid(row=12, column=0, padx=padx, pady=pady_widget, sticky='w')
+    debug_checkbox.grid(row=13, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     return frame
 
