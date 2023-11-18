@@ -4,8 +4,8 @@ from modules.tufup import BASE_DIR
 def get_themes():
     return [
         {'name': custom_theme('blue'), 'title': 'Blue'},
-        {'name': custom_theme('dark-blue'), 'title': 'Dark Blue'},
         {'name': custom_theme('green'), 'title': 'Green'},
+        {'name': custom_theme('red'), 'title': 'Red'},
         {'name': custom_theme('DaynNight'), 'title': 'DaynNight'},
         {'name': custom_theme('GhostTrain'), 'title': 'GhostTrain'},
         {'name': custom_theme('Greengage'), 'title': 'Greengage'},
