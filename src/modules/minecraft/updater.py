@@ -5,11 +5,11 @@ from modules.updater_common import *
 
 # ----- Main Functions ----- #
 def start(app, ctk, textbox, pool):
-    view.log(f'', textbox)
-    view.log(f'[INFO] Beginning process at {utility.get_time()}.', textbox)
+    textbox['log'](f'')
+    textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
 
     # Lock user input
-    view.log(f'[INFO] Locking user input.', textbox)
+    textbox['log'](f'[INFO] Locking user input.')
     view.lock(True)
 
     # Bundling all variables to pass them around throughout the script
@@ -29,9 +29,9 @@ def start(app, ctk, textbox, pool):
 
     # Error Handling
     if (handle_errors(variables)):
-        view.log(f'[INFO] Unlocking user input.', textbox)
+        textbox['log'](f'[INFO] Unlocking user input.')
         view.lock(False)
-        view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
+        textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
     # Skip updating process if nuver is equal to latest ver
@@ -73,10 +73,10 @@ def finalize(vars_):
         vars_['app']
     ]
 
-    view.log(f'[INFO] Unlocking user input.', textbox)
+    textbox['log'](f'[INFO] Unlocking user input.')
     view.lock(False)
     run_executable(os.path.split(exe_path)[-1], options['debug'], textbox, [exe_path])    
-    view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
+    textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
     autoclose_app(vars_)
 
 
@@ -89,26 +89,26 @@ def handle_errors(vars_):
     ]
     error = False
 
-    view.log('[INFO] Validating the provided executable and instance paths.', textbox)
+    textbox['log']('[INFO] Validating the provided executable and instance paths.')
 
     # Ensure the path was provided.
     if inst_path == '':
-        view.log('[ERROR] Please provide a path to your Minecraft instance.', textbox)
+        textbox['log']('[ERROR] Please provide a path to your Minecraft instance.')
         error = True
     else:
         # Ensure the path is valid.
         if not os.path.exists(inst_path):
-            view.log("[ERROR] The provided path to your Minecraft instance doesn't exist.", textbox)
+            textbox['log']("[ERROR] The provided path to your Minecraft instance doesn't exist.")
             error = True
 
     # Ensure the path was provided.
     if exe_path == '':
-        view.log("[ERROR] Please provide a path to your launcher's executable.", textbox)
+        textbox['log']("[ERROR] Please provide a path to your launcher's executable.")
         error= True
     else:
         # Ensure the path is valid.
         if not os.path.isfile(exe_path):
-            view.log("[ERROR] The provided path to your launcher doesn't exist.", textbox)
+            textbox['log']("[ERROR] The provided path to your launcher doesn't exist.")
             error =  True
         
     
@@ -149,7 +149,7 @@ def download_modpack(vars_):
         vars_['version']
     ]
 
-    view.log(f'[INFO] Downloading latest version: {version['name']} v{version['version']}.', textbox)
+    textbox['log'](f'[INFO] Downloading latest version: {version['name']} v{version['version']}.')
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
@@ -164,7 +164,7 @@ def extract_modpack(vars_):
 
     zip_file = os.path.join(tmp, 'update.zip')
 
-    view.log('[INFO] Extracting the modpack zip.', textbox)
+    textbox['log']('[INFO] Extracting the modpack zip.')
     with zipfile.ZipFile(zip_file, 'r') as ref:
         ref.extractall(tmp)
     
@@ -183,7 +183,7 @@ def retrieve_mods(vars_, pool):
         mods = json.loads(f.read().decode('UTF-8'))['files']
         futures = []
 
-        view.log('[INFO] Retrieving any mods not present in the modpack zip:', textbox)
+        textbox['log']('[INFO] Retrieving any mods not present in the modpack zip:')
 
         for mod in mods:
             futures.append(pool.submit(retrieve, mod, vars_))
@@ -206,17 +206,17 @@ def retrieve(mod, vars_):
 
     # Move file if it exists locally
     if os.path.isfile(local_path):
-        view.log(f'[INFO] (M) {name.split('.jar')[0]}.', textbox)
+        textbox['log'](f'[INFO] (M) {name.split('.jar')[0]}.')
         if not os.path.isfile(destination):
             shutil.move(local_path, destination)
     # Move file if it exists locally (initial install)
     elif os.path.isfile(local_path_old):
-        view.log(f'[INFO] (C) {name.split('.jar')[0]}.', textbox)
+        textbox['log'](f'[INFO] (C) {name.split('.jar')[0]}.')
         if not os.path.isfile(destination):
             shutil.copyfile(local_path_old, destination)
     # Download mod
     else:
-        view.log(f'[INFO] (D) {name.split('.jar')[0]}.', textbox)
+        textbox['log'](f'[INFO] (D) {name.split('.jar')[0]}.')
         req = requests.get(mod['downloads'][0], allow_redirects=True)
         open(destination, 'wb').write(req.content)
 
@@ -236,13 +236,13 @@ def install_update(vars_):
     config_tmp = os.path.join(tmp, 'overrides', 'config')
 
     # Remove old mods path and move updated mods to instance
-    view.log('[INFO] Moving updated mods into the provided instance location.', textbox)
+    textbox['log']('[INFO] Moving updated mods into the provided instance location.')
     if (os.path.exists(mods_dest)):
         shutil.rmtree(mods_dest)
     shutil.move(mods_tmp, mods_dest)
 
     # Remove yosbr and move updated configs to instance
-    view.log('[INFO] Moving updated configs into the provided instance location.', textbox)
+    textbox['log']('[INFO] Moving updated configs into the provided instance location.')
     if (os.path.exists(yosbr_path)):
         shutil.rmtree(yosbr_path)
 
@@ -273,10 +273,10 @@ def install_update(vars_):
 
 def execute_launcher(textbox, exe_path):
     _, exe_name = os.path.split(exe_path)
-    view.log(f'[INFO] Launching {exe_name}.', textbox)
+    textbox['log'](f'[INFO] Launching {exe_name}.')
     try:
         subprocess.check_call([exe_path])
         return True
     except Exception as error:
-        view.log(f'[ERROR] {error.strerror.replace('%1', exe_path)}.', textbox)
+        textbox['log'](f'[ERROR] {error.strerror.replace('%1', exe_path)}.')
         return False

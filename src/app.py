@@ -83,6 +83,14 @@ def raise_selected_frame(games):
             frame.tkraise()
             AppSideBar.color_buttons(name)
 
+def broadcast(message):
+    global frames
+
+    for data in frames:
+        textbox = data['textbox']
+        if textbox:
+            textbox['log'](message)
+
 
 def reload_widgets(ctk, app, pool, state):
     global frames
@@ -97,14 +105,6 @@ def reload_widgets(ctk, app, pool, state):
 
     # Recreate the frames
     create_frames(ctk, app, pool, state)
-
-
-def broadcast(message):
-    global frames
-    for data in frames:
-        textbox = data['textbox']
-        if textbox:
-            view.log(message, textbox)
 
 
 # Run the script

@@ -16,7 +16,7 @@ def store_version_number(vars_):
         'version': version['version']
     })
 
-    view.log(f'[INFO] Storing new version ID for future ref: {version['name']} (v{version['version']}).', textbox)
+    textbox['log'](f'[INFO] Storing new version ID for future ref: {version['name']} (v{version['version']}).')
     open(os.path.join(inst_path, 'nazarick.json'), 'w').write(data)
 
 
@@ -41,11 +41,11 @@ def on_latest_version(vars_, initial_install_fn):
 
             # is trying to update an instance path with another pack installed.
             if name == version['name'] and ver == version['version']:
-                view.log(f'[INFO] You are already on the latest version: {name} (v{ver}).', textbox)
+                textbox['log'](f'[INFO] You are already on the latest version: {name} (v{ver}).')
                 return True
 
     # Run the function that handles existing files on initial install
-    view.log('[INFO] Preparing instance for initial install.', textbox)
+    textbox['log']('[INFO] Preparing instance for initial install.')
     initial_install_fn(vars_)
 
     return False
@@ -93,7 +93,7 @@ def purge_files(vars_, pool):
             delete = obj.get('purge')
 
             if bool(delete):
-                view.log('[INFO] Purging obsolete files:', textbox)
+                textbox['log']('[INFO] Purging obsolete files:')
                 futures = []
                 # Ensures only files from these directories will be purged
                 whitelist = ['config', 'shaderpacks']
@@ -109,7 +109,7 @@ def delete_path(base_path, path, whitelist, textbox):
     if can_delete_path(base_path, path, whitelist):
         rm_func = shutil.rmtree if os.path.isdir(path) else os.remove
         rm_func(path)
-        view.log(f'[INFO] (R) {path.replace(base_path, "")[1:]}', textbox)
+        textbox['log'](f'[INFO] (R) {path.replace(base_path, "")[1:]}')
 
 
 def can_delete_path(base_path, path, whitelist = []):
@@ -163,10 +163,10 @@ def clean_update_directories(vars_):
             
     # Delete any existing tmp directory
     if os.path.exists(tmp):
-        view.log('[INFO] Cleaning the tmp directory.', textbox)
+        textbox['log']('[INFO] Cleaning the tmp directory.')
         shutil.rmtree(tmp)
     else:
-        view.log('[INFO] Creating the tmp directory.', textbox)
+        textbox['log']('[INFO] Creating the tmp directory.')
 
     # Create clean tmp directory
     os.makedirs(tmp, exist_ok=True)
@@ -176,13 +176,13 @@ def clean_update_directories(vars_):
 def run_executable(exe_name, debug, textbox, command):
     # Debug mode stops exe from launching
     if not debug:
-        view.log(f'[INFO] Launching {exe_name}.', textbox)
+        textbox['log'](f'[INFO] Launching {exe_name}.')
         try:
             subprocess.check_call(command)
         except Exception as error:
-            view.log(f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.', textbox)
+            textbox['log'](f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.')
     else:
-        view.log('[INFO] The executable is not launched whilst in debug mode.', textbox)
+        textbox['log']('[INFO] The executable is not launched whilst in debug mode.')
 
 def autoclose_app(vars_):
     options, textbox, app = [
@@ -192,5 +192,5 @@ def autoclose_app(vars_):
     ]
 
     if options['autoclose']:
-        view.log('[INFO] Auto close is enabled; closing app.', textbox)
+        textbox['log']('[INFO] Auto close is enabled; closing app.')
         app.quit()

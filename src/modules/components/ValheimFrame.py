@@ -10,7 +10,8 @@ def create(ctk, master, pool):
     # Create components
     textbox = LogBox.create(
         ctk=ctk,
-        master=frame
+        master=frame,
+        game='Valheim'
     )
 
     install = ExplorerSearch.create(
@@ -35,7 +36,7 @@ def create(ctk, master, pool):
     view.add_lockable([*install[:-1]])
 
     # Position components
-    textbox.grid(row=1, columnspan=2, pady=(15, 5), padx=10, sticky='nsew')
+    textbox['get']().grid(row=1, columnspan=2, pady=(15, 5), padx=10, sticky='nsew')
     install[-1].grid(row=2, padx=1, sticky='ew', columnspan=2)
     update.grid(row=3, padx=10, pady=(14, 15), columnspan=2, sticky='ew')
 

@@ -9,7 +9,8 @@ def create(ctk, master, pool):
 
     textbox = LogBox.create(
         ctk=ctk,
-        master=frame
+        master=frame,
+        game='Minecraft'
     )
 
     instance = ExplorerSearch.create(
@@ -44,7 +45,7 @@ def create(ctk, master, pool):
     view.add_lockable([*instance[:-1], *executable[:-1]])
 
     # Position components
-    textbox.grid(row=1, columnspan=2, pady=(15, 5), padx=10, sticky='nsew')
+    textbox['get']().grid(row=1, columnspan=2, pady=(15, 5), padx=10, sticky='nsew')
     instance[-1].grid(row=2, padx=1, sticky='ew', columnspan=2)
     executable[-1].grid(row=3, padx=1, sticky='ew', columnspan=2)
     update.grid(row=4, padx=10, pady=(14, 15), columnspan=2, sticky='ew')

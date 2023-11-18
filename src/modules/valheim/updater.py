@@ -5,11 +5,11 @@ from modules import view, utility, store
 from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
 def start(app, ctk, textbox, pool):
-    view.log(f'', textbox)
-    view.log(f'[INFO] Beginning process at {utility.get_time()}.', textbox)
+    textbox['log'](f'')
+    textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
 
     # Lock user input
-    view.log(f'[INFO] Locking user input.', textbox)
+    textbox['log'](f'[INFO] Locking user input.')
     view.lock(True)
 
     game_state = store.get_game_state('valheim')
@@ -26,9 +26,9 @@ def start(app, ctk, textbox, pool):
     }
 
     if handle_errors(variables):
-        view.log(f'[INFO] Unlocking user input.', textbox)
+        textbox['log'](f'[INFO] Unlocking user input.')
         view.lock(False)
-        view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
+        textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
     if (on_latest_version(variables, initial_install)):
@@ -58,11 +58,11 @@ def finalize(vars_):
         vars_['textbox']
     ]
 
-    view.log(f'[INFO] Unlocking user input.', textbox)
+    textbox['log'](f'[INFO] Unlocking user input.')
     view.lock(False)
     # TODO - Support launching with mac as well
     run_executable('valheim.exe', options['debug'], textbox, ['cmd', '/c', 'start', 'steam://run/892970'])
-    view.log(f'[INFO] Finished process at {utility.get_time()}.', textbox)
+    textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
     autoclose_app(vars_)
 
 
@@ -75,14 +75,14 @@ def handle_errors(vars_):
     ]
     error = False
 
-    view.log('[INFO] Validating the provided install path.', textbox)
+    textbox['log']('[INFO] Validating the provided install path.')
 
     # Ensure the path was provided.
     if inst_path == '':
-        view.log('[ERROR] Please provide a path to your Valheim instance.', textbox)
+        textbox['log']('[ERROR] Please provide a path to your Valheim instance.')
         error = True
     elif not os.path.exists(inst_path):
-        view.log("[ERROR] The provided path to your Valheim instance doesn't exist.", textbox)
+        textbox['log']("[ERROR] The provided path to your Valheim instance doesn't exist.")
         error = True
 
     return error
@@ -109,7 +109,7 @@ def download_modpack(vars_):
         vars_['version']
     ]
 
-    view.log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).', textbox)
+    textbox['log'](f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
@@ -124,7 +124,7 @@ def extract_modpack(vars_):
 
     zip_file = os.path.join(tmp, 'update.zip')
 
-    view.log('[INFO] Extracting the modpack zip.', textbox)
+    textbox['log']('[INFO] Extracting the modpack zip.')
     with zipfile.ZipFile(zip_file, 'r') as ref:
         ref.extractall(tmp)
         
@@ -147,7 +147,7 @@ def retrieve_mods(vars_, pool):
         plugins = json.loads(f.read().decode('UTF-8'))['dependencies']
         futures = []
 
-        view.log('[INFO] Retrieving modpack dependencies:', textbox)
+        textbox['log']('[INFO] Retrieving modpack dependencies:')
 
         for plugin in plugins:
             futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp))
@@ -168,12 +168,12 @@ def retrieve(plugin, vars_, plugins_tmp):
 
     # Move plugin if it already exists locally
     if os.path.isdir(loc_plugin_dir):
-        view.log(f'[INFO] (M) {plugin}', textbox)
+        textbox['log'](f'[INFO] (M) {plugin}')
         if not os.path.exists(tmp_plugin_dir):
             shutil.move(loc_plugin_dir, tmp_plugin_dir)
     # Download zip then extract and delete it
     else:
-        view.log(f'[INFO] (D) {plugin}', textbox)
+        textbox['log'](f'[INFO] (D) {plugin}')
 
         req = requests.get(plugin_url, allow_redirects=True)
         open(plugin_zip, 'wb').write(req.content)
@@ -198,7 +198,7 @@ def install_update(vars_, pool):
     install_tmp = os.path.join(tmp, 'install')
 
     # Iterate over install directory
-    view.log('[INFO] Installing the modpack to the specified install path.', textbox)
+    textbox['log']('[INFO] Installing the modpack to the specified install path.')
     for file_ in os.listdir(install_tmp):
         file_path_loc = os.path.join(inst_path, file_)
         file_path_tmp = os.path.join(install_tmp, file_)
@@ -247,7 +247,7 @@ def setup_bepinex(vars_, pool):
     # Make install directory
     os.makedirs(install_tmp, exist_ok=True)
 
-    view.log('[INFO] Setting up BepInEx.', textbox)
+    textbox['log']('[INFO] Setting up BepInEx.')
 
     # Move BepInEx into install directory
     for plugin in os.listdir(plugins_tmp):

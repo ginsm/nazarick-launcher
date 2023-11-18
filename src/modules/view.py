@@ -5,12 +5,6 @@ window_width = 0
 window_height = 0
 lockable_elements = []
 
-def log(message, textbox):
-    textbox.configure(state='normal')
-    textbox.insert(index='end', text=message + '\n')
-    textbox.configure(state='disabled')
-    textbox.see('end')
-
 def add_lockable(lockable):
     global lockable_elements
 
