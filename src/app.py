@@ -90,8 +90,8 @@ def reload_widgets(ctk, app, pool, state):
     # Delete all frames
     for data in frames:
         frame = data['frame']
-        frame.grid_forget()
         frame.destroy()
+
     frames.clear()
     AppSideBar.clear_game_Buttons()
 
