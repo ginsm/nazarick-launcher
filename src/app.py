@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from customtkinter.windows.widgets.theme import ThemeManager
 from concurrent.futures import ThreadPoolExecutor
 from modules import utility, view, store, tufup, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, MinecraftFrame, ValheimFrame, SettingsFrame
@@ -54,17 +53,16 @@ def main():
 def create_frames(ctk, app, pool, state):
     global frames
 
-    # Create frames
-    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app, pool)
+    # Create frames and add their data to frames
     [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app, pool)
-    settings_frame = SettingsFrame.create(ctk, app, pool, state)
-
-    # Add data to frames
     frames.append({'name': 'Minecraft', 'frame': mc_frame, 'textbox': mc_textbox})
+
+    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app, pool)
     frames.append({'name': 'Valheim', 'frame': vh_frame, 'textbox': vh_textbox})
+
+    settings_frame = SettingsFrame.create(ctk, app, pool, state)
     frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
 
-    # Create sidebar and add to frames
     sidebar = AppSideBar.create(ctk, app, frames)
     frames.append({'name': 'Sidebar', 'frame': sidebar, 'textbox': None})
 
@@ -76,7 +74,6 @@ def create_frames(ctk, app, pool, state):
 
     # Raise selected frame and set color
     raise_selected_frame(frames)
-
 
 def raise_selected_frame(games):
     selected_game = store.get_game()
