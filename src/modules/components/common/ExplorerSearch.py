@@ -16,7 +16,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
     label.grid(row=1, column=0, padx=10, pady=(5, 0), sticky='w')
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
-    entry.grid(row=2, column=0, padx=(10, 5), pady=5, sticky='ew')
+    entry.grid(row=2, column=0, padx=(10, 5), pady=(0, 5), sticky='ew')
     entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(entry, name))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
