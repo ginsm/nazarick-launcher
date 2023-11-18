@@ -3,15 +3,15 @@
     "text_color": ["#2b3449", "#ffffff"]
   },
   "CTk": {
-    "fg_color": ["gray92", "gray14"]
+    "fg_color": ["gray95", "gray10"]
   },
   "CTkToplevel": {
-    "fg_color": ["gray92", "gray14"]
+    "fg_color": ["gray95", "gray10"]
   },
   "CTkFrame": {
     "corner_radius": 6,
     "border_width": 0,
-    "fg_color": ["gray86", "gray17"],
+    "fg_color": ["gray90", "gray13"],
     "top_fg_color": ["gray81", "gray20"],
     "border_color": ["gray65", "gray28"]
   },
