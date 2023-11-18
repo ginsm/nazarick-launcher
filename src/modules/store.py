@@ -1,11 +1,11 @@
 import os
 from tinydb import TinyDB
 from modules.utility import destructure
+from modules import theme_list
 
 # The default state for the store
 default_state={
     'autoclose': False,
-    'accent': 'blue',
     'game': 'minecraft',
     'games': {
         'minecraft': {
@@ -20,6 +20,7 @@ default_state={
     'geometry': '1280x720',
     'logging': True,
     'mode': 'System',
+    'theme': 'Blue',
     'threadamount': 4,
     'debug': False,
 }
@@ -115,11 +116,12 @@ def set_menu_option(name, options):
 
 # ---- State updates ----
 def update(state):
-    state = update_107(state)
+    state = update_1_0_7(state)
+    state = update_1_3_0(state)
     return state
 
 # Version 1.0.7 state updater
-def update_107(state):
+def update_1_0_7(state):
     # Check if the state is old 1.0.6 format
     if state.get('executable'):
         executable = state['executable']
@@ -128,7 +130,6 @@ def update_107(state):
         # Update data
         stateUpdate = {
             'game': 'minecraft',
-            'frame': 'minecraft',
             'games': {
                 'minecraft': {
                     'selectedpack': 'nazarick-smp',
@@ -154,4 +155,24 @@ def update_107(state):
         state.update(stateUpdate)
 
     # Return the updated state
+    return state
+
+def update_1_3_0(state):
+    # Remove unused variables
+    if state.get('frame'):
+        del state['frame']
+
+    if state.get('accent'):
+        del state['accent']
+
+    # Move to new theme/mode convention
+    if state.get('theme') in ['System', 'Dark', 'Light']:
+        mode = state.get('theme')
+        state.update({'mode': mode, 'theme': 'Blue'})
+
+    # Prevent malformed/invalid theme name issues
+    themes = list(map(lambda o: o.get('title'), theme_list.get_themes()))
+    if state.get('theme') not in themes:
+        state.update({'theme': 'Blue'})
+
     return state
