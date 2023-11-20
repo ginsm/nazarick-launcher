@@ -35,12 +35,22 @@ def path_is_relative(base, path):
         return False
     return True
 
-def permission_check(path):
-    test_file = os.path.join(path, 'NazarickPermissionTest')
 
-    try:
-        open(test_file, 'x')
-        os.remove(test_file)
-        return True
-    except:
-        return False
+def some(list_, func):
+    for element in list_:
+        if (func(element)):
+            return True
+    return False
+
+
+def permission_check(path):
+    if (os.path.exists(path)):
+        test_file = os.path.join(path, 'NazarickPermissionTest')
+
+        try:
+            open(test_file, 'x')
+            os.remove(test_file)
+            return True
+        except:
+            return False
+    return True
