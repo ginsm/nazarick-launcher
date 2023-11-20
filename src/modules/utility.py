@@ -40,4 +40,4 @@ def get_theme_from_title(title, themes):
     for theme in themes:
         if theme['title'] == title:
             return theme
-    return False
+    return themes[0]

@@ -24,7 +24,7 @@ def main():
         initial_state.get('theme'),
         theme_list.get_themes()
     )
-    ctk.set_default_color_theme(theme.get('name') if theme else 'blue')
+    ctk.set_default_color_theme(theme.get('name'))
 
     # Initialize tufup and check for updates (only if bundled)
     if tufup.FROZEN:
