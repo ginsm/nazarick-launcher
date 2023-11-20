@@ -1,6 +1,6 @@
 import os
 from app import reload_widgets
-from modules import store, theme_list, utility
+from modules import store, theme_list
 from customtkinter.windows.widgets.theme import ThemeManager
 
 def create(ctk, master, pool, state):
@@ -39,7 +39,7 @@ def create(ctk, master, pool, state):
     theme_dropdown = ctk.CTkOptionMenu(
         master=frame,
         values=list(map(lambda theme: theme['title'], themes)),
-        command=lambda theme: set_theme(ctk, master, utility.get_theme_from_title(theme, themes), options, pool),
+        command=lambda theme: set_theme(ctk, master, theme_list.get_theme_from_title(theme), options, pool),
         variable=options['theme'],
         width=200
     )
