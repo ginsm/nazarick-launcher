@@ -58,7 +58,7 @@ def handle_key_press(ctk, entry, name):
     
     if (stored != value):
         store.set_game_state({name: value})
-        if not utility.permission_check(value):
+        if utility.permission_check(value) == utility.NEED_ADMIN:
             warn_admin_required(ctk, value)
 
 def open_path(entry, name):
@@ -87,7 +87,7 @@ def search_for_dir(entry, name, ctk):
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
         store.set_game_state({name: path})
-        if not utility.permission_check(path):
+        if utility.permission_check(path) == utility.NEED_ADMIN:
             warn_admin_required(ctk, path)
 
 def search_for_file(entry, name, ctk):
@@ -95,7 +95,7 @@ def search_for_file(entry, name, ctk):
     if (path is not None):
         set_entry(entry=entry, string=path.name)
         store.set_game_state({name: path.name})
-        if not utility.permission_check(path):
+        if utility.permission_check(path) == utility.NEED_ADMIN:
             warn_admin_required(ctk, path)
 
 

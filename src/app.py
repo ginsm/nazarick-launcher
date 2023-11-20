@@ -20,7 +20,7 @@ def main():
     # Check if elevated permission is necessary
     permission_check_failed = utility.some(
         store.get_game_paths(),
-        lambda v: not utility.permission_check(v)
+        lambda v: utility.permission_check(v) == utility.NEED_ADMIN
     )
     if (permission_check_failed):
         elevate(show_console=False)

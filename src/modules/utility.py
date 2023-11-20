@@ -44,6 +44,10 @@ def some(list_, func):
     return False
 
 
+NEED_ADMIN = 'need-admin'
+HAVE_PERM = 'have-perm'
+UNKNOWN = 'unknown'
+
 def permission_check(path):
     if (os.path.exists(path)):
         test_file = os.path.join(path, 'NazarickPermissionTest')
@@ -51,7 +55,7 @@ def permission_check(path):
         try:
             open(test_file, 'x')
             os.remove(test_file)
-            return True
+            return HAVE_PERM
         except:
-            return False
-    return True
+            return NEED_ADMIN
+    return UNKNOWN
