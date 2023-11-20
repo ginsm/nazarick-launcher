@@ -35,3 +35,12 @@ def path_is_relative(base, path):
         return False
     return True
 
+def permission_check(path):
+    test_file = os.path.join(path, 'NazarickPermissionTest')
+
+    try:
+        open(test_file, 'x')
+        os.remove(test_file)
+        return True
+    except:
+        return False
