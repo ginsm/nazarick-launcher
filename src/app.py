@@ -20,10 +20,7 @@ def main():
     ctk.set_appearance_mode(initial_state.get('mode') or 'System')
 
     # Set theme
-    theme = utility.get_theme_from_title(
-        initial_state.get('theme'),
-        theme_list.get_themes()
-    )
+    theme = theme_list.get_theme_from_title(initial_state.get('theme'))
     ctk.set_default_color_theme(theme.get('name'))
 
     # Initialize tufup and check for updates (only if bundled)

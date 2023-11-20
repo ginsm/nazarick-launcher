@@ -18,5 +18,14 @@ def get_themes():
         {'name': custom_theme('TrjBlue'), 'title': 'TrjBlue'},
     ]
 
+
 def custom_theme(name):
     return os.path.join(BASE_DIR, 'themes', f'{name}.json')
+
+
+def get_theme_from_title(title):
+    themes = get_themes()
+    for theme in themes:
+        if theme['title'] == title:
+            return theme
+    return themes[0]
