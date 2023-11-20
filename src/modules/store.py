@@ -96,6 +96,24 @@ def set_game_state(obj):
         state['games'][game][pack].update(obj)
         set_state(state)
 
+def get_game_paths():
+    state = get_state()
+    games = state.get('games')
+    paths = []
+
+    for game in games:
+        game_data = games.get(game)
+        for pack in game_data:
+            # Ignore selectedpack key
+            if pack != 'selectedpack':
+                pack_data = game_data.get(pack)
+                for path in pack_data:
+                    # TODO normalize to just install
+                    if path in ['instance', 'install']:
+                        paths.append(pack_data.get(path))
+
+    return paths
+
 
 # Generic state getter/setter
 def get_state(*args):

@@ -20,6 +20,7 @@ def destructure(obj={}, args=[]):
 
     return output
 
+
 def get_time():
     return datetime.now().strftime('%m/%d/%Y %H:%M:%S')
 

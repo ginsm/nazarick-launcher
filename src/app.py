@@ -1,5 +1,6 @@
-import customtkinter as ctk
 from concurrent.futures import ThreadPoolExecutor
+import customtkinter as ctk
+from elevate import elevate
 from modules import utility, view, store, tufup, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, MinecraftFrame, ValheimFrame, SettingsFrame
 
@@ -15,6 +16,14 @@ def main():
     # Initialize the store
     store.init(tufup.DATA_DIR.as_posix())
     initial_state = store.get_state()
+
+    # Check if elevated permission is necessary
+    permission_check_failed = utility.some(
+        store.get_game_paths(),
+        lambda v: not utility.permission_check(v)
+    )
+    if (permission_check_failed):
+        elevate(show_console=False)
 
     # Set mode
     ctk.set_appearance_mode(initial_state.get('mode') or 'System')

@@ -110,6 +110,10 @@ def handle_errors(vars_):
         if not os.path.isfile(exe_path):
             textbox['log']("[ERROR] The provided path to your launcher doesn't exist.")
             error =  True
+
+    if not utility.permission_check(inst_path):
+        textbox['log']("[ERROR] The instance path requires administrative privileges. Please restart your launcher.")
+        error = True
         
     
     return error

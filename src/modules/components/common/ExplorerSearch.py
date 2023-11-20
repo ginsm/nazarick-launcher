@@ -1,11 +1,11 @@
-import os
-import webbrowser
+import os, webbrowser
 from PIL import Image
 from tkinter import filedialog
 from tktooltip import ToolTip
-from modules import store
+from modules import store, utility
 from modules.debounce import debounce
 from modules.tufup import BASE_DIR
+from modules.components.common import InfoModal
 
 def create(ctk, master, label, placeholder, name, find, game=''):
     frame = ctk.CTkFrame(master=master, fg_color='transparent', border_width=0)
@@ -17,7 +17,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(10, 5), pady=(0, 5), sticky='ew')
-    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(entry, name))
+    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(ctk, entry, name))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables
@@ -32,7 +32,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     # Search Button
     search_function = get_search_function(find)
-    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name), height=button_height, width=button_width, border_width=0)
+    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name, ctk), height=button_height, width=button_width, border_width=0)
     search_button.grid(row=2, column=1, padx=(0, 5), pady=5, sticky='ew')
     ToolTip(search_button, msg=f'Search for the {name} path.', delay=0.01, follow=True)
 
@@ -52,12 +52,14 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
 # Helper Functions
 @debounce(1)
-def handle_key_press(entry, name):
+def handle_key_press(ctk, entry, name):
     stored = store.get_game_state()[name]
     value = entry.get()
     
     if (stored != value):
         store.set_game_state({name: value})
+        if not utility.permission_check(value):
+            warn_admin_required(ctk, value)
 
 def open_path(entry, name):
     path = entry.get()
@@ -80,14 +82,27 @@ def set_entry(entry, string):
     entry.delete(first_index=0, last_index='end')
     entry.insert(index=0, string=string)
 
-def search_for_dir(entry, name):
+def search_for_dir(entry, name, ctk):
     path = filedialog.askdirectory()
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
         store.set_game_state({name: path})
+        if not utility.permission_check(path):
+            warn_admin_required(ctk, path)
 
-def search_for_file(entry, name):
+def search_for_file(entry, name, ctk):
     path = filedialog.askopenfile()
     if (path is not None):
         set_entry(entry=entry, string=path.name)
         store.set_game_state({name: path.name})
+        if not utility.permission_check(path):
+            warn_admin_required(ctk, path)
+
+
+def warn_admin_required(ctk, path):
+    InfoModal.create(
+        ctk,
+        text=f'The following path requires administrative privileges:\n\n"{path}"\n\nPlease restart the application or choose another path.',
+        buttons=[{'text': 'OK', 'command': lambda modal: modal.destroy()}],
+        title='Restart Required',
+    )

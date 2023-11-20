@@ -12,7 +12,6 @@ python -m PyInstaller^
  --onedir^
  --windowed^
  --noconsole^
- --uac-admin^
  --name "Nazarick Launcher"^
  F:\Projects\Active\nazarick-launcher\src\app.py
 
