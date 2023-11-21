@@ -2,12 +2,13 @@ import os, webbrowser
 from PIL import Image
 from tkinter import filedialog
 from tktooltip import ToolTip
+from elevate import elevate
 from modules import store, utility
 from modules.debounce import debounce
 from modules.tufup import BASE_DIR
 from modules.components.common import InfoModal
 
-def create(ctk, master, label, placeholder, name, find, game=''):
+def create(ctk, master, app, label, placeholder, name, find, game=''):
     frame = ctk.CTkFrame(master=master, fg_color='transparent', border_width=0)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
@@ -17,7 +18,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(10, 5), pady=(0, 5), sticky='ew')
-    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(ctk, entry, name))
+    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(ctk, entry, name, app))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables
@@ -32,7 +33,7 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
     # Search Button
     search_function = get_search_function(find)
-    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name, ctk), height=button_height, width=button_width, border_width=0)
+    search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name, ctk, app), height=button_height, width=button_width, border_width=0)
     search_button.grid(row=2, column=1, padx=(0, 5), pady=5, sticky='ew')
     ToolTip(search_button, msg=f'Search for the {name} path.', delay=0.01, follow=True)
 
@@ -40,7 +41,6 @@ def create(ctk, master, label, placeholder, name, find, game=''):
     open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width, border_width=0)
     open_button.grid(row=2, column=2, padx=(0, 10), pady=5, sticky='ew')
     ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
-
 
     # Get entry state from storage and set it
     state = store.get_game_state(game)  
@@ -52,14 +52,14 @@ def create(ctk, master, label, placeholder, name, find, game=''):
 
 # Helper Functions
 @debounce(1)
-def handle_key_press(ctk, entry, name):
+def handle_key_press(ctk, entry, name, app):
     stored = store.get_game_state()[name]
     value = entry.get()
     
     if (stored != value):
         store.set_game_state({name: value})
         if utility.permission_check(value) == utility.NEED_ADMIN:
-            warn_admin_required(ctk, value)
+            warn_admin_required(ctk, value, app)
 
 def open_path(entry, name):
     path = entry.get()
@@ -82,27 +82,37 @@ def set_entry(entry, string):
     entry.delete(first_index=0, last_index='end')
     entry.insert(index=0, string=string)
 
-def search_for_dir(entry, name, ctk):
+def search_for_dir(entry, name, ctk, app):
     path = filedialog.askdirectory()
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
         store.set_game_state({name: path})
         if utility.permission_check(path) == utility.NEED_ADMIN:
-            warn_admin_required(ctk, path)
+            warn_admin_required(ctk, path, app)
 
-def search_for_file(entry, name, ctk):
+def search_for_file(entry, name, ctk, app):
     path = filedialog.askopenfile()
     if (path is not None):
         set_entry(entry=entry, string=path.name)
         store.set_game_state({name: path.name})
         if utility.permission_check(path) == utility.NEED_ADMIN:
-            warn_admin_required(ctk, path)
+            warn_admin_required(ctk, path, app)
 
 
-def warn_admin_required(ctk, path):
+def warn_admin_required(ctk, path, app):
+    def handle_restart(modal):
+        app.destroy()
+        elevate(show_console=False)
+
+    def destroy_modal(modal):
+        modal.destroy()
+
     InfoModal.create(
         ctk,
-        text=f'The following path requires administrative privileges:\n\n"{path}"\n\nPlease restart the application or choose another path.',
-        buttons=[{'text': 'OK', 'command': lambda modal: modal.destroy()}],
-        title='Restart Required',
+        text=f'The following path requires administrative privileges:\n\n"{path}"\n\nDo you want to elevate the launcher?',
+        buttons=[
+            {'text': 'Cancel', 'command': destroy_modal},
+            {'text': 'Elevate', 'command': handle_restart},
+        ],
+        title='Admin Required',
     )

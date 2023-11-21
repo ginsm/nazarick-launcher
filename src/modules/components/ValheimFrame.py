@@ -18,6 +18,7 @@ def create(ctk, master, pool):
         ctk=ctk,
         master=frame,
         game='valheim',
+        app=master,
         label='Install Path',
         placeholder='Enter the path to your Valheim install.',
         name='install',

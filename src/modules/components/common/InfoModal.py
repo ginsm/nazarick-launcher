@@ -1,4 +1,4 @@
-def create(ctk, text, buttons, title):
+def create(ctk, text, buttons, title, justify="center"):
     modal = ctk.CTkToplevel()
     modal.title(title)
     modal.grid_rowconfigure(0, weight=1)
@@ -10,15 +10,26 @@ def create(ctk, text, buttons, title):
 
     label = ctk.CTkLabel(
         master=modal, 
-        text=text
+        text=text,
+        justify=justify
     )
-    label.grid(row=0, column=0, pady=(pady, 0), padx=padx, sticky="nsew")
+    label.grid(row=0, column=0, columnspan=len(buttons), pady=(pady, 0), padx=padx, sticky="nsew")
 
     for index, btn in enumerate(buttons):
+        def callback_factory(button):
+            return lambda: button.get('command')(modal)
+        
         button = ctk.CTkButton(
             master=modal,
             text=btn.get('text'),
-            command=lambda: btn.get('command')(modal)
+            command=callback_factory(btn)
         )
 
-        button.grid(row=1, column=index, padx=padx, pady=pady, sticky="we")
+        if (index == 0):
+            button_padx = (padx, 5)
+        elif (index == len(buttons) - 1):
+            button_padx = (5, padx)
+        else:
+            button_padx = 5
+
+        button.grid(row=1, column=index, padx=button_padx, pady=pady, sticky="we")
