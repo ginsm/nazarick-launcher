@@ -24,6 +24,10 @@ def lock(should_lock):
         for element in lockable_elements:
             element.configure(state='normal')
 
+def clear_lockable_elements():
+    global lockable_elements
+    lockable_elements.clear()
+
 @debounce(0.4)
 def resize(app):
     global window_width, window_height

@@ -106,8 +106,10 @@ def reload_widgets(ctk, app, pool, state):
         frame = data['frame']
         frame.destroy()
 
+    # Clear all stored widgets
     frames.clear()
     AppSideBar.clear_game_Buttons()
+    view.clear_lockable_elements()
 
     # Recreate the frames
     create_frames(ctk, app, pool, state)
