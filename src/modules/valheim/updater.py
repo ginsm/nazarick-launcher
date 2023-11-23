@@ -14,6 +14,7 @@ def start(app, ctk, textbox, pool):
 
     game_state = store.get_game_state('valheim')
     options = store.get_state()
+    internet_connection = utility.internet_check()
     variables = {
         'app': app,
         'ctk': ctk,
@@ -22,7 +23,7 @@ def start(app, ctk, textbox, pool):
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'valheim'),
         'textbox': textbox,
-        'version': get_latest_version()
+        'version': get_latest_version() if internet_connection else None
     }
 
     if handle_errors(variables):
@@ -31,23 +32,26 @@ def start(app, ctk, textbox, pool):
         textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
-    if (on_latest_version(variables, initial_install)):
-        finalize(variables)
-        return
+    if internet_connection:
+        if on_latest_version(variables, initial_install):
+            finalize(variables)
+            return
 
-    clean_update_directories(variables)
+        clean_update_directories(variables)
 
-    download_modpack(variables)
+        download_modpack(variables)
 
-    extract_modpack(variables)
+        extract_modpack(variables)
 
-    purge_files(variables, pool)
+        purge_files(variables, pool)
 
-    retrieve_mods(variables, pool)
+        retrieve_mods(variables, pool)
 
-    install_update(variables, pool)
+        install_update(variables, pool)
 
-    store_version_number(variables)
+        store_version_number(variables)
+    else:
+        textbox['log']('[INFO] No internet connection; skipping update process.')
 
     finalize(variables)
 

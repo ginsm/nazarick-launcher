@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-
+from urllib import request
 
 def set_env(name, value):
     os.environ[name] = value
@@ -59,3 +59,10 @@ def permission_check(path):
         except:
             return NEED_ADMIN
     return UNKNOWN
+
+def internet_check():
+    try:
+        response = request.urlopen('https://www.google.com', timeout=4)
+        return True
+    except:
+        return False

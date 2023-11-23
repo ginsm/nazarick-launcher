@@ -15,6 +15,7 @@ def start(app, ctk, textbox, pool):
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('minecraft')
     options = store.get_state()
+    internet_connection = utility.internet_check()
     variables = {
         'app': app,
         'ctk': ctk,
@@ -24,41 +25,44 @@ def start(app, ctk, textbox, pool):
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
         'textbox': textbox,
-        'version': get_latest_version('1.20.1'),
+        'version': get_latest_version('1.20.1') if internet_connection else None,
     }
 
     # Error Handling
-    if (handle_errors(variables)):
+    if handle_errors(variables):
         textbox['log'](f'[INFO] Unlocking user input.')
         view.lock(False)
         textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
     # Skip updating process if nuver is equal to latest ver
-    if (on_latest_version(variables, initial_install)):
-        finalize(variables)
-        return
+    if internet_connection:
+        if (on_latest_version(variables, initial_install)):
+            finalize(variables)
+            return
 
-    # Clean up temp directory
-    clean_update_directories(variables)
+        # Clean up temp directory
+        clean_update_directories(variables)
 
-    # Download latest modpack version
-    download_modpack(variables)
+        # Download latest modpack version
+        download_modpack(variables)
 
-    # Unzip update to temp directory
-    extract_modpack(variables)
+        # Unzip update to temp directory
+        extract_modpack(variables)
 
-    # Purge any files as instructed from modpack archive
-    purge_files(variables, pool)
+        # Purge any files as instructed from modpack archive
+        purge_files(variables, pool)
 
-    # Retrieve all of the mod files
-    retrieve_mods(variables, pool)
+        # Retrieve all of the mod files
+        retrieve_mods(variables, pool)
 
-    # Install the update into the instance
-    install_update(variables)
+        # Install the update into the instance
+        install_update(variables)
 
-    # Store update's version number
-    store_version_number(variables)
+        # Store update's version number
+        store_version_number(variables)
+    else:
+        textbox['log']('[INFO] No internet connection; skipping update process.')
 
     # Run the final bit of code
     finalize(variables)
