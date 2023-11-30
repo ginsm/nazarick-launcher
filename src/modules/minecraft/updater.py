@@ -97,26 +97,26 @@ def handle_errors(vars_):
 
     # Ensure the path was provided.
     if inst_path == '':
-        textbox['log']('[ERROR] Please provide a path to your Minecraft instance.')
+        textbox['log']('[ERROR] Please provide a path to your Minecraft instance.', 'error')
         error = True
     else:
         # Ensure the path is valid.
         if not os.path.exists(inst_path):
-            textbox['log']("[ERROR] The provided path to your Minecraft instance doesn't exist.")
+            textbox['log']("[ERROR] The provided path to your Minecraft instance doesn't exist.", 'error')
             error = True
 
     # Ensure the path was provided.
     if exe_path == '':
-        textbox['log']("[ERROR] Please provide a path to your launcher's executable.")
+        textbox['log']("[ERROR] Please provide a path to your launcher's executable.", 'error')
         error= True
     else:
         # Ensure the path is valid.
         if not os.path.isfile(exe_path):
-            textbox['log']("[ERROR] The provided path to your launcher doesn't exist.")
+            textbox['log']("[ERROR] The provided path to your launcher doesn't exist.", 'error')
             error =  True
 
     if utility.permission_check(inst_path) == utility.NEED_ADMIN:
-        textbox['log']("[ERROR] The instance path requires administrative privileges. Please restart your launcher.")
+        textbox['log']("[ERROR] The instance path requires administrative privileges. Please restart your launcher.", 'error')
         error = True
         
     
@@ -286,5 +286,5 @@ def execute_launcher(textbox, exe_path):
         subprocess.check_call([exe_path])
         return True
     except Exception as error:
-        textbox['log'](f'[ERROR] {error.strerror.replace('%1', exe_path)}.')
+        textbox['log'](f'[ERROR] {error.strerror.replace('%1', exe_path)}.', 'error')
         return False

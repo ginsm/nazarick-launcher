@@ -7,14 +7,17 @@ def create(ctk, master, game):
         state='disabled'
     )
 
+    textbox.tag_config('error', foreground='red')
+    textbox.tag_config('warning', foreground='yellow')
+
     # Add game to logs
     if not logs.get(game):
         logs[game] = []
 
     # Methods to return
-    def log(message, store = True):
+    def log(message, tag = '', store = True):
         textbox.configure(state='normal')
-        textbox.insert(index='end', text=message + '\n')
+        textbox.insert(index='end', text=message + '\n', tags=tag)
         textbox.configure(state='disabled')
         textbox.see('end')
         if store:

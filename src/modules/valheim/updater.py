@@ -83,14 +83,14 @@ def handle_errors(vars_):
 
     # Ensure the path was provided.
     if inst_path == '':
-        textbox['log']('[ERROR] Please provide a path to your Valheim instance.')
+        textbox['log']('[ERROR] Please provide a path to your Valheim instance.', 'error')
         error = True
     elif not os.path.exists(inst_path):
-        textbox['log']("[ERROR] The provided path to your Valheim instance doesn't exist.")
+        textbox['log']("[ERROR] The provided path to your Valheim instance doesn't exist.", 'error')
         error = True
 
     if utility.permission_check(inst_path) == utility.NEED_ADMIN:
-        textbox['log']("[ERROR] The install path requires administrative privileges. Please restart your launcher.")
+        textbox['log']('[ERROR] The install path requires administrative privileges. Please restart your launcher.', 'error')
         error = True
 
     return error
