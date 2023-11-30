@@ -25,6 +25,10 @@ def create(ctk, text, buttons, title, justify="center"):
             command=callback_factory(btn)
         )
 
+        if btn.get('border'):
+            button.configure(border_color=btn.get('border'))
+            button.configure(border_width=1)
+
         if (index == 0):
             button_padx = (padx, 5)
         elif (index == len(buttons) - 1):
