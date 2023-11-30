@@ -2,6 +2,7 @@ import os, webbrowser
 from PIL import Image
 from tkinter import filedialog
 from tktooltip import ToolTip
+from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
 from modules import store, utility
 from modules.debounce import debounce
@@ -107,12 +108,14 @@ def warn_admin_required(ctk, path, app):
     def destroy_modal(modal):
         modal.destroy()
 
+    border_color = ThemeManager.theme.get('CTkCheckBox').get('border_color')
+    
     InfoModal.create(
         ctk,
         text=f'The following path requires administrative privileges:\n\n"{path}"\n\nDo you want to elevate the launcher?',
         buttons=[
             {'text': 'Cancel', 'command': destroy_modal},
-            {'text': 'Elevate', 'command': handle_restart},
+            {'text': 'Elevate', 'command': handle_restart, 'border': border_color},
         ],
         title='Admin Required',
     )
