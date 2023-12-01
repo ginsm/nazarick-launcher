@@ -1,8 +1,9 @@
 from concurrent.futures import ThreadPoolExecutor
 import customtkinter as ctk
 from elevate import elevate
-from modules import utility, view, store, tufup, version_upgrader, theme_list
-from modules.components import AppWindow, AppSideBar, MinecraftFrame, ValheimFrame, SettingsFrame
+from modules import game_list, utility, view, store, tufup, version_upgrader, theme_list
+from modules.components import AppWindow, AppSideBar, SettingsFrame
+from modules.components.common import GameFrame
 
 frames = []
 
@@ -60,11 +61,11 @@ def create_frames(ctk, app, pool, state):
     global frames
 
     # Create frames and add their data to frames
-    [mc_frame, mc_textbox] = MinecraftFrame.create(ctk, app, pool)
-    frames.append({'name': 'Minecraft', 'frame': mc_frame, 'textbox': mc_textbox})
-
-    [vh_frame, vh_textbox] = ValheimFrame.create(ctk, app, pool)
-    frames.append({'name': 'Valheim', 'frame': vh_frame, 'textbox': vh_textbox})
+    games = game_list.LIST
+    for game in games:
+        [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
+        frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
+        frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
 
     settings_frame = SettingsFrame.create(ctk, app, pool, state)
     frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
@@ -74,8 +75,6 @@ def create_frames(ctk, app, pool, state):
 
     # Position frames
     sidebar.grid(row=0, column=0, sticky='ns')
-    vh_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
-    mc_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
     settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
 
     # Raise selected frame and set color
