@@ -1,5 +1,5 @@
 import os, requests, json, shutil, zipfile
-from modules.updater_common import *
+from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
 from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS

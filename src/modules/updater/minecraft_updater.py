@@ -1,7 +1,7 @@
 import os, subprocess, json, zipfile, shutil, requests
 from concurrent.futures import wait
 from modules import view, store, utility
-from modules.updater_common import *
+from modules.updater.common import *
 
 # ----- Main Functions ----- #
 def start(app, ctk, textbox, pool):

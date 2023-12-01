@@ -1,6 +1,6 @@
 import os, shutil, json, subprocess
 from concurrent.futures import wait
-from modules import view, utility
+from modules import utility
 
 
 # ---- LOCAL VERSION CHECKING ---- #
