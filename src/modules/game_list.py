@@ -18,7 +18,7 @@ LIST = [
                 'placeholder': "Enter the path to your launcher's executable."
             }
         ],
-        'updater': minecraft_updater
+        'updater': minecraft_updater,
     },
     {
         'name': 'Valheim',
@@ -30,6 +30,6 @@ LIST = [
                 'placeholder': 'Enter the path to your Valheim install.',
             },
         ],
-        'updater': valheim_updater
+        'updater': valheim_updater,
     }
 ]

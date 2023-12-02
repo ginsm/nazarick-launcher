@@ -35,12 +35,12 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
     # Search Button
     search_function = get_search_function(find)
     search_button = ctk.CTkButton(master=frame, image=search_image, text='', command=lambda: search_function(entry, name, ctk, app), height=button_height, width=button_width, border_width=0)
-    search_button.grid(row=2, column=1, padx=(0, 5), pady=5, sticky='ew')
+    search_button.grid(row=2, column=1, padx=(0, 5), pady=(0, 5), sticky='ew')
     ToolTip(search_button, msg=f'Search for the {name} path.', delay=0.01, follow=True)
 
     # Open Button
     open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width, border_width=0)
-    open_button.grid(row=2, column=2, padx=(0, 10), pady=5, sticky='ew')
+    open_button.grid(row=2, column=2, padx=(0, 10), pady=(0, 5), sticky='ew')
     ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
 
     # Get entry state from storage and set it

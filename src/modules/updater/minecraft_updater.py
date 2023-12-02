@@ -4,7 +4,7 @@ from modules import view, store, utility
 from modules.updater.common import *
 
 # ----- Main Functions ----- #
-def start(app, ctk, textbox, pool):
+def start(app, ctk, textbox, pool, progress):
     textbox['log'](f'')
     textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
 
@@ -24,9 +24,14 @@ def start(app, ctk, textbox, pool):
         'options': options,
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
+        'progress': progress,
         'textbox': textbox,
         'version': get_latest_version('1.20.1') if internet_connection else None,
     }
+
+    # This represents the percentage each task (other than retrieve_mods) will increment
+    # the progress bar
+    task_percent = 0.25 / 9
 
     # Error Handling
     if handle_errors(variables):
@@ -35,52 +40,66 @@ def start(app, ctk, textbox, pool):
         textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
+    # This is ran after each task (aside from retrieve_mods)
+    progress.add_percent(task_percent)
+    
     # Skip updating process if nuver is equal to latest ver
     if internet_connection:
         if (on_latest_version(variables, initial_install)):
-            finalize(variables)
+            progress.add_percent(1 - (task_percent * 2))
+            finalize(variables, task_percent)
             return
 
         # Clean up temp directory
         clean_update_directories(variables)
+        progress.add_percent(task_percent)
 
         # Download latest modpack version
         download_modpack(variables)
+        progress.add_percent(task_percent)
 
         # Unzip update to temp directory
         extract_modpack(variables)
+        progress.add_percent(task_percent)
 
         # Purge any files as instructed from modpack archive
         purge_files(variables, pool)
+        progress.add_percent(task_percent)
 
         # Retrieve all of the mod files
         retrieve_mods(variables, pool)
 
         # Install the update into the instance
         install_update(variables)
+        progress.add_percent(task_percent)
 
         # Store update's version number
         store_version_number(variables)
+        progress.add_percent(task_percent)
     else:
         textbox['log']('[INFO] No internet connection; skipping update process.')
 
     # Run the final bit of code
-    finalize(variables)
+    finalize(variables, task_percent)
 
 
 # This is split so that it can be ran at multiple points in the main function
-def finalize(vars_):
-    options, textbox, exe_path, app = [
+def finalize(vars_, task_percent):
+    options, textbox, exe_path, progress = [
         vars_['options'],
         vars_['textbox'],
         vars_['exepath'],
-        vars_['app']
+        vars_['progress']
     ]
 
     textbox['log'](f'[INFO] Unlocking user input.')
     view.lock(False)
-    run_executable(os.path.split(exe_path)[-1], options['debug'], textbox, [exe_path])    
+
+    run_executable(os.path.split(exe_path)[-1], options['debug'], textbox, [exe_path]) 
+    progress.add_percent(task_percent)
+   
     textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
+    progress.reset_percent()
     autoclose_app(vars_)
 
 
@@ -189,22 +208,24 @@ def retrieve_mods(vars_, pool):
     # read modrinth.index.json
     with open(os.path.join(tmp, 'modrinth.index.json'), 'rb') as f:
         mods = json.loads(f.read().decode('UTF-8'))['files']
+        mod_progress_percent = 0.75 / len(mods)
         futures = []
 
         textbox['log']('[INFO] Retrieving any mods not present in the modpack zip:')
 
         for mod in mods:
-            futures.append(pool.submit(retrieve, mod, vars_))
+            futures.append(pool.submit(retrieve, mod, vars_, mod_progress_percent))
 
         wait(futures)
 
 
-def retrieve(mod, vars_):
+def retrieve(mod, vars_, mod_percent):
     _, name = os.path.split(mod['path'])
-    textbox, inst_path, tmp = [
+    textbox, inst_path, tmp, progress = [
         vars_['textbox'],
         vars_['instpath'],
-        vars_['tmp']
+        vars_['tmp'],
+        vars_['progress']
     ]
 
     # Split path to get mod name and join with instpath
@@ -227,6 +248,8 @@ def retrieve(mod, vars_):
         textbox['log'](f'[INFO] (D) {name.split('.jar')[0]}.')
         req = requests.get(mod['downloads'][0], allow_redirects=True)
         open(destination, 'wb').write(req.content)
+    
+    progress.add_percent(mod_percent)
 
 
 def install_update(vars_):

@@ -4,7 +4,7 @@ from concurrent.futures import wait
 from modules import view, utility, store
 from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
-def start(app, ctk, textbox, pool):
+def start(app, ctk, textbox, pool, progress):
     textbox['log'](f'')
     textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
 
@@ -22,9 +22,14 @@ def start(app, ctk, textbox, pool):
         'options': options,
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'valheim'),
+        'progress': progress,
         'textbox': textbox,
         'version': get_latest_version() if internet_connection else None
     }
+
+    # This represents the percentage each task (other than retrieve_mods) will increment
+    # the progress bar.
+    task_percent = 0.25 / 9
 
     if handle_errors(variables):
         textbox['log'](f'[INFO] Unlocking user input.')
@@ -32,50 +37,67 @@ def start(app, ctk, textbox, pool):
         textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
         return
     
+    # This is ran after each task (aside from retrieve_mods)
+    progress.add_percent(task_percent)
+    
     if internet_connection:
         if on_latest_version(variables, initial_install):
-            finalize(variables)
+            progress.add_percent(1 - (task_percent * 2))
+            finalize(variables, task_percent)
             return
+        progress.add_percent(task_percent)
 
         clean_update_directories(variables)
+        progress.add_percent(task_percent)
 
         download_modpack(variables)
+        progress.add_percent(task_percent)
 
         extract_modpack(variables)
+        progress.add_percent(task_percent)
 
         purge_files(variables, pool)
+        progress.add_percent(task_percent)
 
         retrieve_mods(variables, pool)
 
         install_update(variables, pool)
+        progress.add_percent(task_percent)
 
         store_version_number(variables)
+        progress.add_percent(task_percent)
     else:
         textbox['log']('[INFO] No internet connection; skipping update process.')
 
-    finalize(variables)
+    finalize(variables, task_percent)
 
 
-def finalize(vars_):
-    options, textbox = [
+def finalize(vars_, task_percent):
+    options, textbox, progress = [
         vars_['options'],
-        vars_['textbox']
+        vars_['textbox'],
+        vars_['progress']
     ]
 
     textbox['log'](f'[INFO] Unlocking user input.')
     view.lock(False)
+    
     # TODO - Support launching with mac as well
     run_executable('valheim.exe', options['debug'], textbox, ['cmd', '/c', 'start', 'steam://run/892970'])
+    progress.add_percent(task_percent)
+
     textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
+    progress.reset_percent()
     autoclose_app(vars_)
 
 
 # ----- Helper Functions ----- #
 # Ensure the install path was provided and valid
 def handle_errors(vars_):
-    textbox, inst_path = [
+    textbox, inst_path, progress = [
         vars_['textbox'],
-        vars_['instpath']
+        vars_['instpath'],
+        vars_['progress']
     ]
     error = False
 
@@ -150,23 +172,25 @@ def retrieve_mods(vars_, pool):
     plugins_tmp = os.path.join(tmp, 'plugins')
     os.makedirs(plugins_tmp, exist_ok=True)
 
-
+    # Read manifest.json
     with open(os.path.join(tmp, 'manifest.json'), 'rb') as f:
         plugins = json.loads(f.read().decode('UTF-8'))['dependencies']
+        plugin_progress_percent = 0.75 / len(plugins)
         futures = []
 
         textbox['log']('[INFO] Retrieving modpack dependencies:')
 
         for plugin in plugins:
-            futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp))
+            futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp, plugin_progress_percent))
 
         wait(futures)
 
 
-def retrieve(plugin, vars_, plugins_tmp):
-    textbox, inst_path = [
+def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
+    textbox, inst_path, progress = [
         vars_['textbox'],
-        vars_['instpath']
+        vars_['instpath'],
+        vars_['progress']
     ]
 
     plugin_url = f"https://thunderstore.io/package/download/{plugin.replace('-', '/')}"
@@ -190,6 +214,8 @@ def retrieve(plugin, vars_, plugins_tmp):
             ref.extractall(tmp_plugin_dir)
 
         os.remove(plugin_zip)
+
+    progress.add_percent(plugin_percent)
 
 
 def install_update(vars_, pool):
