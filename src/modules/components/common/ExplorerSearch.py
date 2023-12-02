@@ -15,10 +15,10 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
     frame.grid_rowconfigure(0, weight=1)
 
     label = ctk.CTkLabel(master=frame, text=label)
-    label.grid(row=1, column=0, padx=10, pady=(5, 0), sticky='w')
+    label.grid(row=1, column=0, pady=2, sticky='w')
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
-    entry.grid(row=2, column=0, padx=(10, 5), pady=(0, 5), sticky='ew')
+    entry.grid(row=2, column=0, padx=(0, 5), pady=(0, 5), sticky='ew')
     entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(ctk, entry, name, app))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
@@ -40,7 +40,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 
     # Open Button
     open_button = ctk.CTkButton(master=frame, image=open_image, text='', command=lambda: open_path(entry, name), height=button_height, width=button_width, border_width=0)
-    open_button.grid(row=2, column=2, padx=(0, 10), pady=(0, 5), sticky='ew')
+    open_button.grid(row=2, column=2, pady=(0, 5), sticky='ew')
     ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
 
     # Get entry state from storage and set it
@@ -62,6 +62,7 @@ def handle_key_press(ctk, entry, name, app):
         if utility.permission_check(value) == utility.NEED_ADMIN:
             warn_admin_required(ctk, value, app)
 
+
 def open_path(entry, name):
     path = entry.get()
     if (name == 'executable'):
@@ -69,6 +70,7 @@ def open_path(entry, name):
 
     if (os.path.isdir(path)):
         webbrowser.open(path)
+
 
 def get_search_function(find):
     match find:
@@ -79,9 +81,11 @@ def get_search_function(find):
         case _:
             return search_for_file
 
+
 def set_entry(entry, string):
     entry.delete(first_index=0, last_index='end')
     entry.insert(index=0, string=string)
+
 
 def search_for_dir(entry, name, ctk, app):
     path = filedialog.askdirectory()
@@ -90,6 +94,7 @@ def search_for_dir(entry, name, ctk, app):
         store.set_game_state({name: path})
         if utility.permission_check(path) == utility.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
+
 
 def search_for_file(entry, name, ctk, app):
     path = filedialog.askopenfile()
