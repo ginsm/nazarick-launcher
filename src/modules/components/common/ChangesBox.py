@@ -88,12 +88,12 @@ def get_stylesheet(colors, mode):
         }}
 
         h1 {{
-            font-size: 24px;
+            font-size: 20px;
             margin: 0;
         }}
 
         h2 {{
-            font-size: 16px;
+            font-size: 14px;
         }}
 
         h2, h3 {{
@@ -101,12 +101,12 @@ def get_stylesheet(colors, mode):
         }}
 
         ul, ol {{
-            margin: 0 0 10px 30px;
+            margin: 0 0 10px 15px;
             padding: 0;
         }}
 
         li {{
-            font-size: 13px;
+            font-size: 12px;
             margin-top: 8px;
         }}
 
