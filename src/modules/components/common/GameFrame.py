@@ -68,6 +68,7 @@ def create(ctk, app, pool, name, settings, updater):
     # Create progress frame contents and position them
     progress_label = ctk.CTkLabel(master=progress_frame, text='Update Progress')
     progress = ProgressBar.create(ctk, progress_frame)
+
     progress_label.grid(row=0, sticky='w')
     progress.bar.grid(row=1, pady=(2,0), sticky='we')
 
