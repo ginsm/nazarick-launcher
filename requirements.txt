@@ -7,5 +7,5 @@ Pillow=9.5.0
 requests=2.31.0
 tinydb=4.8.0
 tkinter-tooltip=2.1.0
-tkhtmlview=0.2.0 # the spacing has been modified on this
+tkinterweb=3.23.5
 markdown2=2.4.10
