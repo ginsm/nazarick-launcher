@@ -63,7 +63,7 @@ def start(app, ctk, textbox, pool, progress):
         progress.add_percent(task_percent)
 
         # Purge any files as instructed from modpack archive
-        purge_files(variables, pool)
+        purge_files(variables, pool, whitelist=['config', 'shaderpacks'])
         progress.add_percent(task_percent)
 
         # Retrieve all of the mod files

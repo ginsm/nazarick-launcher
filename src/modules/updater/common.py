@@ -76,7 +76,7 @@ def convert_to_new_version_format(vars_):
 
 
 # ---- FILE MANIPULATION ---- #
-def purge_files(vars_, pool):
+def purge_files(vars_, pool, whitelist):
     textbox, inst_path, tmp = [
         vars_['textbox'],
         vars_['instpath'],
@@ -95,8 +95,6 @@ def purge_files(vars_, pool):
             if bool(delete):
                 textbox['log']('[INFO] Purging obsolete files:')
                 futures = []
-                # Ensures only files from these directories will be purged
-                whitelist = ['config', 'shaderpacks']
 
                 for file_ in delete:
                     path = os.path.join(inst_path, file_)

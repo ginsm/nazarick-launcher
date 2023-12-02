@@ -56,7 +56,7 @@ def start(app, ctk, textbox, pool, progress):
         extract_modpack(variables)
         progress.add_percent(task_percent)
 
-        purge_files(variables, pool)
+        purge_files(variables, pool, whitelist=['BepInEx/config'])
         progress.add_percent(task_percent)
 
         retrieve_mods(variables, pool)
