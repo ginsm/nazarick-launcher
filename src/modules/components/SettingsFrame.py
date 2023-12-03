@@ -3,8 +3,8 @@ from app import reload_widgets
 from modules import store, theme_list
 from customtkinter.windows.widgets.theme import ThemeManager
 
-def create(ctk, master, pool, state):
-    frame = ctk.CTkFrame(master=master, corner_radius=0, border_width=0)
+def create(ctk, parent, pool, state):
+    frame = ctk.CTkFrame(master=parent, corner_radius=0, border_width=0)
     h2_size=24
 
 
@@ -27,7 +27,7 @@ def create(ctk, master, pool, state):
     mode_dropdown = ctk.CTkOptionMenu(
         master=frame, 
         values=['System', 'Dark', 'Light'],
-        command=lambda _: set_mode(ctk, options),
+        command=lambda _: set_mode(ctk, parent, options, pool),
         variable=options['mode'],
         width=200,
     )
@@ -39,7 +39,7 @@ def create(ctk, master, pool, state):
     theme_dropdown = ctk.CTkOptionMenu(
         master=frame,
         values=list(map(lambda theme: theme['title'], themes)),
-        command=lambda theme: set_theme(ctk, master, theme_list.get_theme_from_title(theme), options, pool),
+        command=lambda theme: set_theme(ctk, parent, theme_list.get_theme_from_title(theme), options, pool),
         variable=options['theme'],
         width=200
     )
@@ -139,9 +139,12 @@ def create(ctk, master, pool, state):
     return frame
 
 
-def set_mode(ctk, options):
+def set_mode(ctk, app, options, pool):
     ctk.set_appearance_mode(options['mode'].get())
     store.set_menu_option('mode', options)
+
+    # Reload the widgets
+    reload_widgets(ctk, app, pool, store.get_state())
 
 
 def set_theme(ctk, app, theme, options, pool):
