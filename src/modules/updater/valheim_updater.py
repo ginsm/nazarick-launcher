@@ -282,7 +282,6 @@ def install_update(vars_, pool):
 
 def setup_bepinex(vars_, pool):
     tmp, log = [
-        vars_['instpath'],
         vars_['tmp'],
         vars_['log']
     ]
