@@ -9,6 +9,7 @@ python -m PyInstaller^
  --add-data F:\Projects\Active\nazarick-launcher\src\icons:icons\^
  --add-data F:\Projects\Active\nazarick-launcher\src\themes:themes\^
  --add-binary "nazaricklauncher.ico;."^
+ --collect-all tkinterweb^
  --onedir^
  --windowed^
  --console^
