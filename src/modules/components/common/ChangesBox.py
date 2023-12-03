@@ -62,7 +62,7 @@ def load_changelog(ctk, changes, game, html_frame):
             # FIXME - Incorrect value being passed to scrollbar
             html_scrollbar.set(*html_frame.yview())
     else:
-        html_frame.load_html(stylesheet + '<div>Changes cannot be shown for this game.</div>')
+        html_frame.load_html(stylesheet + '<div>There is no change log available for this game.</div>')
 
 def update_scrollbar(event, scrollbar, frame):
     scrollbar.set(*frame.yview())
