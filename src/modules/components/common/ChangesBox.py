@@ -60,7 +60,7 @@ def load_changelog(ctk, changes, game, html_frame):
             html_frame.bind_all("<MouseWheel>", lambda e: update_scrollbar(e, html_scrollbar, html_frame))
 
             # FIXME - Incorrect value being passed to scrollbar
-            html_frame.on_done_loading(lambda: html_scrollbar.set(*html_frame.yview()))
+            html_scrollbar.set(*html_frame.yview())
     else:
         html_frame.load_html(stylesheet + '<div>Changes cannot be shown for this game.</div>')
 
