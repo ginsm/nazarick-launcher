@@ -4,7 +4,7 @@ def create(ctk, master, game):
     textbox = ctk.CTkTextbox(
         master=master,
         border_width=0,
-        border_spacing=15,
+        border_spacing=16,
         state='disabled'
     )
 
