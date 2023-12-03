@@ -36,7 +36,7 @@ def create(ctk, master, games):
 
 def GameButton(ctk, master, game, games, frame, size):
     # Image directory
-    IMAGE_DIR = BASE_DIR / 'icons'
+    IMAGE_DIR = BASE_DIR / 'assets' / 'icons'
 
     # Create game image
     game_image = ctk.CTkImage(

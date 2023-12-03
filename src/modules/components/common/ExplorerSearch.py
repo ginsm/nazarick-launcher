@@ -28,7 +28,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
     icon_size = 18
 
     # Images
-    IMAGE_DIR = BASE_DIR / 'icons'
+    IMAGE_DIR = BASE_DIR / 'assets' / 'icons'
     search_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
     open_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'folder.png')), size=(icon_size, icon_size))
 
