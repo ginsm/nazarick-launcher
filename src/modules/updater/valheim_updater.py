@@ -1,10 +1,11 @@
 import os, requests, json, shutil, zipfile
+from modules.components.common import ChangesBox
+from modules.tufup import BASE_DIR
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
-from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
-def start(app, ctk, textbox, pool, progress):
+def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
     textbox['log'](f'')
     textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
 
@@ -32,6 +33,10 @@ def start(app, ctk, textbox, pool, progress):
     task_percent = 0.25 / 9
 
     if handle_errors(variables):
+        # Switch to logs tab
+        tabs.set('Logs')
+
+        # Unlock user input
         textbox['log'](f'[INFO] Unlocking user input.')
         view.lock(False)
         textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
@@ -53,7 +58,7 @@ def start(app, ctk, textbox, pool, progress):
         download_modpack(variables)
         progress.add_percent(task_percent)
 
-        extract_modpack(variables)
+        extract_modpack(variables, changes, html_frame)
         progress.add_percent(task_percent)
 
         purge_files(variables, pool, whitelist=['BepInEx/config'])
@@ -146,8 +151,9 @@ def download_modpack(vars_):
     open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
 
 
-def extract_modpack(vars_):
-    textbox, tmp = [
+def extract_modpack(vars_, changes, html_frame):
+    ctk, textbox, tmp = [
+        vars_['ctk'],
         vars_['textbox'],
         vars_['tmp']
     ]
@@ -160,6 +166,17 @@ def extract_modpack(vars_):
         
     # Remove update.zip
     os.remove(zip_file)
+
+    # Move the changelog to its destination
+    changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
+    changelog_dest = os.path.join(BASE_DIR, 'assets', 'Valheim', 'CHANGELOG.md')
+
+    if os.path.exists(changelog_tmp):
+        os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)
+        shutil.move(changelog_tmp, changelog_dest)
+
+        ChangesBox.load_changelog(ctk, changes, 'Valheim', html_frame)
+
 
 
 def retrieve_mods(vars_, pool):

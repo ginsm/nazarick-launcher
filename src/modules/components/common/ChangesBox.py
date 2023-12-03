@@ -5,16 +5,22 @@ from customtkinter.windows.widgets.theme import ThemeManager
 from markdown2 import Markdown
 from tkinterweb import HtmlFrame
 
+stylesheet = ''
 
 def create(ctk, parent, game):
-    # Colors
+    # Theme information
+    mode = 1 if ctk.get_appearance_mode() == 'Dark' else 0
     colors = {
         'background_color': ThemeManager.theme.get('CTkTextbox').get('fg_color'),
         'text_color': ThemeManager.theme.get('CTkTextbox').get('text_color'),
         'faint_text_color': ThemeManager.theme.get('CTkFrame').get('fg_color')
     }
 
-    # Create the frame
+    # Initialize the stylesheet
+    global stylesheet
+    stylesheet = get_stylesheet(colors, mode)
+
+    # Create the container frame
     changes = ctk.CTkFrame(
         master=parent,
         corner_radius=6,
@@ -26,40 +32,37 @@ def create(ctk, parent, game):
     changes.grid_columnconfigure(0, weight=1)
     changes.grid_rowconfigure(0, weight=1)
 
+    # Create the HTML frame
+    html_frame = HtmlFrame(master=changes, messages_enabled=False, vertical_scrollbar=False)
+    html_frame.on_link_click(webbrowser.open)
+    html_frame.grid(row=0, column=0, padx=12, pady=(10, 6), sticky='nsew')
+
+    # Load changelog
+    load_changelog(ctk, changes, game, html_frame)
+
+    return [changes, html_frame]
+
+
+def load_changelog(ctk, changes, game, html_frame):
     # Check if CHANGELOG.md exists
     changelog_path = os.path.join(BASE_DIR, 'assets', game, 'CHANGELOG.md')
-
     if os.path.exists(changelog_path):
         with open(changelog_path, 'rb') as f:
             contents = f.read().decode('UTF-8')
             md2html = Markdown()
 
-            # Get color mode
-            mode = 1 if ctk.get_appearance_mode() == 'Dark' else 0
+            # Set HTML
+            html_frame.load_html(stylesheet + md2html.convert(contents))
 
-            html_frame = HtmlFrame(master=changes, messages_enabled=False, vertical_scrollbar=False)
-            html_frame.load_html(get_stylesheet(colors, mode) + md2html.convert(contents))
-            html_frame.on_link_click(webbrowser.open)
-            html_frame.grid(row=0, column=0, padx=12, pady=(10, 6), sticky='nsew')
-            html_frame.yview_scroll(1, 'units')
-
+            # Create scrollbar and bind necessary events
             html_scrollbar = ctk.CTkScrollbar(master=changes, command=html_frame.yview)
             html_scrollbar.grid(row=0, column=1, pady=10, padx=5, sticky='ns')
-
             html_frame.bind_all("<MouseWheel>", lambda e: update_scrollbar(e, html_scrollbar, html_frame))
+
             # FIXME - Incorrect value being passed to scrollbar
             html_frame.on_done_loading(lambda: html_scrollbar.set(*html_frame.yview()))
-    
     else:
-        label = ctk.CTkLabel(
-            master=changes,
-            text='Changes cannot be shown for this game.',
-            text_color=colors.get('text_color'),
-        )
-        label.grid(row=0, column=0, padx=12, pady=6, sticky='nsew')
-
-    return changes
-
+        html_frame.load_html(stylesheet + '<div>Changes cannot be shown for this game.</div>')
 
 def update_scrollbar(event, scrollbar, frame):
     scrollbar.set(*frame.yview())
@@ -80,6 +83,7 @@ def get_stylesheet(colors, mode):
             background: {background_color[mode]};
             scrollbar-color: red orange;
             scrollbar-width: thin;
+            font-size: 12px;
         }}
 
         hr {{

@@ -35,7 +35,7 @@ def create(ctk, app, pool, name, settings, updater):
     tabs.grid(row=0, columnspan=2, padx=10, sticky='nsew')
 
     # ---- Changes Tab ---- #
-    changes = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)
+    [changes, html_frame] = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)
     changes.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Logs Tab ---- #
@@ -78,12 +78,15 @@ def create(ctk, app, pool, name, settings, updater):
     # ---- Update button ---- #
     update_button = UpdateButton.create(
         ctk=ctk,
-        master=frame,
+        parent=frame,
         textbox=textbox,
         pool=pool,
         progress=progress,
+        tabs=tabs,
+        changes=changes,
+        html_frame=html_frame,
         update_fn=updater.start
     )
-    update_button.grid( row=len(settings) + 1, column=1, padx=(10, 15), pady=15, sticky='ew')
+    update_button.grid(row=len(settings) + 1, column=1, padx=(10, 15), pady=15, sticky='ew')
 
     return [frame, textbox]
