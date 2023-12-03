@@ -22,15 +22,16 @@ def create(ctk, master, game):
         textbox.configure(state='disabled')
         textbox.see('end')
         if store:
-            logs[game].append(message)
+            logs[game].append([message, tag])
 
     def get():
         return textbox
 
     # Restore previous logs
     if len(logs.get(game)):
-        content = '\n'.join(logs.get(game))
-        log(content, store=False)
+        for stored_log in logs.get(game):
+            message, tag = stored_log
+            log(message, tag=tag, store=False)
 
     return {
         'log': log,
