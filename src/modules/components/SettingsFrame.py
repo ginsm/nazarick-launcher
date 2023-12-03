@@ -3,10 +3,11 @@ from app import reload_widgets
 from modules import store, theme_list
 from customtkinter.windows.widgets.theme import ThemeManager
 
+from modules.components.common import CoverFrame
+
 def create(ctk, parent, pool, state):
     frame = ctk.CTkFrame(master=parent, corner_radius=0, border_width=0)
     h2_size=24
-
 
     options = {
         'mode': ctk.StringVar(value=state.get('mode') or 'System'),        
@@ -140,8 +141,16 @@ def create(ctk, parent, pool, state):
 
 
 def set_mode(ctk, app, options, pool):
+    # This frame essentially makes the app look pretty whilst loading/switching themes
+    cover_frame = CoverFrame.create(ctk, app)
+    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
+
+    # Set the mode
     ctk.set_appearance_mode(options['mode'].get())
     store.set_menu_option('mode', options)
+
+    # Delete the cover frame
+    cover_frame.destroy()
 
     # Reload the widgets
     reload_widgets(ctk, app, pool, store.get_state())

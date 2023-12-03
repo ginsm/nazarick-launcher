@@ -3,7 +3,7 @@ import customtkinter as ctk
 from elevate import elevate
 from modules import game_list, utility, view, store, tufup, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, SettingsFrame
-from modules.components.common import GameFrame
+from modules.components.common import CoverFrame, GameFrame
 
 frames = []
 
@@ -60,12 +60,17 @@ def main():
 def create_frames(ctk, app, pool, state):
     global frames
 
+    # This frame essentially makes the app look pretty whilst loading/switching themes
+    cover_frame = CoverFrame.create(ctk, app)
+    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
+
     # Create frames and add their data to frames
     games = game_list.LIST
     for game in games:
         [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
         frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
         frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
+        cover_frame.tkraise()
 
     settings_frame = SettingsFrame.create(ctk, app, pool, state)
     frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
@@ -76,9 +81,11 @@ def create_frames(ctk, app, pool, state):
     # Position frames
     sidebar.grid(row=0, column=0, sticky='ns')
     settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
+    cover_frame.tkraise()
 
     # Raise selected frame and set color
     raise_selected_frame(frames)
+    cover_frame.destroy()
 
 
 def raise_selected_frame(frames):
