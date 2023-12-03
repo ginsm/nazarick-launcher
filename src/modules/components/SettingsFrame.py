@@ -149,24 +149,31 @@ def set_mode(ctk, app, options, pool):
     ctk.set_appearance_mode(options['mode'].get())
     store.set_menu_option('mode', options)
 
+    # Reload the widgets
+    reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+
     # Delete the cover frame
     cover_frame.destroy()
 
-    # Reload the widgets
-    reload_widgets(ctk, app, pool, store.get_state())
-
 
 def set_theme(ctk, app, theme, options, pool):
+    # This frame essentially makes the app look pretty whilst loading/switching themes
+    cover_frame = CoverFrame.create(ctk, app)
+    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
+
     # Store new theme
     options['theme'] = ctk.StringVar(value=theme['title'])
     store.set_menu_option('theme', options)
 
     # Set theme and reload widgets
     ctk.set_default_color_theme(theme['name'])
-    reload_widgets(ctk, app, pool, store.get_state())
+    reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
 
     # Set app background
     app.configure(fg_color=ThemeManager.theme.get('CTk').get('fg_color'))
+
+    # Delete the cover frame
+    cover_frame.destroy()
 
 
 

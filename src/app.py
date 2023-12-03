@@ -57,12 +57,8 @@ def main():
     app.mainloop()
 
 
-def create_frames(ctk, app, pool, state):
+def create_frames(ctk, app, pool, state, cover_frame = None):
     global frames
-
-    # This frame essentially makes the app look pretty whilst loading/switching themes
-    cover_frame = CoverFrame.create(ctk, app)
-    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
 
     # Create frames and add their data to frames
     games = game_list.LIST
@@ -70,7 +66,9 @@ def create_frames(ctk, app, pool, state):
         [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
         frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
         frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
-        cover_frame.tkraise()
+
+        # Raise cover frame whenever grid changes
+        if cover_frame: cover_frame.tkraise()
 
     settings_frame = SettingsFrame.create(ctk, app, pool, state)
     frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
@@ -81,11 +79,12 @@ def create_frames(ctk, app, pool, state):
     # Position frames
     sidebar.grid(row=0, column=0, sticky='ns')
     settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
-    cover_frame.tkraise()
+
+    # Raise cover frame
+    if cover_frame: cover_frame.tkraise()
 
     # Raise selected frame and set color
     raise_selected_frame(frames)
-    cover_frame.destroy()
 
 
 def raise_selected_frame(frames):
@@ -106,7 +105,7 @@ def broadcast(message):
             textbox['log'](message)
 
 
-def reload_widgets(ctk, app, pool, state):
+def reload_widgets(ctk, app, pool, state, cover_frame = None):
     global frames
 
     # Delete all frames
@@ -120,7 +119,10 @@ def reload_widgets(ctk, app, pool, state):
     view.clear_lockable_elements()
 
     # Recreate the frames
-    create_frames(ctk, app, pool, state)
+    create_frames(ctk, app, pool, state, cover_frame)
+
+    # Raise cover frame
+    if cover_frame: cover_frame.tkraise()
 
 
 # Run the script
