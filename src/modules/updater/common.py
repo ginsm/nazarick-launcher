@@ -43,10 +43,10 @@ def on_latest_version(vars_, initial_install_fn):
             if name == version['name'] and ver == version['version']:
                 textbox['log'](f'[INFO] You are already on the latest version: {name} (v{ver}).')
                 return True
-
-    # Run the function that handles existing files on initial install
-    textbox['log']('[INFO] Preparing instance for initial install.')
-    initial_install_fn(vars_)
+    else:
+        # Run the function that handles existing files on initial install
+        log('[INFO] Preparing instance for initial install.')
+        initial_install_fn(vars_)
 
     return False
 
