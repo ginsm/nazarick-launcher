@@ -1,4 +1,4 @@
-from modules import view
+from modules import store, view
 from modules.components.common import ChangesBox, ExplorerSearch, LogBox, ProgressBar, UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
@@ -10,7 +10,13 @@ def create(ctk, app, pool, name, settings, updater):
 
     # ---- Tab View ---- #
     # Create the tabview that changes, logs, and settings will live in
-    tabs = ctk.CTkTabview(master=frame, anchor='nw', border_width=0, corner_radius=0)
+    tabs = ctk.CTkTabview(
+        master=frame,
+        anchor='nw',
+        border_width=0,
+        corner_radius=0,
+        command=lambda: store.set_tab(tabs.get())
+    )
 
     # Add tabs
     tabs.add('Changes')
@@ -33,6 +39,9 @@ def create(ctk, app, pool, name, settings, updater):
     )
 
     tabs.grid(row=0, columnspan=2, padx=10, sticky='nsew')
+
+    # Set the selected tab
+    tabs.set(store.get_tab(name) or 'Settings')
 
     # ---- Changes Tab ---- #
     [changebox, html_frame] = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)

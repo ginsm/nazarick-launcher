@@ -7,6 +7,10 @@ from modules import theme_list
 default_state={
     'autoclose': False,
     'frame': 'minecraft',
+    'tab': {
+        'minecraft': 'Settings',
+        'valheim': 'Settings'
+    },
     'games': {
         'minecraft': {
             'selectedpack': 'nazarick-smp',
@@ -40,7 +44,7 @@ def init(path):
     if state.get(doc_id=1) is None:
         state.insert(default_state)
     else:
-        updated_state = update(state.get(doc_id=1))
+        updated_state = _update(state.get(doc_id=1))
         if state.get(doc_id=1) != updated_state:
             set_state_doc(updated_state)
 
@@ -57,7 +61,7 @@ def set_state_doc(data):
         state.insert(data)
 
 
-# Game getter/setter
+# Frame getter/setter
 def get_frame():
     state = get_state()
     return state['frame']
@@ -65,6 +69,22 @@ def get_frame():
 def set_frame(frame):
     if bool(frame):
         set_state({'frame': frame})
+
+
+# Tab getter/setter
+def get_tab(frame):
+    if bool(frame):
+        frame = frame.lower()
+        state = get_state()
+        return state.get('tab').get(frame)
+    return False
+
+def set_tab(tab):
+    if bool(tab):
+        frame = get_frame()
+        state = get_state()
+        state['tab'][frame] = tab
+        set_state(state)
 
 
 # Pack getter/setter
@@ -133,25 +153,32 @@ def set_menu_option(name, options):
 
 
 # ---- State updates ----
-def update(state):
-    state = update_1_0_7(state)
-    state = update_1_3_0(state)
-    state = update_1_4_1(state)
+def _update(state):
+    state = _update_1_0_7(state)
+    state = _update_1_3_0(state)
+    state = _update_1_4_1(state)
     return state
 
-def update_1_4_1(state):
+def _update_1_4_1(state):
     # Rename 'game' to frame
     game = state.get('game')
     if game:
         state.update({'frame': game})
         del state['game']
+
+    # Add tab state
+    if not state.get('tab'):
+        state.update({'tab': {
+            'minecraft': 'Settings',
+            'valheim': 'Settings'
+        }})
         
     return state
 
-def update_1_3_0(state):
+def _update_1_3_0(state):
     # Remove unused variables
 
-    # Removed since 'frame' will now be used.
+    # v1.4.1 - Removed since 'frame' is now used.
     # if state.get('frame'):
     #     del state['frame']
 
@@ -171,7 +198,7 @@ def update_1_3_0(state):
     return state
 
 # Version 1.0.7 state updater
-def update_1_0_7(state):
+def _update_1_0_7(state):
     # Check if the state is old 1.0.6 format
     if state.get('executable'):
         executable = state['executable']
