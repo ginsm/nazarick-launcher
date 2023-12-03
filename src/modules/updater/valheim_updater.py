@@ -1,6 +1,4 @@
 import os, requests, json, shutil, zipfile
-from modules.components.common import ChangesBox
-from modules.tufup import BASE_DIR
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
@@ -159,11 +157,9 @@ def download_modpack(vars_):
 
 
 def extract_modpack(vars_):
-    ctk, log, tmp, widgets = [
-        vars_['ctk'],
+    log, tmp = [
         vars_['log'],
         vars_['tmp'],
-        vars_['widgets']
     ]
 
     zip_file = os.path.join(tmp, 'update.zip')
@@ -285,7 +281,7 @@ def install_update(vars_, pool):
 
 
 def setup_bepinex(vars_, pool):
-    inst_path, tmp, log = [
+    tmp, log = [
         vars_['instpath'],
         vars_['tmp'],
         vars_['log']
@@ -295,7 +291,6 @@ def setup_bepinex(vars_, pool):
     plugins_tmp = os.path.join(tmp, 'plugins')
     config_tmp = os.path.join(tmp, 'config')
     install_tmp = os.path.join(tmp, 'install')
-    config_loc = os.path.join(inst_path, 'BepInEx', 'config')
 
     # Make install directory
     os.makedirs(install_tmp, exist_ok=True)
@@ -333,7 +328,6 @@ def setup_bepinex(vars_, pool):
         ))
 
     for config in os.listdir(config_tmp):
-        local_config_path = os.path.join(config_loc, config)
         futures.append(pool.submit(
             shutil.move,
             os.path.join(config_tmp, config),

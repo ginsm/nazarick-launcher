@@ -1,8 +1,6 @@
-import os, subprocess, json, zipfile, shutil, requests
+import os, json, zipfile, shutil, requests
 from concurrent.futures import wait
 from modules import view, store, utility
-from modules.components.common import ChangesBox
-from modules.tufup import BASE_DIR
 from modules.updater.common import *
 
 # ----- Main Functions ----- #
@@ -195,11 +193,9 @@ def download_modpack(vars_):
 
 
 def extract_modpack(vars_):
-    ctk, log, tmp, widgets = [
-        vars_['ctk'],
+    log, tmp = [
         vars_['log'],
         vars_['tmp'],
-        vars_['widgets']
     ]
 
     zip_file = os.path.join(tmp, 'update.zip')

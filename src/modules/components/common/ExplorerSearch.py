@@ -106,7 +106,7 @@ def search_for_file(entry, name, ctk, app):
 
 
 def warn_admin_required(ctk, path, app):
-    def handle_restart(modal):
+    def handle_restart(_):
         app.destroy()
         elevate(show_console=False)
 
