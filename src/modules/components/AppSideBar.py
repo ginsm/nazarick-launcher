@@ -4,91 +4,91 @@ from customtkinter.windows.widgets.theme import ThemeManager
 from modules.tufup import BASE_DIR
 from modules import store
 
-game_buttons = []
+frame_buttons = []
 
-def create(ctk, master, games):
+def create(ctk, parent, frames):
     icon_size=54
     pad=10
 
     # Create frame
-    frame = ctk.CTkFrame(master=master, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
+    sidebar = ctk.CTkFrame(master=parent, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
 
     # Create buttons
-    for game in games:
-        global game_buttons
+    for frame in frames:
+        global frame_buttons
 
         # Create button
-        button = GameButton(
+        button = FrameButton(
             ctk=ctk,
-            master=master,
-            game=game['name'],
-            games=games,
-            frame=game['frame'],
+            master=parent,
+            name=frame['name'],
+            frames=frames,
+            frame=frame['frame'],
             size=icon_size
         )
-        button.grid(column=0, row=len(game_buttons), sticky='n', ipady=pad, ipadx=pad * 2)
+        button.grid(column=0, row=len(frame_buttons), sticky='n', ipady=pad, ipadx=pad * 2)
 
-        # Add button to global game_buttons
-        game_buttons.append({'name': game['name'], 'button': button})
+        # Add button to global frame_buttons
+        frame_buttons.append({'name': frame['name'], 'button': button})
 
-    return frame
+    return sidebar
 
 
-def GameButton(ctk, master, game, games, frame, size):
+def FrameButton(ctk, master, name, frames, frame, size):
     # Image directory
     IMAGE_DIR = BASE_DIR / 'assets' / 'icons'
 
-    # Create game image
-    game_image = ctk.CTkImage(
-        Image.open(os.path.join(IMAGE_DIR, f'{game}.png')),
+    # Create frame image
+    frame_image = ctk.CTkImage(
+        Image.open(os.path.join(IMAGE_DIR, f'{name}.png')),
         size=(size, size)
     )
 
     # Create button and return it
     return ctk.CTkButton(
         master=master,
-        image=game_image,
-        text=game,
+        image=frame_image,
+        text=name,
         compound='top',
-        command=lambda: select_game(game, games, frame),
+        command=lambda: select_frame(name, frames, frame),
         height=size,
         width=size,
         corner_radius=0,
         border_width=0
     )
 
-def clear_game_Buttons():
-    global game_buttons
-    game_buttons = []
+def clear_frame_Buttons():
+    global frame_buttons
+    frame_buttons = []
 
-def color_buttons(selected_game):
-    global game_buttons
+def color_buttons(selected_frame):
+    global frame_buttons
 
     normal=ThemeManager.theme.get('CTk').get('fg_color')
     text=ThemeManager.theme.get('Sidebar').get('text_color')
     selected=ThemeManager.theme.get('CTkFrame').get('fg_color')
 
-    for game_button in game_buttons:
-        button = game_button['button']
+    for frame_button in frame_buttons:
+        button = frame_button['button']
         button.configure(hover_color=selected)
         button.configure(text_color=text)
         
-        if game_button['name'] == selected_game:
+        if frame_button['name'] == selected_frame:
             button.configure(fg_color=selected)
         else:
             button.configure(fg_color=normal)
 
 
-def select_game(game, games, frame):
+def select_frame(frame_name, frames, frame):
     # Raise the frame in the app
-    frame.grid(row=0, column=1, rowspan=len(games), sticky='nsew')
+    frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
 
-    for g in games:
-        if g['name'] != game:
-            g['frame'].grid_forget()
+    for f in frames:
+        if f['name'] != frame_name:
+            f['frame'].grid_forget()
 
-    # Set the game in store
-    store.set_game(game.lower())
+    # Set the frame in store
+    store.set_frame(frame_name.lower())
 
-    # Color the game button differently
-    color_buttons(game)
+    # Color the frame button differently
+    color_buttons(frame_name)

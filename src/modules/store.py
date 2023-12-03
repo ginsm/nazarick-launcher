@@ -6,7 +6,7 @@ from modules import theme_list
 # The default state for the store
 default_state={
     'autoclose': False,
-    'game': 'minecraft',
+    'frame': 'minecraft',
     'games': {
         'minecraft': {
             'selectedpack': 'nazarick-smp',
@@ -58,24 +58,24 @@ def set_state_doc(data):
 
 
 # Game getter/setter
-def get_game():
+def get_frame():
     state = get_state()
-    return state['game']
+    return state['frame']
 
-def set_game(game):
-    if bool(game):
-        set_state({'game': game})
+def set_frame(frame):
+    if bool(frame):
+        set_state({'frame': frame})
 
 
 # Pack getter/setter
 def get_selected_pack(game=""):
     state = get_state()
-    game = game or get_game()
+    game = game or get_frame()
     return state['games'][game]['selectedpack']
 
 def set_selected_pack(pack):
     if bool(pack):
-        game = get_game()
+        game = get_frame()
         state = get_state()
         state['games'][game].update({'selectedpack': pack})
         set_state(state)
@@ -83,14 +83,14 @@ def set_selected_pack(pack):
 
 # Game state getter/setter
 def get_game_state(game=""):
-    game = game or get_game()
+    game = game or get_frame()
     pack = get_selected_pack(game)
     state = get_state()
     return state['games'][game][pack]
 
 def set_game_state(obj):
     if bool(obj):
-        game = get_game()
+        game = get_frame()
         pack = get_selected_pack()
         state = get_state()
         state['games'][game][pack].update(obj)
@@ -136,6 +136,38 @@ def set_menu_option(name, options):
 def update(state):
     state = update_1_0_7(state)
     state = update_1_3_0(state)
+    state = update_1_4_1(state)
+    return state
+
+def update_1_4_1(state):
+    # Rename 'game' to frame
+    game = state.get('game')
+    if game:
+        state.update({'frame': game})
+        del state['game']
+        
+    return state
+
+def update_1_3_0(state):
+    # Remove unused variables
+
+    # Removed since 'frame' will now be used.
+    # if state.get('frame'):
+    #     del state['frame']
+
+    if state.get('accent'):
+        del state['accent']
+
+    # Move to new theme/mode convention
+    if state.get('theme') in ['System', 'Dark', 'Light']:
+        mode = state.get('theme')
+        state.update({'mode': mode, 'theme': 'Blue'})
+
+    # Prevent malformed/invalid theme name issues
+    themes = list(map(lambda o: o.get('title'), theme_list.get_themes()))
+    if state.get('theme') not in themes:
+        state.update({'theme': 'Blue'})
+
     return state
 
 # Version 1.0.7 state updater
@@ -173,24 +205,4 @@ def update_1_0_7(state):
         state.update(stateUpdate)
 
     # Return the updated state
-    return state
-
-def update_1_3_0(state):
-    # Remove unused variables
-    if state.get('frame'):
-        del state['frame']
-
-    if state.get('accent'):
-        del state['accent']
-
-    # Move to new theme/mode convention
-    if state.get('theme') in ['System', 'Dark', 'Light']:
-        mode = state.get('theme')
-        state.update({'mode': mode, 'theme': 'Blue'})
-
-    # Prevent malformed/invalid theme name issues
-    themes = list(map(lambda o: o.get('title'), theme_list.get_themes()))
-    if state.get('theme') not in themes:
-        state.update({'theme': 'Blue'})
-
     return state

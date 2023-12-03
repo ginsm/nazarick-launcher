@@ -80,13 +80,15 @@ def create_frames(ctk, app, pool, state):
     # Raise selected frame and set color
     raise_selected_frame(frames)
 
-def raise_selected_frame(games):
-    selected_game = store.get_game()
-    for game in games:
-        [name, frame] = utility.destructure(game, ['name', 'frame'])
-        if name.lower() == selected_game:
+
+def raise_selected_frame(frames):
+    selected_frame = store.get_frame()
+    for frame_data in frames:
+        [name, frame] = utility.destructure(frame_data, ['name', 'frame'])
+        if name.lower() == selected_frame:
             frame.tkraise()
             AppSideBar.color_buttons(name)
+
 
 def broadcast(message):
     global frames
@@ -107,7 +109,7 @@ def reload_widgets(ctk, app, pool, state):
 
     # Clear all stored widgets
     frames.clear()
-    AppSideBar.clear_game_Buttons()
+    AppSideBar.clear_frame_Buttons()
     view.clear_lockable_elements()
 
     # Recreate the frames
