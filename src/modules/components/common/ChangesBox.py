@@ -83,7 +83,8 @@ def get_stylesheet(colors, mode):
             background: {background_color[mode]};
             scrollbar-color: red orange;
             scrollbar-width: thin;
-            font-size: 12px;
+            font-family: Roboto, 'Open Sans', Arial;
+            font-size: 13px;
         }}
 
         hr {{
@@ -110,7 +111,7 @@ def get_stylesheet(colors, mode):
         }}
 
         li {{
-            font-size: 12px;
+            font-size: 13px;
             margin-top: 8px;
         }}
 
