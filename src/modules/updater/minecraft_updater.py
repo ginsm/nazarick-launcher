@@ -6,12 +6,16 @@ from modules.tufup import BASE_DIR
 from modules.updater.common import *
 
 # ----- Main Functions ----- #
-def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
-    textbox['log'](f'')
-    textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
+def start(ctk, app, pool, widgets):
+    # Define the logging function
+    log = widgets.get('logbox').get('log')
+
+    # Start logs
+    log(f'')
+    log(f'[INFO] Beginning process at {utility.get_time()}.')
 
     # Lock user input
-    textbox['log'](f'[INFO] Locking user input.')
+    log(f'[INFO] Locking user input.')
     view.lock(True)
 
     # Bundling all variables to pass them around throughout the script
@@ -26,64 +30,65 @@ def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
         'options': options,
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
-        'progress': progress,
-        'textbox': textbox,
+        'widgets': widgets,
+        'log': log,
         'version': get_latest_version('1.20.1') if internet_connection else None,
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar
     task_percent = 0.25 / 9
+    progressbar = widgets.get('progressbar')
 
     # Error Handling
     if handle_errors(variables):
         # Switch to logs tab
-        tabs.set('Logs')
+        widgets.get('tabs').set('Logs')
 
         # Unlock user input
-        textbox['log'](f'[INFO] Unlocking user input.')
+        log(f'[INFO] Unlocking user input.')
         view.lock(False)
-        textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
+        log(f'[INFO] Finished process at {utility.get_time()}.')
         return
     
     # This is ran after each task (aside from retrieve_mods)
-    progress.add_percent(task_percent)
+    progressbar.add_percent(task_percent)
     
     # Skip updating process if nuver is equal to latest ver
     if internet_connection:
         if (on_latest_version(variables, initial_install)):
-            progress.add_percent(1 - (task_percent * 2))
+            progressbar.add_percent(1 - (task_percent * 2))
             finalize(variables, task_percent)
             return
 
         # Clean up temp directory
         clean_update_directories(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         # Download latest modpack version
         download_modpack(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         # Unzip update to temp directory
-        extract_modpack(variables, changes, html_frame)
-        progress.add_percent(task_percent)
+        extract_modpack(variables)
+        progressbar.add_percent(task_percent)
 
         # Purge any files as instructed from modpack archive
         purge_files(variables, pool, whitelist=['config', 'shaderpacks'])
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         # Retrieve all of the mod files
         retrieve_mods(variables, pool)
 
         # Install the update into the instance
         install_update(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         # Store update's version number
         store_version_number(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
     else:
-        textbox['log']('[INFO] No internet connection; skipping update process.')
+        log('[INFO] No internet connection; skipping update process.')
 
     # Run the final bit of code
     finalize(variables, task_percent)
@@ -91,60 +96,60 @@ def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
 
 # This is split so that it can be ran at multiple points in the main function
 def finalize(vars_, task_percent):
-    options, textbox, exe_path, progress = [
+    options, log, exe_path, widgets = [
         vars_['options'],
-        vars_['textbox'],
+        vars_['log'],
         vars_['exepath'],
-        vars_['progress']
+        vars_['widgets']
     ]
+    progressbar = widgets.get('progressbar')
 
-    textbox['log'](f'[INFO] Unlocking user input.')
+    log(f'[INFO] Unlocking user input.')
     view.lock(False)
 
-    run_executable(os.path.split(exe_path)[-1], options['debug'], textbox, [exe_path]) 
-    progress.add_percent(task_percent)
+    run_executable(exe_name=os.path.split(exe_path)[-1], debug=options['debug'], log=log, command=[exe_path]) 
+    progressbar.add_percent(task_percent)
    
-    textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
-    progress.reset_percent()
+    log(f'[INFO] Finished process at {utility.get_time()}.')
+    progressbar.reset_percent()
     autoclose_app(vars_)
 
 
 # ----- Helper Functions ----- #
 def handle_errors(vars_):
-    textbox, exe_path, inst_path = [
-        vars_['textbox'],
+    log, exe_path, inst_path = [
+        vars_['log'],
         vars_['exepath'],
         vars_['instpath']
     ]
     error = False
 
-    textbox['log']('[INFO] Validating the provided executable and instance paths.')
+    log('[INFO] Validating the provided executable and instance paths.')
 
     # Ensure the path was provided.
     if inst_path == '':
-        textbox['log']('[ERROR] Please provide a path to your Minecraft instance.', 'error')
+        log('[ERROR] Please provide a path to your Minecraft instance.', 'error')
         error = True
     else:
         # Ensure the path is valid.
         if not os.path.exists(inst_path):
-            textbox['log']("[ERROR] The provided path to your Minecraft instance doesn't exist.", 'error')
+            log("[ERROR] The provided path to your Minecraft instance doesn't exist.", 'error')
             error = True
 
     # Ensure the path was provided.
     if exe_path == '':
-        textbox['log']("[ERROR] Please provide a path to your launcher's executable.", 'error')
-        error= True
+        log("[ERROR] Please provide a path to your launcher's executable.", 'error')
+        error = True
     else:
         # Ensure the path is valid.
         if not os.path.isfile(exe_path):
-            textbox['log']("[ERROR] The provided path to your launcher doesn't exist.", 'error')
+            log("[ERROR] The provided path to your launcher doesn't exist.", 'error')
             error =  True
 
     if utility.permission_check(inst_path) == utility.NEED_ADMIN:
-        textbox['log']("[ERROR] The instance path requires administrative privileges. Please restart your launcher.", 'error')
+        log("[ERROR] The instance path requires administrative privileges. Please restart your launcher.", 'error')
         error = True
         
-    
     return error
 
 
@@ -176,29 +181,30 @@ def initial_install(vars_):
 
 
 def download_modpack(vars_):
-    textbox, tmp, version = [
-        vars_['textbox'],
+    log, tmp, version = [
+        vars_['log'],
         vars_['tmp'],
         vars_['version']
     ]
 
-    textbox['log'](f'[INFO] Downloading latest version: {version['name']} v{version['version']}.')
+    log(f'[INFO] Downloading latest version: {version['name']} v{version['version']}.')
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
     open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
 
 
-def extract_modpack(vars_, changes, html_frame):
-    ctk, textbox, tmp = [
+def extract_modpack(vars_):
+    ctk, log, tmp, widgets = [
         vars_['ctk'],
-        vars_['textbox'],
-        vars_['tmp']
+        vars_['log'],
+        vars_['tmp'],
+        vars_['widgets']
     ]
 
     zip_file = os.path.join(tmp, 'update.zip')
 
-    textbox['log']('[INFO] Extracting the modpack zip.')
+    log('[INFO] Extracting the modpack zip.')
     with zipfile.ZipFile(zip_file, 'r') as ref:
         ref.extractall(tmp)
     
@@ -206,20 +212,13 @@ def extract_modpack(vars_, changes, html_frame):
     os.remove(zip_file)
 
     # Move the changelog to its destination
-    changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
-    changelog_dest = os.path.join(BASE_DIR, 'assets', 'Valheim', 'CHANGELOG.md')
-
-    if os.path.exists(changelog_tmp):
-        os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)
-        shutil.move(changelog_tmp, changelog_dest)
-
-        ChangesBox.load_changelog(ctk, changes, 'Valheim', html_frame)
+    extract_modpack_changelog(vars_, 'Minecraft')
 
 
 def retrieve_mods(vars_, pool):
-    tmp, textbox = [
+    tmp, log = [
         vars_['tmp'],
-        vars_['textbox'],
+        vars_['log'],
     ]
 
     # read modrinth.index.json
@@ -228,7 +227,7 @@ def retrieve_mods(vars_, pool):
         mod_progress_percent = 0.75 / len(mods)
         futures = []
 
-        textbox['log']('[INFO] Retrieving any mods not present in the modpack zip:')
+        log('[INFO] Retrieving any mods not present in the modpack zip:')
 
         for mod in mods:
             futures.append(pool.submit(retrieve, mod, vars_, mod_progress_percent))
@@ -238,12 +237,13 @@ def retrieve_mods(vars_, pool):
 
 def retrieve(mod, vars_, mod_percent):
     _, name = os.path.split(mod['path'])
-    textbox, inst_path, tmp, progress = [
-        vars_['textbox'],
+    log, inst_path, tmp, widgets = [
+        vars_['log'],
         vars_['instpath'],
         vars_['tmp'],
-        vars_['progress']
+        vars_['widgets']
     ]
+    progressbar = widgets.get('progressbar')
 
     # Split path to get mod name and join with instpath
     local_path = os.path.join(inst_path, 'mods', name)
@@ -252,28 +252,28 @@ def retrieve(mod, vars_, mod_percent):
 
     # Move file if it exists locally
     if os.path.isfile(local_path):
-        textbox['log'](f'[INFO] (M) {name.split('.jar')[0]}.')
+        log(f'[INFO] (M) {name.split('.jar')[0]}.')
         if not os.path.isfile(destination):
             shutil.move(local_path, destination)
     # Move file if it exists locally (initial install)
     elif os.path.isfile(local_path_old):
-        textbox['log'](f'[INFO] (C) {name.split('.jar')[0]}.')
+        log(f'[INFO] (C) {name.split('.jar')[0]}.')
         if not os.path.isfile(destination):
             shutil.copyfile(local_path_old, destination)
     # Download mod
     else:
-        textbox['log'](f'[INFO] (D) {name.split('.jar')[0]}.')
+        log(f'[INFO] (D) {name.split('.jar')[0]}.')
         req = requests.get(mod['downloads'][0], allow_redirects=True)
         open(destination, 'wb').write(req.content)
     
-    progress.add_percent(mod_percent)
+    progressbar.add_percent(mod_percent)
 
 
 def install_update(vars_):
-    inst_path, tmp, textbox = [
+    inst_path, tmp, log = [
         vars_['instpath'],
         vars_['tmp'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     # Paths
@@ -284,13 +284,13 @@ def install_update(vars_):
     config_tmp = os.path.join(tmp, 'overrides', 'config')
 
     # Remove old mods path and move updated mods to instance
-    textbox['log']('[INFO] Moving updated mods into the provided instance location.')
+    log('[INFO] Moving updated mods into the provided instance location.')
     if (os.path.exists(mods_dest)):
         shutil.rmtree(mods_dest)
     shutil.move(mods_tmp, mods_dest)
 
     # Remove yosbr and move updated configs to instance
-    textbox['log']('[INFO] Moving updated configs into the provided instance location.')
+    log('[INFO] Moving updated configs into the provided instance location.')
     if (os.path.exists(yosbr_path)):
         shutil.rmtree(yosbr_path)
 
@@ -317,14 +317,3 @@ def install_update(vars_):
         else:
             target_path = os.path.join(config_dest, file_)
             shutil.move(file_path, target_path)
-
-
-def execute_launcher(textbox, exe_path):
-    _, exe_name = os.path.split(exe_path)
-    textbox['log'](f'[INFO] Launching {exe_name}.')
-    try:
-        subprocess.check_call([exe_path])
-        return True
-    except Exception as error:
-        textbox['log'](f'[ERROR] {error.strerror.replace('%1', exe_path)}.', 'error')
-        return False

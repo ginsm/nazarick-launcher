@@ -1,13 +1,15 @@
 import os, shutil, json, subprocess
 from concurrent.futures import wait
 from modules import utility
+from modules.components.common import ChangesBox
+from modules.tufup import BASE_DIR
 
 
 # ---- LOCAL VERSION CHECKING ---- #
 def store_version_number(vars_):
-    version, textbox, inst_path = [
+    version, log, inst_path = [
         vars_['version'],
-        vars_['textbox'],
+        vars_['log'],
         vars_['instpath']
     ]
 
@@ -16,15 +18,15 @@ def store_version_number(vars_):
         'version': version['version']
     })
 
-    textbox['log'](f'[INFO] Storing new version ID for future ref: {version['name']} (v{version['version']}).')
+    log(f'[INFO] Storing new version ID for future ref: {version['name']} (v{version['version']}).')
     open(os.path.join(inst_path, 'nazarick.json'), 'w').write(data)
 
 
 def on_latest_version(vars_, initial_install_fn):
-    version, inst_path, textbox = [
+    version, inst_path, log = [
         vars_['version'],
         vars_['instpath'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     # Convert from 'nuver' file to 'nazarick.json'
@@ -38,10 +40,9 @@ def on_latest_version(vars_, initial_install_fn):
             data = json.loads(f.read().decode('UTF-8'))
             name, ver = [data['name'], data['version']]
 
-
-            # is trying to update an instance path with another pack installed.
+            # Ensure modpack version and name are the same
             if name == version['name'] and ver == version['version']:
-                textbox['log'](f'[INFO] You are already on the latest version: {name} (v{ver}).')
+                log(f'[INFO] You are already on the latest version: {name} (v{ver}).')
                 return True
     else:
         # Run the function that handles existing files on initial install
@@ -52,9 +53,9 @@ def on_latest_version(vars_, initial_install_fn):
 
 
 def convert_to_new_version_format(vars_):
-    inst_path, textbox = [
+    inst_path, log = [
         vars_['instpath'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     nuver_path = os.path.join(inst_path, 'nuver')
@@ -68,7 +69,7 @@ def convert_to_new_version_format(vars_):
                     'version': stored_version[-1]
                 },
                 'instpath': inst_path,
-                'textbox': textbox
+                'log': log
             })
 
         # Delete nuver
@@ -77,8 +78,8 @@ def convert_to_new_version_format(vars_):
 
 # ---- FILE MANIPULATION ---- #
 def purge_files(vars_, pool, whitelist):
-    textbox, inst_path, tmp = [
-        vars_['textbox'],
+    log, inst_path, tmp = [
+        vars_['log'],
         vars_['instpath'],
         vars_['tmp']
     ]
@@ -93,21 +94,39 @@ def purge_files(vars_, pool, whitelist):
             delete = obj.get('purge')
 
             if bool(delete):
-                textbox['log']('[INFO] Purging obsolete files:')
+                log('[INFO] Purging obsolete files:')
                 futures = []
 
                 for file_ in delete:
                     path = os.path.join(inst_path, file_)
-                    futures.append(pool.submit(delete_path, inst_path, path, whitelist, textbox))
+                    futures.append(pool.submit(delete_path, inst_path, path, whitelist, log))
 
                 wait(futures)
 
 
-def delete_path(base_path, path, whitelist, textbox):
+def extract_modpack_changelog(vars_, game):
+    tmp, ctk, widgets = [
+        vars_.get('tmp'),
+        vars_.get('ctk'),
+        vars_.get('widgets')
+    ]
+
+    # Move the changelog to its destination
+    changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
+    changelog_dest = os.path.join(BASE_DIR, 'assets', game, 'CHANGELOG.md')
+
+    if os.path.exists(changelog_tmp):
+        os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)
+        shutil.move(changelog_tmp, changelog_dest)
+
+        ChangesBox.load_changelog(ctk, widgets.get('changebox'), 'Valheim', widgets.get('html_frame'))
+
+
+def delete_path(base_path, path, whitelist, log):
     if can_delete_path(base_path, path, whitelist):
         rm_func = shutil.rmtree if os.path.isdir(path) else os.remove
         rm_func(path)
-        textbox['log'](f'[INFO] (R) {path.replace(base_path, "")[1:]}')
+        log(f'[INFO] (R) {path.replace(base_path, "")[1:]}')
 
 
 def can_delete_path(base_path, path, whitelist = []):
@@ -154,41 +173,42 @@ def overwrite(source, target):
 
 
 def clean_update_directories(vars_):
-    tmp, textbox = [
+    tmp, log = [
         vars_['tmp'],
-        vars_['textbox']
+        vars_['log']
     ]
             
     # Delete any existing tmp directory
     if os.path.exists(tmp):
-        textbox['log']('[INFO] Cleaning the tmp directory.')
+        log('[INFO] Cleaning the tmp directory.')
         shutil.rmtree(tmp)
     else:
-        textbox['log']('[INFO] Creating the tmp directory.')
+        log('[INFO] Creating the tmp directory.')
 
     # Create clean tmp directory
     os.makedirs(tmp, exist_ok=True)
 
 
 # ---- Finalize Methods ---- #
-def run_executable(exe_name, debug, textbox, command):
+def run_executable(exe_name, debug, log, command):
     # Debug mode stops exe from launching
     if not debug:
-        textbox['log'](f'[INFO] Launching {exe_name}.')
+        log(f'[INFO] Launching {exe_name}.')
         try:
             subprocess.check_call(command)
         except Exception as error:
-            textbox['log'](f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.')
+            log(f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.')
     else:
-        textbox['log']('[INFO] The executable is not launched whilst in debug mode.')
+        log('[INFO] The executable is not launched whilst in debug mode.')
+
 
 def autoclose_app(vars_):
-    options, textbox, app = [
+    options, log, app = [
         vars_['options'],
-        vars_['textbox'],
+        vars_['log'],
         vars_['app']
     ]
 
     if options['autoclose']:
-        textbox['log']('[INFO] Auto close is enabled; closing app.')
+        log('[INFO] Auto close is enabled; closing app.')
         app.quit()

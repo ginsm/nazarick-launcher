@@ -5,14 +5,19 @@ from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
 
-def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
-    textbox['log'](f'')
-    textbox['log'](f'[INFO] Beginning process at {utility.get_time()}.')
+def start(ctk, app, pool, widgets):
+    # Definet he logging function
+    log = widgets.get('logbox').get('log')
+
+    # Start logs
+    log(f'')
+    log(f'[INFO] Beginning process at {utility.get_time()}.')
 
     # Lock user input
-    textbox['log'](f'[INFO] Locking user input.')
+    log(f'[INFO] Locking user input.')
     view.lock(True)
 
+    # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('valheim')
     options = store.get_state()
     internet_connection = utility.internet_check()
@@ -23,101 +28,103 @@ def start(app, ctk, textbox, pool, tabs, changes, html_frame, progress):
         'options': options,
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'valheim'),
-        'progress': progress,
-        'textbox': textbox,
+        'widgets': widgets,
+        'log': log,
         'version': get_latest_version() if internet_connection else None
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar.
     task_percent = 0.25 / 9
+    progressbar = widgets.get('progressbar')
 
     if handle_errors(variables):
         # Switch to logs tab
-        tabs.set('Logs')
+        widgets.get('tabs').set('Logs')
 
         # Unlock user input
-        textbox['log'](f'[INFO] Unlocking user input.')
+        log(f'[INFO] Unlocking user input.')
         view.lock(False)
-        textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
+        log(f'[INFO] Finished process at {utility.get_time()}.')
         return
     
     # This is ran after each task (aside from retrieve_mods)
-    progress.add_percent(task_percent)
+    progressbar.add_percent(task_percent)
     
     if internet_connection:
         if on_latest_version(variables, initial_install):
-            progress.add_percent(1 - (task_percent * 2))
+            progressbar.add_percent(1 - (task_percent * 2))
             finalize(variables, task_percent)
             return
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         clean_update_directories(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         download_modpack(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
-        extract_modpack(variables, changes, html_frame)
-        progress.add_percent(task_percent)
+        extract_modpack(variables)
+        progressbar.add_percent(task_percent)
 
         purge_files(variables, pool, whitelist=['BepInEx/config'])
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         retrieve_mods(variables, pool)
 
         install_update(variables, pool)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
 
         store_version_number(variables)
-        progress.add_percent(task_percent)
+        progressbar.add_percent(task_percent)
     else:
-        textbox['log']('[INFO] No internet connection; skipping update process.')
+        log('[INFO] No internet connection; skipping update process.')
 
     finalize(variables, task_percent)
 
 
+# This is split so that it can be ran at multiple points in the main function
 def finalize(vars_, task_percent):
-    options, textbox, progress = [
+    options, log, widgets = [
         vars_['options'],
-        vars_['textbox'],
-        vars_['progress']
+        vars_['log'],
+        vars_['widgets']
     ]
 
-    textbox['log'](f'[INFO] Unlocking user input.')
+    progressbar = widgets.get('progressbar')
+
+    log(f'[INFO] Unlocking user input.')
     view.lock(False)
     
     # TODO - Support launching with mac as well
-    run_executable('valheim.exe', options['debug'], textbox, ['cmd', '/c', 'start', 'steam://run/892970'])
-    progress.add_percent(task_percent)
+    run_executable(exe_name='valheim.exe', debug=options['debug'], log=log, command=['cmd', '/c', 'start', 'steam://run/892970'])
+    progressbar.add_percent(task_percent)
 
-    textbox['log'](f'[INFO] Finished process at {utility.get_time()}.')
-    progress.reset_percent()
+    log(f'[INFO] Finished process at {utility.get_time()}.')
+    progressbar.reset_percent()
     autoclose_app(vars_)
 
 
 # ----- Helper Functions ----- #
-# Ensure the install path was provided and valid
 def handle_errors(vars_):
-    textbox, inst_path, progress = [
-        vars_['textbox'],
+    log, inst_path = [
+        vars_['log'],
         vars_['instpath'],
-        vars_['progress']
     ]
     error = False
 
-    textbox['log']('[INFO] Validating the provided install path.')
+    log('[INFO] Validating the provided install path.')
 
     # Ensure the path was provided.
     if inst_path == '':
-        textbox['log']('[ERROR] Please provide a path to your Valheim instance.', 'error')
+        log('[ERROR] Please provide a path to your Valheim instance.', 'error')
         error = True
     elif not os.path.exists(inst_path):
-        textbox['log']("[ERROR] The provided path to your Valheim instance doesn't exist.", 'error')
+        log("[ERROR] The provided path to your Valheim instance doesn't exist.", 'error')
         error = True
 
     if utility.permission_check(inst_path) == utility.NEED_ADMIN:
-        textbox['log']('[ERROR] The install path requires administrative privileges. Please restart your launcher.', 'error')
+        log('[ERROR] The install path requires administrative privileges. Please restart your launcher.', 'error')
         error = True
 
     return error
@@ -138,29 +145,30 @@ def initial_install(vars_):
 
 
 def download_modpack(vars_):
-    textbox, tmp, version = [
-        vars_['textbox'],
+    log, tmp, version = [
+        vars_['log'],
         vars_['tmp'],
         vars_['version']
     ]
 
-    textbox['log'](f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
+    log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
 
     # Download the mrpack as .zip
     req = requests.get(version['url'], allow_redirects=True)
     open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
 
 
-def extract_modpack(vars_, changes, html_frame):
-    ctk, textbox, tmp = [
+def extract_modpack(vars_):
+    ctk, log, tmp, widgets = [
         vars_['ctk'],
-        vars_['textbox'],
-        vars_['tmp']
+        vars_['log'],
+        vars_['tmp'],
+        vars_['widgets']
     ]
 
     zip_file = os.path.join(tmp, 'update.zip')
 
-    textbox['log']('[INFO] Extracting the modpack zip.')
+    log('[INFO] Extracting the modpack zip.')
     with zipfile.ZipFile(zip_file, 'r') as ref:
         ref.extractall(tmp)
         
@@ -168,21 +176,14 @@ def extract_modpack(vars_, changes, html_frame):
     os.remove(zip_file)
 
     # Move the changelog to its destination
-    changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
-    changelog_dest = os.path.join(BASE_DIR, 'assets', 'Valheim', 'CHANGELOG.md')
-
-    if os.path.exists(changelog_tmp):
-        os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)
-        shutil.move(changelog_tmp, changelog_dest)
-
-        ChangesBox.load_changelog(ctk, changes, 'Valheim', html_frame)
+    extract_modpack_changelog(vars_, 'Valheim')
 
 
 
 def retrieve_mods(vars_, pool):
-    tmp, textbox = [
+    tmp, log = [
         vars_['tmp'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     # Make a plugins folder
@@ -195,7 +196,7 @@ def retrieve_mods(vars_, pool):
         plugin_progress_percent = 0.75 / len(plugins)
         futures = []
 
-        textbox['log']('[INFO] Retrieving modpack dependencies:')
+        log('[INFO] Retrieving modpack dependencies:')
 
         for plugin in plugins:
             futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp, plugin_progress_percent))
@@ -204,11 +205,12 @@ def retrieve_mods(vars_, pool):
 
 
 def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
-    textbox, inst_path, progress = [
-        vars_['textbox'],
+    log, inst_path, widgets = [
+        vars_['log'],
         vars_['instpath'],
-        vars_['progress']
+        vars_['widgets']
     ]
+    progressbar = widgets.get('progressbar')
 
     plugin_url = f"https://thunderstore.io/package/download/{plugin.replace('-', '/')}"
     plugin_zip = os.path.join(plugins_tmp, f'{plugin}.zip')
@@ -217,12 +219,12 @@ def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
 
     # Move plugin if it already exists locally
     if os.path.isdir(loc_plugin_dir):
-        textbox['log'](f'[INFO] (M) {plugin}')
+        log(f'[INFO] (M) {plugin}')
         if not os.path.exists(tmp_plugin_dir):
             shutil.move(loc_plugin_dir, tmp_plugin_dir)
     # Download zip then extract and delete it
     else:
-        textbox['log'](f'[INFO] (D) {plugin}')
+        log(f'[INFO] (D) {plugin}')
 
         req = requests.get(plugin_url, allow_redirects=True)
         open(plugin_zip, 'wb').write(req.content)
@@ -232,14 +234,14 @@ def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
 
         os.remove(plugin_zip)
 
-    progress.add_percent(plugin_percent)
+    progressbar.add_percent(plugin_percent)
 
 
 def install_update(vars_, pool):
-    inst_path, tmp, textbox = [
+    inst_path, tmp, log = [
         vars_['instpath'],
         vars_['tmp'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     # Set up BepInEx
@@ -249,7 +251,7 @@ def install_update(vars_, pool):
     install_tmp = os.path.join(tmp, 'install')
 
     # Iterate over install directory
-    textbox['log']('[INFO] Installing the modpack to the specified install path.')
+    log('[INFO] Installing the modpack to the specified install path.')
     for file_ in os.listdir(install_tmp):
         file_path_loc = os.path.join(inst_path, file_)
         file_path_tmp = os.path.join(install_tmp, file_)
@@ -283,10 +285,10 @@ def install_update(vars_, pool):
 
 
 def setup_bepinex(vars_, pool):
-    inst_path, tmp, textbox = [
+    inst_path, tmp, log = [
         vars_['instpath'],
         vars_['tmp'],
-        vars_['textbox']
+        vars_['log']
     ]
 
     # Paths
@@ -298,7 +300,7 @@ def setup_bepinex(vars_, pool):
     # Make install directory
     os.makedirs(install_tmp, exist_ok=True)
 
-    textbox['log']('[INFO] Setting up BepInEx.')
+    log('[INFO] Setting up BepInEx.')
 
     # Move BepInEx into install directory
     for plugin in os.listdir(plugins_tmp):

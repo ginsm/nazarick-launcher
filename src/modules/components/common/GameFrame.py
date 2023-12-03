@@ -35,16 +35,16 @@ def create(ctk, app, pool, name, settings, updater):
     tabs.grid(row=0, columnspan=2, padx=10, sticky='nsew')
 
     # ---- Changes Tab ---- #
-    [changes, html_frame] = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)
-    changes.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
+    [changebox, html_frame] = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)
+    changebox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Logs Tab ---- #
-    textbox = LogBox.create(
+    logbox = LogBox.create(
         ctk=ctk,
         master=tabs.tab('Logs'),
         game=name
     )
-    textbox['get']().grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
+    logbox['get']().grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
     for index, setting in enumerate(settings):
@@ -67,10 +67,10 @@ def create(ctk, app, pool, name, settings, updater):
 
     # Create progress frame contents and position them
     progress_label = ctk.CTkLabel(master=progress_frame, text='Update Progress')
-    progress = ProgressBar.create(ctk, progress_frame)
+    progressbar = ProgressBar.create(ctk, progress_frame)
 
     progress_label.grid(row=0, sticky='w')
-    progress.bar.grid(row=1, pady=(2,0), sticky='we')
+    progressbar.bar.grid(row=1, pady=(2,0), sticky='we')
 
     # Position progress frame
     progress_frame.grid(row=len(settings) + 1, column=0, sticky='nswe', pady=5, padx=(15, 5))
@@ -79,14 +79,16 @@ def create(ctk, app, pool, name, settings, updater):
     update_button = UpdateButton.create(
         ctk=ctk,
         parent=frame,
-        textbox=textbox,
         pool=pool,
-        progress=progress,
-        tabs=tabs,
-        changes=changes,
-        html_frame=html_frame,
-        update_fn=updater.start
+        update_fn=updater.start,
+        widgets={
+            'logbox': logbox,
+            'changebox': changebox,
+            'html_frame': html_frame,
+            'progressbar': progressbar,
+            'tabs': tabs
+        }
     )
     update_button.grid(row=len(settings) + 1, column=1, padx=(10, 15), pady=15, sticky='ew')
 
-    return [frame, textbox]
+    return [frame, logbox]
