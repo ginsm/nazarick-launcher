@@ -49,7 +49,7 @@ def start(ctk, app, pool, widgets):
     # This is ran after each task (aside from retrieve_mods)
     progressbar.add_percent(task_percent)
     
-    if internet_connection:
+    if internet_connection and variables.get('version'):
         if on_latest_version(variables, initial_install):
             progressbar.add_percent(1 - (task_percent * 2))
             finalize(variables, task_percent)
@@ -75,6 +75,8 @@ def start(ctk, app, pool, widgets):
 
         store_version_number(variables)
         progressbar.add_percent(task_percent)
+    elif not variables.get('version'):
+        log('[INFO] Invalid response from Thunderstore; skipping update process.')
     else:
         log('[INFO] No internet connection; skipping update process.')
 
@@ -130,6 +132,10 @@ def handle_errors(vars_):
 # Get latest version from thunderstore.io API
 def get_latest_version():
     req = requests.get('https://thunderstore.io/api/experimental/package/Syh/Nazarick_Core/')
+
+    if (req.status_code != 200):
+        return False
+
     data = json.loads(req.text)
     return {
         'name': data['full_name'],
