@@ -57,14 +57,22 @@ def load_changelog(ctk, changes, game, html_frame):
             # Create scrollbar and bind necessary events
             html_scrollbar = ctk.CTkScrollbar(master=changes, command=html_frame.yview)
             html_scrollbar.grid(row=0, column=1, pady=10, padx=5, sticky='ns')
-            html_frame.bind_all("<MouseWheel>", lambda e: update_scrollbar(e, html_scrollbar, html_frame))
+            html_scrollbar.set(*html_frame.yview()) # Set initial value
 
-            # FIXME - Incorrect value being passed to scrollbar
-            html_scrollbar.set(*html_frame.yview())
+            # Event handling (scrolling)
+            html_frame.bind('<Enter>', lambda _: bind_to_mousewheel(html_frame, html_scrollbar))
+            html_frame.bind('<Leave>', lambda _: unbind_to_mousewheel(html_frame))
     else:
         html_frame.load_html(stylesheet + '<div>There is no change log available for this game.</div>')
 
-def update_scrollbar(event, scrollbar, frame):
+
+def bind_to_mousewheel(frame, scrollbar):
+    frame.bind_all("<MouseWheel>", lambda e: update_scrollbar(e, frame, scrollbar))
+
+def unbind_to_mousewheel(frame):
+    frame.unbind_all("<MouseWheel>")
+
+def update_scrollbar(event, frame, scrollbar):
     scrollbar.set(*frame.yview())
     frame.scroll(event)
 
