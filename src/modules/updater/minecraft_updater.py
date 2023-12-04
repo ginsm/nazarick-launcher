@@ -53,7 +53,7 @@ def start(ctk, app, pool, widgets):
     progressbar.add_percent(task_percent)
     
     # Skip updating process if nuver is equal to latest ver
-    if internet_connection:
+    if internet_connection and variables.get('version'):
         if (on_latest_version(variables, initial_install)):
             progressbar.add_percent(1 - (task_percent * 2))
             finalize(variables, task_percent)
@@ -85,6 +85,8 @@ def start(ctk, app, pool, widgets):
         # Store update's version number
         store_version_number(variables)
         progressbar.add_percent(task_percent)
+    elif not variables.get('version'):
+        log('[INFO] Invalid response from Modrinth; skipping update process.')
     else:
         log('[INFO] No internet connection; skipping update process.')
 
@@ -159,7 +161,11 @@ def get_latest_version(version):
             'version': obj['version_number']
         }
     
-    req = requests.get(f'https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=["{version}"]')
+    req = requests.get(f'https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=["{version}"]', timeout=20)
+    
+    if (req.status_code != 200):
+        return False
+
     data = json.loads(req.text)
     parsed = list(map(parse_json, data))
     return parsed[0]
