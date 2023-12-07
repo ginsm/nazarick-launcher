@@ -1,4 +1,4 @@
-def create(ctk, text, buttons, title, justify="center"):
+def create(ctk, text, buttons, title, max_width = 1000, justify="center"):
     modal = ctk.CTkToplevel()
     modal.title(title)
     modal.grid_rowconfigure(0, weight=1)
@@ -11,7 +11,8 @@ def create(ctk, text, buttons, title, justify="center"):
     label = ctk.CTkLabel(
         master=modal, 
         text=text,
-        justify=justify
+        justify=justify,
+        wraplength=max_width
     )
     label.grid(row=0, column=0, columnspan=len(buttons), pady=(pady, 0), padx=padx, sticky="nsew")
 
