@@ -1,9 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
+import webbrowser
 import customtkinter as ctk
+from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
 from modules import game_list, utility, view, store, tufup, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, SettingsFrame
-from modules.components.common import CoverFrame, GameFrame
+from modules.components.common import GameFrame, InfoModal
 
 frames = []
 
@@ -35,7 +37,9 @@ def main():
 
     # Initialize tufup and check for updates (only if bundled)
     if tufup.FROZEN:
-        tufup.init(initial_state)
+        tufup_status = tufup.init(initial_state)
+    else:
+        tufup_status = tufup.SUCCESS
 
     # Initialize the thread pool executor
     threadamount = initial_state.get('threadamount') or 4
@@ -46,6 +50,19 @@ def main():
 
     # Create frames
     create_frames(ctk, app, pool, initial_state)
+
+    # Handle tufup running into issues
+    if tufup_status == tufup.FAILED:
+        border_color = ThemeManager.theme.get('CTkCheckBox').get('border_color')
+        InfoModal.create(
+            ctk=ctk,
+            title='Error: Update Failed',
+            text='The launcher tried to update itself but ran into issues. As such, the launcher may not function properly.\n\nYou can either try to use the launcher without updating or download the most recent version and update it manually.',
+            max_width=350,
+            buttons=[
+                {'text': 'Cancel', 'command': lambda modal: modal.destroy()},
+                {'text': 'Download', 'command': lambda _: webbrowser.open('https://github.com/ginsm/nazarick-launcher/releases/latest/download/Nazarick.Launcher.zip'), 'border': border_color}
+            ])
 
     # UI Events
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize

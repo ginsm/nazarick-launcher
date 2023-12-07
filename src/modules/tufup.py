@@ -42,52 +42,62 @@ else:
     METADATA_BASE_URL = 'http://localhost:8000/metadata/'
     TARGET_BASE_URL = 'http://localhost:8000/targets/'
 
+SUCCESS = 'sucecss'
+FAILED = 'failed'
+
 # Set up tufup client
 def init(initial_state):
-    # The app must ensure dirs exist
-    for dir_path in [BASE_DIR, METADATA_DIR, TARGET_DIR]:
-        dir_path.mkdir(exist_ok=True, parents=True)
+    return FAILED
+    try:
+        # The app must ensure dirs exist
+        for dir_path in [BASE_DIR, METADATA_DIR, TARGET_DIR]:
+            dir_path.mkdir(exist_ok=True, parents=True)
 
-    # Move root.json to proper location
-    source_path = LOCAL_METADATA_DIR / 'root.json'
-    destination_path = METADATA_DIR / 'root.json'
-    if not destination_path.exists():
-        shutil.copy(src=source_path, dst=destination_path)
-        print('Trusted root metadata copied to cache.')
+        # Move root.json to proper location
+        source_path = LOCAL_METADATA_DIR / 'root.json'
+        destination_path = METADATA_DIR / 'root.json'
+        if not destination_path.exists():
+            shutil.copy(src=source_path, dst=destination_path)
+            print('Trusted root metadata copied to cache.')
 
-    # Create update client
-    client = Client(
-        app_name=APP_NAME,
-        app_install_dir=INSTALL_DIR,
-        current_version=APP_VERSION,
-        metadata_dir=METADATA_DIR,
-        metadata_base_url=METADATA_BASE_URL,
-        target_dir=TARGET_DIR,
-        target_base_url=TARGET_BASE_URL,
-        refresh_required=False,
-    )
+        # Create update client
+        client = Client(
+            app_name=APP_NAME,
+            app_install_dir=INSTALL_DIR,
+            current_version=APP_VERSION,
+            metadata_dir=METADATA_DIR,
+            metadata_base_url=METADATA_BASE_URL,
+            target_dir=TARGET_DIR,
+            target_base_url=TARGET_BASE_URL,
+            refresh_required=False,
+        )
 
-    # Perform update
-    if client.check_for_updates():
-        if initial_state.get('autorestart'):
-            custom_batch_template = """@echo off
-            {log_lines}
-            echo Moving app files...
-            robocopy "{src_dir}" "{dst_dir}" {robocopy_options}
-            echo Done.
-            echo Restarting app
-            start "" "{app_exe_path}"
-            {delete_self}
-            """
+        # Perform update
+        if client.check_for_updates():
+            if initial_state.get('autorestart'):
+                custom_batch_template = """@echo off
+                {log_lines}
+                echo Moving app files...
+                robocopy "{src_dir}" "{dst_dir}" {robocopy_options}
+                echo Done.
+                echo Restarting app
+                start "" "{app_exe_path}"
+                {delete_self}
+                """
 
-            client.download_and_apply_update(
-                skip_confirmation=True,
-                log_file_name='update.log',
-                batch_template=custom_batch_template,
-                batch_template_extra_kwargs=dict(app_exe_path=sys.executable),
-            )
-        else:
-            client.download_and_apply_update(
-                skip_confirmation=True,
-                log_file_name='update.log'
-            )
+                client.download_and_apply_update(
+                    skip_confirmation=True,
+                    log_file_name='update.log',
+                    batch_template=custom_batch_template,
+                    batch_template_extra_kwargs=dict(app_exe_path=sys.executable),
+                )
+            else:
+                client.download_and_apply_update(
+                    skip_confirmation=True,
+                    log_file_name='update.log'
+                )
+
+        return SUCCESS
+    except Exception as e:
+        print(e)
+        return FAILED
