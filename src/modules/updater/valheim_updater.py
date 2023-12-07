@@ -1,4 +1,5 @@
 import os, requests, json, shutil, zipfile
+from threading import Event
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
@@ -68,7 +69,15 @@ def start(ctk, app, pool, widgets):
         purge_files(variables, pool, whitelist=['BepInEx/config'])
         progressbar.add_percent(task_percent)
 
-        retrieve_mods(variables, pool)
+        # Attempt to retrieve all of the mod files
+        try:
+            retrieve_mods(variables, pool)
+        except Exception as e:
+            widgets.get('tabs').set('Logs')
+            log(f'[ERROR] {e}; terminating update process.', 'error')
+            log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
+            finalize(variables, task_percent)
+            return
 
         install_update(variables, pool)
         progressbar.add_percent(task_percent)
@@ -76,9 +85,13 @@ def start(ctk, app, pool, widgets):
         store_version_number(variables)
         progressbar.add_percent(task_percent)
     elif not variables.get('version'):
-        log('[INFO] Invalid response from Thunderstore; skipping update process.')
+        widgets.get('tabs').set('Logs')
+        log('[ERROR] Invalid response from Modrinth (modpack); skipping update process.', 'error')
+        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
     else:
-        log('[INFO] No internet connection; skipping update process.')
+        widgets.get('tabs').set('Logs')
+        log('[WARN] No internet connection; skipping update process.', 'warning')
+        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
 
     finalize(variables, task_percent)
 
@@ -144,7 +157,7 @@ def get_latest_version():
     }
 
 
-def initial_install(vars_):
+def initial_install(_):
     return
 
 
@@ -198,15 +211,22 @@ def retrieve_mods(vars_, pool):
         plugin_progress_percent = 0.75 / len(plugins)
         futures = []
 
+        stop_processing = Event()
+
         log('[INFO] Retrieving modpack dependencies:')
 
         for plugin in plugins:
-            futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp, plugin_progress_percent))
+            futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp, plugin_progress_percent, stop_processing))
 
-        wait(futures)
+        result = wait(futures, return_when="FIRST_EXCEPTION")
+
+        if len(result.not_done) > 0:
+            stop_processing.set()
+            exception = list(result.done)[-1].exception()
+            raise Exception(exception)
 
 
-def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
+def retrieve(plugin, vars_, plugins_tmp, plugin_percent, stop_processing):
     log, inst_path, widgets = [
         vars_['log'],
         vars_['instpath'],
@@ -219,6 +239,9 @@ def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
     tmp_plugin_dir = os.path.join(plugins_tmp, plugin)
     loc_plugin_dir = os.path.join(inst_path, 'BepInEx', 'plugins', plugin)
 
+    if stop_processing.is_set():
+        return
+
     # Move plugin if it already exists locally
     if os.path.isdir(loc_plugin_dir):
         log(f'[INFO] (M) {plugin}')
@@ -226,15 +249,18 @@ def retrieve(plugin, vars_, plugins_tmp, plugin_percent):
             shutil.move(loc_plugin_dir, tmp_plugin_dir)
     # Download zip then extract and delete it
     else:
-        log(f'[INFO] (D) {plugin}')
-
         req = requests.get(plugin_url, allow_redirects=True)
-        open(plugin_zip, 'wb').write(req.content)
 
-        with zipfile.ZipFile(plugin_zip, 'r') as ref:
-            ref.extractall(tmp_plugin_dir)
+        if req.status_code == 200:
+            log(f'[INFO] (D) {plugin}')
+            open(plugin_zip, 'wb').write(req.content)
 
-        os.remove(plugin_zip)
+            with zipfile.ZipFile(plugin_zip, 'r') as ref:
+                ref.extractall(tmp_plugin_dir)
+
+            os.remove(plugin_zip)
+        else:
+            raise Exception(f'Invalid response from Thunderstore ({plugin})')
 
     progressbar.add_percent(plugin_percent)
 

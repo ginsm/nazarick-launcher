@@ -1,5 +1,6 @@
 import os, json, zipfile, shutil, requests
 from concurrent.futures import wait
+from threading import Event
 from modules import view, store, utility
 from modules.updater.common import *
 
@@ -75,8 +76,15 @@ def start(ctk, app, pool, widgets):
         purge_files(variables, pool, whitelist=['config', 'shaderpacks'])
         progressbar.add_percent(task_percent)
 
-        # Retrieve all of the mod files
-        retrieve_mods(variables, pool)
+        # Attempt to retrieve all of the mod files
+        try:
+            retrieve_mods(variables, pool)
+        except Exception as e:
+            widgets.get('tabs').set('Logs')
+            log(f'[ERROR] {e}; terminating update process.', 'error')
+            log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
+            finalize(variables, task_percent)
+            return
 
         # Install the update into the instance
         install_update(variables)
@@ -86,9 +94,13 @@ def start(ctk, app, pool, widgets):
         store_version_number(variables)
         progressbar.add_percent(task_percent)
     elif not variables.get('version'):
-        log('[INFO] Invalid response from Modrinth; skipping update process.')
+        widgets.get('tabs').set('Logs')
+        log('[ERROR] Invalid response from Modrinth (modpack); skipping update process.', 'error')
+        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
     else:
-        log('[INFO] No internet connection; skipping update process.')
+        widgets.get('tabs').set('Logs')
+        log('[WARN] No internet connection; skipping update process.', 'warning')
+        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
 
     # Run the final bit of code
     finalize(variables, task_percent)
@@ -229,15 +241,22 @@ def retrieve_mods(vars_, pool):
         mod_progress_percent = 0.75 / len(mods)
         futures = []
 
+        stop_processing = Event()
+
         log('[INFO] Retrieving any mods not present in the modpack zip:')
 
         for mod in mods:
-            futures.append(pool.submit(retrieve, mod, vars_, mod_progress_percent))
+            futures.append(pool.submit(retrieve, mod, vars_, mod_progress_percent, stop_processing))
 
-        wait(futures)
+        result = wait(futures, return_when="FIRST_EXCEPTION")
+
+        if len(result.not_done) > 0:
+            stop_processing.set()
+            exception = list(result.done)[-1].exception()
+            raise Exception(exception)
 
 
-def retrieve(mod, vars_, mod_percent):
+def retrieve(mod, vars_, mod_percent, stop_processing):
     _, name = os.path.split(mod['path'])
     log, inst_path, tmp, widgets = [
         vars_['log'],
@@ -252,6 +271,9 @@ def retrieve(mod, vars_, mod_percent):
     local_path_old = os.path.join(inst_path, 'mods-old', name)
     destination = os.path.join(tmp, 'overrides', 'mods', name)
 
+    if stop_processing.is_set():
+        return
+
     # Move file if it exists locally
     if os.path.isfile(local_path):
         log(f'[INFO] (M) {name.split('.jar')[0]}.')
@@ -264,9 +286,13 @@ def retrieve(mod, vars_, mod_percent):
             shutil.copyfile(local_path_old, destination)
     # Download mod
     else:
-        log(f'[INFO] (D) {name.split('.jar')[0]}.')
         req = requests.get(mod['downloads'][0], allow_redirects=True)
-        open(destination, 'wb').write(req.content)
+
+        if req.status_code == 200:
+            log(f'[INFO] (D) {name.split('.jar')[0]}.')
+            open(destination, 'wb').write(req.content)
+        else:
+            raise Exception(f'Invalid response from Modrinth ({name.split('.jar')[0]})')
     
     progressbar.add_percent(mod_percent)
 
