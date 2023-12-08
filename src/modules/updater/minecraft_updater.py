@@ -107,12 +107,12 @@ def start(ctk, app, pool, widgets):
 
 
 # This is split so that it can be ran at multiple points in the main function
-def finalize(vars_, task_percent):
+def finalize(variables, task_percent):
     options, log, exe_path, widgets = [
-        vars_['options'],
-        vars_['log'],
-        vars_['exepath'],
-        vars_['widgets']
+        variables['options'],
+        variables['log'],
+        variables['exepath'],
+        variables['widgets']
     ]
     progressbar = widgets.get('progressbar')
 
@@ -124,15 +124,15 @@ def finalize(vars_, task_percent):
    
     log(f'[INFO] Finished process at {utility.get_time()}.')
     progressbar.reset_percent()
-    autoclose_app(vars_)
+    autoclose_app(variables)
 
 
 # ----- Helper Functions ----- #
-def handle_errors(vars_):
+def handle_errors(variables):
     log, exe_path, inst_path = [
-        vars_['log'],
-        vars_['exepath'],
-        vars_['instpath']
+        variables['log'],
+        variables['exepath'],
+        variables['instpath']
     ]
     error = False
 
@@ -229,10 +229,11 @@ def extract_modpack(vars_):
     extract_modpack_changelog(vars_, 'Minecraft')
 
 
-def retrieve_mods(vars_, pool):
-    tmp, log = [
-        vars_['tmp'],
-        vars_['log'],
+def retrieve_mods(variables, pool):
+    tmp, log, inst_path = [
+        variables['tmp'],
+        variables['log'],
+        variables['instpath']
     ]
 
     # read modrinth.index.json
@@ -297,11 +298,11 @@ def retrieve(mod, vars_, mod_percent, stop_processing):
     progressbar.add_percent(mod_percent)
 
 
-def install_update(vars_):
+def install_update(variables):
     inst_path, tmp, log = [
-        vars_['instpath'],
-        vars_['tmp'],
-        vars_['log']
+        variables['instpath'],
+        variables['tmp'],
+        variables['log']
     ]
 
     # Paths

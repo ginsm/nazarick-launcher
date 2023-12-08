@@ -6,11 +6,11 @@ from modules.tufup import BASE_DIR
 
 
 # ---- LOCAL VERSION CHECKING ---- #
-def store_version_number(vars_):
+def store_version_number(variables):
     version, log, inst_path = [
-        vars_['version'],
-        vars_['log'],
-        vars_['instpath']
+        variables['version'],
+        variables['log'],
+        variables['instpath']
     ]
 
     data = json.dumps({
@@ -18,19 +18,19 @@ def store_version_number(vars_):
         'version': version['version']
     })
 
-    log(f'[INFO] Storing new version ID for future ref: {version['name']} (v{version['version']}).')
+    log(f'[INFO] Storing new version ID for future ref: {version['name']} ({version['version']}).')
     open(os.path.join(inst_path, 'nazarick.json'), 'w').write(data)
 
 
-def on_latest_version(vars_, initial_install_fn):
+def on_latest_version(variables, initial_install_fn = None):
     version, inst_path, log = [
-        vars_['version'],
-        vars_['instpath'],
-        vars_['log']
+        variables['version'],
+        variables['instpath'],
+        variables['log']
     ]
 
     # Convert from 'nuver' file to 'nazarick.json'
-    convert_to_new_version_format(vars_)
+    convert_to_new_version_format(variables)
 
     # Check if the user is on the latest version
     nazarick_path = os.path.join(inst_path, 'nazarick.json')
@@ -42,20 +42,21 @@ def on_latest_version(vars_, initial_install_fn):
 
             # Ensure modpack version and name are the same
             if name == version['name'] and ver == version['version']:
-                log(f'[INFO] You are already on the latest version: {name} (v{ver}).')
+                log(f'[INFO] You are already on the latest version: {name} ({ver}).')
                 return True
     else:
-        # Run the function that handles existing files on initial install
-        log('[INFO] Preparing instance for initial install.')
-        initial_install_fn(vars_)
+        if initial_install_fn:
+            # Run the function that handles existing files on initial install
+            log('[INFO] Preparing instance for initial install.')
+            initial_install_fn(variables)
 
     return False
 
 
-def convert_to_new_version_format(vars_):
+def convert_to_new_version_format(variables):
     inst_path, log = [
-        vars_['instpath'],
-        vars_['log']
+        variables['instpath'],
+        variables['log']
     ]
 
     nuver_path = os.path.join(inst_path, 'nuver')
@@ -77,11 +78,11 @@ def convert_to_new_version_format(vars_):
 
 
 # ---- FILE MANIPULATION ---- #
-def purge_files(vars_, pool, whitelist):
+def purge_files(variables, pool, whitelist):
     log, inst_path, tmp = [
-        vars_['log'],
-        vars_['instpath'],
-        vars_['tmp']
+        variables['log'],
+        variables['instpath'],
+        variables['tmp']
     ]
 
     json_path = os.path.join(tmp, 'launcher.json')
@@ -104,11 +105,11 @@ def purge_files(vars_, pool, whitelist):
                 wait(futures)
 
 
-def extract_modpack_changelog(vars_, game):
+def extract_modpack_changelog(variables, game):
     tmp, ctk, widgets = [
-        vars_.get('tmp'),
-        vars_.get('ctk'),
-        vars_.get('widgets')
+        variables.get('tmp'),
+        variables.get('ctk'),
+        variables.get('widgets')
     ]
 
     # Move the changelog to its destination
@@ -172,10 +173,10 @@ def overwrite(source, target):
     shutil.move(source, target)
 
 
-def clean_update_directories(vars_):
+def clean_update_directories(variables):
     tmp, log = [
-        vars_['tmp'],
-        vars_['log']
+        variables['tmp'],
+        variables['log']
     ]
             
     # Delete any existing tmp directory
@@ -202,11 +203,11 @@ def run_executable(exe_name, debug, log, command):
         log('[INFO] The executable is not launched whilst in debug mode.')
 
 
-def autoclose_app(vars_):
+def autoclose_app(variables):
     options, log, app = [
-        vars_['options'],
-        vars_['log'],
-        vars_['app']
+        variables['options'],
+        variables['log'],
+        variables['app']
     ]
 
     if options['autoclose']:

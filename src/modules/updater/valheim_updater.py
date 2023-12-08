@@ -97,11 +97,11 @@ def start(ctk, app, pool, widgets):
 
 
 # This is split so that it can be ran at multiple points in the main function
-def finalize(vars_, task_percent):
+def finalize(variables, task_percent):
     options, log, widgets = [
-        vars_['options'],
-        vars_['log'],
-        vars_['widgets']
+        variables['options'],
+        variables['log'],
+        variables['widgets']
     ]
 
     progressbar = widgets.get('progressbar')
@@ -115,14 +115,14 @@ def finalize(vars_, task_percent):
 
     log(f'[INFO] Finished process at {utility.get_time()}.')
     progressbar.reset_percent()
-    autoclose_app(vars_)
+    autoclose_app(variables)
 
 
 # ----- Helper Functions ----- #
-def handle_errors(vars_):
+def handle_errors(variables):
     log, inst_path = [
-        vars_['log'],
-        vars_['instpath'],
+        variables['log'],
+        variables['instpath'],
     ]
     error = False
 
@@ -195,10 +195,11 @@ def extract_modpack(vars_):
 
 
 
-def retrieve_mods(vars_, pool):
-    tmp, log = [
-        vars_['tmp'],
-        vars_['log']
+def retrieve_mods(variables, pool):
+    tmp, log, inst_path = [
+        variables['tmp'],
+        variables['log'],
+        variables['instpath']
     ]
 
     # Make a plugins folder
@@ -265,15 +266,15 @@ def retrieve(plugin, vars_, plugins_tmp, plugin_percent, stop_processing):
     progressbar.add_percent(plugin_percent)
 
 
-def install_update(vars_, pool):
+def install_update(variables, pool):
     inst_path, tmp, log = [
-        vars_['instpath'],
-        vars_['tmp'],
-        vars_['log']
+        variables['instpath'],
+        variables['tmp'],
+        variables['log']
     ]
 
     # Set up BepInEx
-    setup_bepinex(vars_, pool)
+    setup_bepinex(variables, pool)
 
     # Move BepInEx files
     install_tmp = os.path.join(tmp, 'install')
@@ -312,10 +313,10 @@ def install_update(vars_, pool):
             overwrite(file_path_tmp, file_path_loc)
 
 
-def setup_bepinex(vars_, pool):
+def setup_bepinex(variables, pool):
     tmp, log = [
-        vars_['tmp'],
-        vars_['log']
+        variables['tmp'],
+        variables['log']
     ]
 
     # Paths
