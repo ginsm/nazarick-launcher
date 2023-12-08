@@ -59,7 +59,7 @@ def load_changelog(ctk, changes, game, html_frame):
                 master=changes,
                 command=lambda _, dist, unit: scroll_scrollbar(html_frame, scrollbar, dist, unit)
             )
-            scrollbar.grid(row=0, column=1, pady=10, padx=5, sticky='ns')
+            scrollbar.grid(row=0, column=1, pady=12, padx=12, sticky='ns')
             scrollbar.set(*html_frame.yview()) # Set initial value
 
             # Event handling (scrolling)
