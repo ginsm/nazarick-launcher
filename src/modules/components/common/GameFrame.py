@@ -15,22 +15,21 @@ def create(ctk, app, pool, name, settings, updater):
         anchor='nw',
         border_width=0,
         corner_radius=0,
+        fg_color='transparent',
         command=lambda: store.set_tab(tabs.get())
     )
 
     # Add tabs
-    tabs.add('Changes')
-    tabs.add('Logs')
-    tabs.add('Settings')
+    for tab in ['Changes', 'Logs', 'Settings']:
+        tabs.add(tab)
+        # Configure all tabs columns to occupy entire space
+        tabs.tab(tab).grid_columnconfigure(0, weight=1)
 
-    # Configure how tabs rows/columns
-    tabs.tab('Changes').grid_columnconfigure(0, weight=1)
+    # Configure some tabs rows to occupy entire space
     tabs.tab('Changes').grid_rowconfigure(0, weight=1)
-    tabs.tab('Logs').grid_columnconfigure(0, weight=1)
     tabs.tab('Logs').grid_rowconfigure(0, weight=1)
-    tabs.tab('Settings').grid_columnconfigure(0, weight=1)
 
-    # Configure segmented button appearance (hacky, may break)
+    # Configure segmented button appearance (hacky, may break when ctk updates)
     segmented_buttons = tabs._segmented_button
     segmented_buttons.configure(
         height=36,
