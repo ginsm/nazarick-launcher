@@ -1,5 +1,7 @@
-import os, requests, json, shutil, zipfile
+import os, json, shutil
 from threading import Event
+from modules.providers.ModProviders import ThunderstoreModProvider
+from modules.providers.ModpackProviders import ThunderstoreModpackProvider
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
@@ -16,6 +18,10 @@ def start(ctk, app, pool, widgets):
     log(f'[INFO] Locking user input.')
     view.lock(True)
 
+    # Initiate providers
+    ModpackProvider = ThunderstoreModpackProvider()
+    ModProvider = ThunderstoreModProvider()
+
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('valheim')
     options = store.get_state()
@@ -28,8 +34,9 @@ def start(ctk, app, pool, widgets):
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'valheim'),
         'widgets': widgets,
+        'modprovider': ModProvider,
         'log': log,
-        'version': get_latest_version() if internet_connection else None
+        'version': ModpackProvider.get_latest_version('valheim', 'nazarick-smp') if internet_connection else None
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment
@@ -51,43 +58,49 @@ def start(ctk, app, pool, widgets):
     progressbar.add_percent(task_percent)
     
     if internet_connection and variables.get('version'):
-        if on_latest_version(variables, initial_install):
-            progressbar.add_percent(1 - (task_percent * 2))
-            finalize(variables, task_percent)
-            return
-        progressbar.add_percent(task_percent)
-
-        clean_update_directories(variables)
-        progressbar.add_percent(task_percent)
-
-        download_modpack(variables)
-        progressbar.add_percent(task_percent)
-
-        extract_modpack(variables)
-        progressbar.add_percent(task_percent)
-
-        purge_files(variables, pool, whitelist=['BepInEx/config'])
-        progressbar.add_percent(task_percent)
-
-        # Attempt to retrieve all of the mod files
         try:
+            # Skips update process if they're already on the latest version
+            if on_latest_version(variables):
+                progressbar.add_percent(1 - (task_percent * 2))
+                finalize(variables, task_percent)
+                return
+
+            # Clean up temp directory
+            clean_update_directories(variables)
+            progressbar.add_percent(task_percent)
+
+            # Download latest modpack version
+            ModpackProvider.download(variables)
+            progressbar.add_percent(task_percent)
+
+            # Unzip update to temp directory
+            ModpackProvider.extract(variables, 'Valheim')
+            progressbar.add_percent(task_percent)
+
+            # Purge any files as instructed from modpack archive
+            purge_files(variables, pool, whitelist=['BepInEx/config'])
+            progressbar.add_percent(task_percent)
+
+            # Attempt to retrieve all of the mod files
             retrieve_mods(variables, pool)
+
+            # Install the update into the instance
+            install_update(variables, pool)
+            progressbar.add_percent(task_percent)
+
+            # Store update's version number
+            store_version_number(variables)
+            progressbar.add_percent(task_percent)
+
         except Exception as e:
             widgets.get('tabs').set('Logs')
-            log(f'[ERROR] {e}; terminating update process.', 'error')
-            log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
-            finalize(variables, task_percent)
-            return
-
-        install_update(variables, pool)
-        progressbar.add_percent(task_percent)
-
-        store_version_number(variables)
-        progressbar.add_percent(task_percent)
+            log(f'[WARN] {e}; terminating update process.', 'warning')
+            log('[WARN] You may have trouble connecting to the server.', 'warning')
+        
     elif not variables.get('version'):
         widgets.get('tabs').set('Logs')
-        log('[ERROR] Invalid response from Modrinth (modpack); skipping update process.', 'error')
-        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
+        log('[WARN] Invalid response from Thunderstore (modpack); skipping update process.', 'warning')
+        log('[WARN] You may have trouble connecting to the server.', 'warning')
     else:
         widgets.get('tabs').set('Logs')
         log('[WARN] No internet connection; skipping update process.', 'warning')
@@ -142,58 +155,6 @@ def handle_errors(variables):
 
     return error
 
-# Get latest version from thunderstore.io API
-def get_latest_version():
-    req = requests.get('https://thunderstore.io/api/experimental/package/Syh/Nazarick_Core/')
-
-    if (req.status_code != 200):
-        return False
-
-    data = json.loads(req.text)
-    return {
-        'name': data['full_name'],
-        'version': data['latest']['version_number'],
-        'url': data['latest']['download_url']
-    }
-
-
-def initial_install(_):
-    return
-
-
-def download_modpack(vars_):
-    log, tmp, version = [
-        vars_['log'],
-        vars_['tmp'],
-        vars_['version']
-    ]
-
-    log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
-
-    # Download the mrpack as .zip
-    req = requests.get(version['url'], allow_redirects=True)
-    open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
-
-
-def extract_modpack(vars_):
-    log, tmp = [
-        vars_['log'],
-        vars_['tmp'],
-    ]
-
-    zip_file = os.path.join(tmp, 'update.zip')
-
-    log('[INFO] Extracting the modpack zip.')
-    with zipfile.ZipFile(zip_file, 'r') as ref:
-        ref.extractall(tmp)
-        
-    # Remove update.zip
-    os.remove(zip_file)
-
-    # Move the changelog to its destination
-    extract_modpack_changelog(vars_, 'Valheim')
-
-
 
 def retrieve_mods(variables, pool):
     tmp, log, inst_path = [
@@ -217,7 +178,15 @@ def retrieve_mods(variables, pool):
         log('[INFO] Retrieving modpack dependencies:')
 
         for plugin in plugins:
-            futures.append(pool.submit(retrieve, plugin, vars_, plugins_tmp, plugin_progress_percent, stop_processing))
+            mod_data = {'name': plugin}
+            # These paths are checked for the mod in question; if it exists, it's moved
+            # to the destination.
+            local_paths = [
+                os.path.join(inst_path, 'BepInEx', 'plugins')
+            ]
+            destination = os.path.join(tmp, 'plugins', plugin)
+
+            futures.append(pool.submit(retrieve, mod_data, variables, local_paths, destination, plugin_progress_percent, stop_processing))
 
         result = wait(futures, return_when="FIRST_EXCEPTION")
 
@@ -225,45 +194,6 @@ def retrieve_mods(variables, pool):
             stop_processing.set()
             exception = list(result.done)[-1].exception()
             raise Exception(exception)
-
-
-def retrieve(plugin, vars_, plugins_tmp, plugin_percent, stop_processing):
-    log, inst_path, widgets = [
-        vars_['log'],
-        vars_['instpath'],
-        vars_['widgets']
-    ]
-    progressbar = widgets.get('progressbar')
-
-    plugin_url = f"https://thunderstore.io/package/download/{plugin.replace('-', '/')}"
-    plugin_zip = os.path.join(plugins_tmp, f'{plugin}.zip')
-    tmp_plugin_dir = os.path.join(plugins_tmp, plugin)
-    loc_plugin_dir = os.path.join(inst_path, 'BepInEx', 'plugins', plugin)
-
-    if stop_processing.is_set():
-        return
-
-    # Move plugin if it already exists locally
-    if os.path.isdir(loc_plugin_dir):
-        log(f'[INFO] (M) {plugin}')
-        if not os.path.exists(tmp_plugin_dir):
-            shutil.move(loc_plugin_dir, tmp_plugin_dir)
-    # Download zip then extract and delete it
-    else:
-        req = requests.get(plugin_url, allow_redirects=True)
-
-        if req.status_code == 200:
-            log(f'[INFO] (D) {plugin}')
-            open(plugin_zip, 'wb').write(req.content)
-
-            with zipfile.ZipFile(plugin_zip, 'r') as ref:
-                ref.extractall(tmp_plugin_dir)
-
-            os.remove(plugin_zip)
-        else:
-            raise Exception(f'Invalid response from Thunderstore ({plugin})')
-
-    progressbar.add_percent(plugin_percent)
 
 
 def install_update(variables, pool):

@@ -1,8 +1,10 @@
-import os, json, zipfile, shutil, requests
+import os, json, shutil
 from concurrent.futures import wait
 from threading import Event
 from modules import view, store, utility
 from modules.updater.common import *
+from modules.providers.ModpackProviders import SelfHostedMinecraftModpackProvider
+from modules.providers.ModProviders import ModrinthModProvider
 
 # ----- Main Functions ----- #
 def start(ctk, app, pool, widgets):
@@ -17,6 +19,10 @@ def start(ctk, app, pool, widgets):
     log(f'[INFO] Locking user input.')
     view.lock(True)
 
+    # Initiate providers
+    ModpackProvider = SelfHostedMinecraftModpackProvider()
+    ModProvider = ModrinthModProvider()
+
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('minecraft')
     options = store.get_state()
@@ -30,8 +36,9 @@ def start(ctk, app, pool, widgets):
         'root': utility.get_env('nazpath'),
         'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
         'widgets': widgets,
+        'modprovider': ModProvider,
         'log': log,
-        'version': get_latest_version('1.20.1') if internet_connection else None,
+        'version': ModpackProvider.get_latest_version('minecraft', 'nazarick-smp') if internet_connection else None,
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment
@@ -53,50 +60,51 @@ def start(ctk, app, pool, widgets):
     # This is ran after each task (aside from retrieve_mods)
     progressbar.add_percent(task_percent)
     
-    # Skip updating process if nuver is equal to latest ver
     if internet_connection and variables.get('version'):
-        if (on_latest_version(variables, initial_install)):
-            progressbar.add_percent(1 - (task_percent * 2))
-            finalize(variables, task_percent)
-            return
-
-        # Clean up temp directory
-        clean_update_directories(variables)
-        progressbar.add_percent(task_percent)
-
-        # Download latest modpack version
-        download_modpack(variables)
-        progressbar.add_percent(task_percent)
-
-        # Unzip update to temp directory
-        extract_modpack(variables)
-        progressbar.add_percent(task_percent)
-
-        # Purge any files as instructed from modpack archive
-        purge_files(variables, pool, whitelist=['config', 'shaderpacks'])
-        progressbar.add_percent(task_percent)
-
-        # Attempt to retrieve all of the mod files
         try:
+            # Skips update process if they're already on the latest version
+            if (on_latest_version(variables, ModpackProvider.initial_install)):
+                progressbar.add_percent(1 - (task_percent * 2))
+                finalize(variables, task_percent)
+                return
+
+            # Clean up temp directory
+            clean_update_directories(variables)
+            progressbar.add_percent(task_percent)
+
+            # Download latest modpack version
+            ModpackProvider.download(variables)
+            progressbar.add_percent(task_percent)
+
+            # Unzip update to temp directory
+            ModpackProvider.extract(variables, 'Minecraft')
+            progressbar.add_percent(task_percent)
+
+            # Purge any files as instructed from modpack archive
+            purge_files(variables, pool, whitelist=['config', 'shaderpacks'])
+            progressbar.add_percent(task_percent)
+
+            # Attempt to retrieve all of the mod files
             retrieve_mods(variables, pool)
+
+            # Install the update into the instance
+            install_update(variables)
+            progressbar.add_percent(task_percent)
+
+            # Store update's version number
+            store_version_number(variables)
+            progressbar.add_percent(task_percent)
+
         except Exception as e:
             widgets.get('tabs').set('Logs')
-            log(f'[ERROR] {e}; terminating update process.', 'error')
-            log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
-            finalize(variables, task_percent)
-            return
+            log(f'[WARN] {e}; terminating update process.', 'warning')
+            log('[WARN] You may have trouble connecting to the server.', 'warning')
 
-        # Install the update into the instance
-        install_update(variables)
-        progressbar.add_percent(task_percent)
-
-        # Store update's version number
-        store_version_number(variables)
-        progressbar.add_percent(task_percent)
     elif not variables.get('version'):
         widgets.get('tabs').set('Logs')
-        log('[ERROR] Invalid response from Modrinth (modpack); skipping update process.', 'error')
-        log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
+        log('[WARN] Invalid response from Modrinth (modpack); skipping update process.', 'warning')
+        log('[WARN] You may have trouble connecting to the server.', 'warning')
+
     else:
         widgets.get('tabs').set('Logs')
         log('[WARN] No internet connection; skipping update process.', 'warning')
@@ -165,70 +173,6 @@ def handle_errors(variables):
     return error
 
 
-def get_latest_version(version):
-    def parse_json(obj):
-        return {
-            'name': ' '.join(obj['name'].split(" ")[:-1]),
-            'url': obj['files'][0]['url'],
-            'version': obj['version_number']
-        }
-    
-    req = requests.get(f'https://api.modrinth.com/v2/project/nazarick-smp/version?game_versions=["{version}"]', timeout=20)
-    
-    if (req.status_code != 200):
-        return False
-
-    data = json.loads(req.text)
-    parsed = list(map(parse_json, data))
-    return parsed[0]
-
-
-def initial_install(vars_):
-    inst_path = vars_['instpath']
-    configpath = os.path.join(inst_path, 'config')
-    modspath = os.path.join(inst_path, 'mods')
-
-    def move_existing_files(path):
-        if os.path.exists(path):
-            os.rename(path, f'{path}-old')
-
-    move_existing_files(configpath)
-    move_existing_files(modspath)
-
-
-def download_modpack(vars_):
-    log, tmp, version = [
-        vars_['log'],
-        vars_['tmp'],
-        vars_['version']
-    ]
-
-    log(f'[INFO] Downloading latest version: {version['name']} v{version['version']}.')
-
-    # Download the mrpack as .zip
-    req = requests.get(version['url'], allow_redirects=True)
-    open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
-
-
-def extract_modpack(vars_):
-    log, tmp = [
-        vars_['log'],
-        vars_['tmp'],
-    ]
-
-    zip_file = os.path.join(tmp, 'update.zip')
-
-    log('[INFO] Extracting the modpack zip.')
-    with zipfile.ZipFile(zip_file, 'r') as ref:
-        ref.extractall(tmp)
-    
-    # Remove update.zip
-    os.remove(zip_file)
-
-    # Move the changelog to its destination
-    extract_modpack_changelog(vars_, 'Minecraft')
-
-
 def retrieve_mods(variables, pool):
     tmp, log, inst_path = [
         variables['tmp'],
@@ -247,7 +191,19 @@ def retrieve_mods(variables, pool):
         log('[INFO] Retrieving any mods not present in the modpack zip:')
 
         for mod in mods:
-            futures.append(pool.submit(retrieve, mod, vars_, mod_progress_percent, stop_processing))
+            # Assign name key to mod data (used in retrieve and provider.download).
+            file_name = os.path.split(mod.get('path'))[1]
+            mod['name'] = file_name
+
+            # These paths are checked for the mod in question; if it exists, it's moved
+            # to the destination.
+            local_paths = [
+                os.path.join(inst_path, 'mods'),
+                os.path.join(inst_path, 'mods-old')
+            ]
+            destination = os.path.join(tmp, 'overrides', 'mods', file_name)
+
+            futures.append(pool.submit(retrieve, mod, variables, local_paths, destination, mod_progress_percent, stop_processing))
 
         result = wait(futures, return_when="FIRST_EXCEPTION")
 
@@ -255,47 +211,6 @@ def retrieve_mods(variables, pool):
             stop_processing.set()
             exception = list(result.done)[-1].exception()
             raise Exception(exception)
-
-
-def retrieve(mod, vars_, mod_percent, stop_processing):
-    _, name = os.path.split(mod['path'])
-    log, inst_path, tmp, widgets = [
-        vars_['log'],
-        vars_['instpath'],
-        vars_['tmp'],
-        vars_['widgets']
-    ]
-    progressbar = widgets.get('progressbar')
-
-    # Split path to get mod name and join with instpath
-    local_path = os.path.join(inst_path, 'mods', name)
-    local_path_old = os.path.join(inst_path, 'mods-old', name)
-    destination = os.path.join(tmp, 'overrides', 'mods', name)
-
-    if stop_processing.is_set():
-        return
-
-    # Move file if it exists locally
-    if os.path.isfile(local_path):
-        log(f'[INFO] (M) {name.split('.jar')[0]}.')
-        if not os.path.isfile(destination):
-            shutil.move(local_path, destination)
-    # Move file if it exists locally (initial install)
-    elif os.path.isfile(local_path_old):
-        log(f'[INFO] (C) {name.split('.jar')[0]}.')
-        if not os.path.isfile(destination):
-            shutil.copyfile(local_path_old, destination)
-    # Download mod
-    else:
-        req = requests.get(mod['downloads'][0], allow_redirects=True)
-
-        if req.status_code == 200:
-            log(f'[INFO] (D) {name.split('.jar')[0]}.')
-            open(destination, 'wb').write(req.content)
-        else:
-            raise Exception(f'Invalid response from Modrinth ({name.split('.jar')[0]})')
-    
-    progressbar.add_percent(mod_percent)
 
 
 def install_update(variables):

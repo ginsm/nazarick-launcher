@@ -213,3 +213,31 @@ def autoclose_app(variables):
     if options['autoclose']:
         log('[INFO] Auto close is enabled; closing app.')
         app.quit()
+
+
+def retrieve(mod_data, variables, local_paths, destination, progress_percent, stop_processing):
+    log, ModProvider, widgets = [
+        variables['log'],
+        variables['modprovider'],
+        variables['widgets']
+    ]
+
+    name = mod_data.get('name')
+    progressbar = widgets.get('progressbar')
+
+    if stop_processing.is_set():
+        return
+    
+    # Move any local files to the destination
+    for local_path in local_paths:
+        local_file_path = os.path.join(local_path, name)
+        if os.path.exists(local_file_path):
+            if not os.path.exists(destination):
+                log(f'[INFO] (M) {name}')
+                shutil.move(local_file_path, destination)
+
+    # Download the mod
+    if not os.path.exists(destination):
+        ModProvider.download(log, mod_data, destination)
+
+    progressbar.add_percent(progress_percent)
