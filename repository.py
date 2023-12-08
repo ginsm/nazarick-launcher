@@ -7,7 +7,7 @@ from tufup.repo import (
     DEFAULT_KEYS_DIR_NAME, 
     DEFAULT_REPO_DIR_NAME
 )
-from src.modules.tufup import APP_NAME, APP_VERSION
+from src.modules.constants import APP_NAME, APP_VERSION
 
 def run_operation():
     # Get operation and run accompanying function

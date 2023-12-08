@@ -2,7 +2,7 @@ import os, shutil, json, subprocess
 from concurrent.futures import wait
 from modules import utility
 from modules.components.common import ChangesBox
-from modules.tufup import BASE_DIR
+from modules import constants
 
 
 # ---- LOCAL VERSION CHECKING ---- #
@@ -114,7 +114,7 @@ def extract_modpack_changelog(variables, game):
 
     # Move the changelog to its destination
     changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
-    changelog_dest = os.path.join(BASE_DIR, 'assets', game, 'CHANGELOG.md')
+    changelog_dest = os.path.join(constants.APP_BASE_DIR, 'assets', game, 'CHANGELOG.md')
 
     if os.path.exists(changelog_tmp):
         os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)

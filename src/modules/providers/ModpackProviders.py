@@ -2,6 +2,7 @@ import json
 import os
 import requests
 from modules.providers.ModpackProviderAbstract import ModpackProviderAbstract
+from modules import constants
 
 # ANCHOR Self Hosted (Multiple Games)
 class SelfHostedModpackProvider(ModpackProviderAbstract):
@@ -15,8 +16,7 @@ class SelfHostedModpackProvider(ModpackProviderAbstract):
         super().extract(variables, game)
 
     def get_latest_version(self, game, pack):
-        # TODO - Probably make a constants file and put this in there
-        website = 'https://mgin.me/nazarick-launcher/'
+        website = constants.SELFHOSTED_WEBSITE
         req = requests.get(f'{website}/modpacks/manifest.json')
 
         if (req.status_code != 200):

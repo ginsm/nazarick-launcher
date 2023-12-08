@@ -12,3 +12,4 @@ keystore
 .tufup-repo-config
 src/assets/Valheim
 src/assets/Minecraft
+.env

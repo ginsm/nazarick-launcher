@@ -3,7 +3,7 @@ import webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import game_list, utility, view, store, tufup, version_upgrader, theme_list
+from modules import game_list, utility, view, store, tufup, constants, version_upgrader, theme_list
 from modules.components import AppWindow, AppSideBar, SettingsFrame
 from modules.components.common import GameFrame, InfoModal
 
@@ -11,7 +11,7 @@ frames = []
 
 def main():
     # Store the mod's path in environment
-    utility.set_env('nazpath', tufup.BASE_DIR.as_posix())
+    utility.set_env('nazpath', constants.APP_BASE_DIR.as_posix())
 
     # Upgrade the app (converts old version conventions to newer ones)
     version_upgrader.run()
@@ -36,23 +36,23 @@ def main():
     ctk.set_default_color_theme(theme.get('name'))
 
     # Initialize tufup and check for updates (only if bundled)
-    if tufup.FROZEN:
+    if constants.APP_BUNDLED:
         tufup_status = tufup.init(initial_state)
     else:
-        tufup_status = tufup.SUCCESS
+        tufup_status = tufup.INIT_SUCCESS
 
     # Initialize the thread pool executor
     threadamount = initial_state.get('threadamount') or 4
     pool = ThreadPoolExecutor(max_workers=threadamount - 1)
 
     # Top level components
-    app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), tufup.APP_NAME)
+    app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), constants.APP_NAME)
 
     # Create frames
     create_frames(ctk, app, pool, initial_state)
 
     # Handle tufup running into issues
-    if tufup_status == tufup.FAILED:
+    if tufup_status == tufup.INIT_FAILED:
         border_color = ThemeManager.theme.get('CTkCheckBox').get('border_color')
         InfoModal.create(
             ctk=ctk,
@@ -68,7 +68,7 @@ def main():
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    broadcast(f'[INFO] The app has finished initializing ({tufup.APP_VERSION}).')
+    broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
 
     # Main loop
     app.mainloop()

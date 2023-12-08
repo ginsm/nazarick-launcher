@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 from customtkinter.windows.widgets.theme import ThemeManager
-from modules.tufup import BASE_DIR
+from modules import constants
 from modules import store
 
 frame_buttons = []
@@ -36,7 +36,7 @@ def create(ctk, parent, frames):
 
 def FrameButton(ctk, master, name, frames, frame, size):
     # Image directory
-    IMAGE_DIR = BASE_DIR / 'assets' / 'icons'
+    IMAGE_DIR = constants.APP_BASE_DIR / 'assets' / 'icons'
 
     # Create frame image
     frame_image = ctk.CTkImage(

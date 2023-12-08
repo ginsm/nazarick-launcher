@@ -33,7 +33,6 @@ class ModpackProviderAbstract(ABC):
         
         return req
 
-    #REVIEW - Maybe this should be moved to updater/common.py?
     @abstractmethod
     def extract(self, variables, game):
         log, tmp = [

@@ -4,9 +4,8 @@ from tkinter import filedialog
 from tktooltip import ToolTip
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import store, utility
+from modules import store, utility, constants
 from modules.debounce import debounce
-from modules.tufup import BASE_DIR
 from modules.components.common import InfoModal
 
 def create(ctk, master, app, label, placeholder, name, find, game=''):
@@ -28,7 +27,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
     icon_size = 18
 
     # Images
-    IMAGE_DIR = BASE_DIR / 'assets' / 'icons'
+    IMAGE_DIR = constants.APP_BASE_DIR / 'assets' / 'icons'
     search_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'zoom.png')), size=(icon_size, icon_size))
     open_image = ctk.CTkImage(Image.open(os.path.join(IMAGE_DIR, 'folder.png')), size=(icon_size, icon_size))
 

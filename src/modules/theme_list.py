@@ -1,5 +1,5 @@
 import os
-from modules.tufup import BASE_DIR
+from modules import constants
 
 def get_themes():
     return [
@@ -20,7 +20,7 @@ def get_themes():
 
 
 def custom_theme(name):
-    return os.path.join(BASE_DIR, 'assets', 'themes', f'{name}.json')
+    return os.path.join(constants.APP_BASE_DIR, 'assets', 'themes', f'{name}.json')
 
 
 def get_theme_from_title(title):
