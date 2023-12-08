@@ -62,7 +62,7 @@ class ThunderstoreModpackProvider(ModpackProviderAbstract):
     # to this method in valheim_updater. *_ just denotes that any arguments passed
     # are unused.
     def get_latest_version(self, *_):
-        req = requests.get('https://thunderstore.io/api/experimental/package/Syh/Nazarick_Core/')
+        req = requests.get(f'https://thunderstore.io/api/experimental/package/{constants.THUNDERSTORE_PACKAGE}')
 
         if (req.status_code != 200):
             return False
