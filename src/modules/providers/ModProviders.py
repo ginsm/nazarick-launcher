@@ -1,11 +1,12 @@
 import requests, os, zipfile
+from modules import constants
 from modules.providers.ModProviderAbstract import ModProviderAbstract
 
 # ANCHOR CurseForge (Minecraft)
 # TODO - Make this actually functional/useful.
 class CurseForgeModProvider(ModProviderAbstract):
-    def __init__(self, api_key):
-        self.api_key = api_key
+    def __init__(self):
+        self.api_key = constants.CURSEFORGE_API_KEY
 
     def get_download_url(self, mod_data):
         mod_id, file_id = [
