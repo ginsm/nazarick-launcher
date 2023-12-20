@@ -57,7 +57,7 @@ def load_changelog(ctk, changes, game, html_frame):
             # Create scrollbar and bind necessary events
             scrollbar = ctk.CTkScrollbar(
                 master=changes,
-                command=lambda _, dist, unit: scroll_scrollbar(html_frame, scrollbar, dist, unit)
+                command=lambda _, location: scroll_drag(html_frame, scrollbar, location)
             )
             scrollbar.grid(row=0, column=1, pady=12, padx=12, sticky='ns')
             scrollbar.set(*html_frame.yview()) # Set initial value
@@ -79,8 +79,8 @@ def scroll_event(event, frame, scrollbar):
     scrollbar.set(*frame.yview())
     frame.scroll(event)
 
-def scroll_scrollbar(frame, scrollbar, dist, unit):
-    frame.yview_scroll(dist, unit)
+def scroll_drag(frame, scrollbar, new_location):
+    frame.yview_moveto(new_location)
     scrollbar.set(*frame.yview())
 
 
