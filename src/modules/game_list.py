@@ -1,4 +1,4 @@
-from modules.updater import minecraft_updater, valheim_updater
+from modules.updater import minecraft_updater, valheim_updater, enshrouded_updater
 
 
 LIST = [
@@ -31,5 +31,17 @@ LIST = [
             },
         ],
         'updater': valheim_updater,
+    },
+    {
+        'name': 'Enshrouded',
+        'settings': [
+            {
+                'name': 'install',
+                'type': 'directory',
+                'label': 'Install Path',
+                'placeholder': 'Enter the path to your Enshrouded install.',
+            }
+        ],
+        'updater': enshrouded_updater,
     }
 ]
