@@ -91,7 +91,7 @@ def set_tab(tab):
 def get_selected_pack(game=""):
     state = get_state()
     game = game or get_frame()
-    return state['games'][game]['selectedpack']
+    return state['games'][game]['selectedpack'] if game in state['games'] else 'nazarick-smp'
 
 def set_selected_pack(pack):
     if bool(pack):
@@ -104,16 +104,27 @@ def set_selected_pack(pack):
 # Game state getter/setter
 def get_game_state(game=""):
     game = game or get_frame()
-    pack = get_selected_pack(game)
     state = get_state()
-    return state['games'][game][pack]
+    if game in state['games']: 
+        pack = get_selected_pack(game)
+        return state['games'][game][pack]
+    else:
+        return {}
 
 def set_game_state(obj):
     if bool(obj):
         game = get_frame()
         pack = get_selected_pack()
         state = get_state()
-        state['games'][game][pack].update(obj)
+        if game in state['games']:
+            state['games'][game][pack].update(obj)
+        else:
+            state['games'].update({
+                game: 
+                {
+                    "selectedpack": pack,
+                    pack: obj}
+            })
         set_state(state)
 
 def get_game_paths():
