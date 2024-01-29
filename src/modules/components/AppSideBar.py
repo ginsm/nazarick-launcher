@@ -11,7 +11,9 @@ def create(ctk, parent, frames):
     pad=10
 
     # Create frame
-    sidebar = ctk.CTkFrame(master=parent, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'), height=icon_size + pad)
+    sidebar = ctk.CTkFrame(master=parent, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'))
+    sidebar.grid_columnconfigure(0, weight=1)
+    sidebar.grid_rowconfigure(3, weight=1)
 
     # Create buttons
     for frame in frames:
@@ -20,16 +22,18 @@ def create(ctk, parent, frames):
         # Create button
         button = FrameButton(
             ctk=ctk,
-            master=parent,
+            master=sidebar,
             name=frame['name'],
             frames=frames,
             frame=frame['frame'],
             size=icon_size
         )
-        button.grid(column=0, row=len(frame_buttons), sticky='n', ipady=pad, ipadx=pad * 2)
+        
+        button.grid(column=0, row=len(frame_buttons), sticky='nsew', ipady=pad, ipadx=pad * 2)
 
         # Add button to global frame_buttons
         frame_buttons.append({'name': frame['name'], 'button': button})
+
 
     return sidebar
 
@@ -84,7 +88,7 @@ def select_frame(frame_name, frames, frame):
     frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
 
     for f in frames:
-        if f['name'] != frame_name:
+        if f['name'] != frame_name and f['name'] != 'Sidebar':
             f['frame'].grid_forget()
 
     # Set the frame in store
