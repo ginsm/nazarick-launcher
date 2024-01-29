@@ -46,6 +46,12 @@ class SelfHostedMinecraftModpackProvider(SelfHostedModpackProvider):
         move_existing_files(configpath)
         move_existing_files(modspath)
 
+    def move_custom_mods(self, variables, mod_index):
+        instance_path = variables['instpath']
+        mods_dir = os.path.join(instance_path, 'mods')
+        
+        super().move_custom_mods(mods_dir, variables, mod_index)
+
 
 # ANCHOR Thunderstore (Valheim)
 class ThunderstoreModpackProvider(ModpackProviderAbstract):
@@ -57,6 +63,13 @@ class ThunderstoreModpackProvider(ModpackProviderAbstract):
 
     def extract(self, variables, game):
         super().extract(variables, game)
+
+    def move_custom_mods(self, variables, mod_index):
+        install_path = variables['instpath']
+        plugins_dir = os.path.join(install_path, 'BepInEx', 'plugins')
+        ignore = ['Valheim.DisplayBepInExInfo.dll']
+
+        super().move_custom_mods(plugins_dir, variables, mod_index, ignore)
 
     # In order to keep the providers consistent, I'll be passing 'game' and 'pack'
     # to this method in valheim_updater. *_ just denotes that any arguments passed

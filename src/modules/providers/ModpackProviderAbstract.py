@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+import shutil
 import zipfile
 
 import requests
@@ -8,12 +9,39 @@ from modules.updater.common import extract_modpack_changelog
 
 class ModpackProviderAbstract(ABC):
     @abstractmethod
-    def get_latest_version():
+    def get_latest_version(self):
         raise NotImplementedError
     
     @abstractmethod
-    def initial_install():
+    def initial_install(self):
         raise NotImplementedError
+    
+    @abstractmethod
+    def move_custom_mods(self, mods_dir = '', variables = {}, mod_index = [], ignore = []):
+        log, tmp = [
+            variables['log'],
+            variables['tmp']
+        ]
+
+        log('[INFO] Moving user added mods.')
+
+        destination = os.path.join(tmp, 'custommods')
+
+        # Create custommods directory
+        os.makedirs(destination, exist_ok=True)
+
+        mods = os.listdir(mods_dir)
+
+        # This is needed to prevent file being used by another process error
+        os.chdir(tmp)
+
+        for mod in mods:
+            if mod not in mod_index and mod not in ignore:
+                log(f'[INFO] (M) {mod}')
+                shutil.move(
+                    os.path.join(mods_dir, mod),
+                    os.path.join(destination, mod)
+                )
 
     @abstractmethod
     def download(self, variables):

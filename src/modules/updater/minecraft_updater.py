@@ -43,7 +43,7 @@ def start(ctk, app, pool, widgets):
 
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar
-    task_percent = 0.25 / 9
+    task_percent = 0.25 / 10
     progressbar = widgets.get('progressbar')
 
     # Error Handling
@@ -85,14 +85,23 @@ def start(ctk, app, pool, widgets):
             progressbar.add_percent(task_percent)
 
             # Attempt to retrieve all of the mod files
-            retrieve_mods(variables, pool)
+            mod_index = retrieve_mods(variables, pool)
+
+            # Get version data and move custom mods
+            version_data = get_version_data(variables)
+            if version_data.get('mod_index'):
+                ModpackProvider.move_custom_mods(
+                    variables,
+                    version_data.get('mod_index')
+                )
+            progressbar.add_percent(task_percent)
 
             # Install the update into the instance
             install_update(variables)
             progressbar.add_percent(task_percent)
 
             # Store update's version number
-            store_version_number(variables)
+            store_version_data(variables, mod_index)
             progressbar.add_percent(task_percent)
 
         except Exception as e:
@@ -180,6 +189,8 @@ def retrieve_mods(variables, pool):
         variables['instpath']
     ]
 
+    mods_tmp = os.path.join(tmp, 'overrides', 'mods')
+
     # read modrinth.index.json
     with open(os.path.join(tmp, 'modrinth.index.json'), 'rb') as f:
         mods = json.loads(f.read().decode('UTF-8'))['files']
@@ -188,7 +199,7 @@ def retrieve_mods(variables, pool):
 
         stop_processing = Event()
 
-        log('[INFO] Retrieving any mods not present in the modpack zip:')
+        log('[INFO] Retrieving modpack dependencies')
 
         for mod in mods:
             # Assign name key to mod data (used in retrieve and provider.download).
@@ -199,9 +210,10 @@ def retrieve_mods(variables, pool):
             # to the destination.
             local_paths = [
                 os.path.join(inst_path, 'mods'),
-                os.path.join(inst_path, 'mods-old')
+                os.path.join(inst_path, 'mods-old'),
+                mods_tmp
             ]
-            destination = os.path.join(tmp, 'overrides', 'mods', file_name)
+            destination = os.path.join(mods_tmp, file_name)
 
             futures.append(pool.submit(retrieve, mod, variables, local_paths, destination, mod_progress_percent, stop_processing))
 
@@ -211,8 +223,14 @@ def retrieve_mods(variables, pool):
             stop_processing.set()
             exception = list(result.done)[-1].exception()
             raise Exception(exception)
+        
+    all_mods = os.listdir(mods_tmp)
+    os.chdir(tmp)
+        
+    return all_mods
 
 
+# TODO - Move custom mods to the instance location when installing
 def install_update(variables):
     inst_path, tmp, log = [
         variables['instpath'],
@@ -226,15 +244,29 @@ def install_update(variables):
     yosbr_path = os.path.join(inst_path, 'config', 'yosbr')
     mods_tmp = os.path.join(tmp, 'overrides', 'mods')
     config_tmp = os.path.join(tmp, 'overrides', 'config')
+    custommods_tmp = os.path.join(tmp, 'custommods')
+
+    log('[INFO] Installing the modpack to the specified instance path.')
+
+    # Move user added mods to the tmp path
+    custommods = os.listdir(custommods_tmp)
+    os.chdir(tmp)
+    
+    if os.path.exists(custommods_tmp):
+        for mod in custommods:
+            shutil.move(
+                os.path.join(custommods_tmp, mod),
+                os.path.join(mods_tmp, mod)
+            )
 
     # Remove old mods path and move updated mods to instance
-    log('[INFO] Moving updated mods into the provided instance location.')
     if (os.path.exists(mods_dest)):
+        os.chdir(tmp) # Make sure program is not in mods dest
         shutil.rmtree(mods_dest)
+
     shutil.move(mods_tmp, mods_dest)
 
     # Remove yosbr and move updated configs to instance
-    log('[INFO] Moving updated configs into the provided instance location.')
     if (os.path.exists(yosbr_path)):
         shutil.rmtree(yosbr_path)
 

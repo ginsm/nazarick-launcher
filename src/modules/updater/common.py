@@ -5,8 +5,8 @@ from modules.components.common import ChangesBox
 from modules import constants
 
 
-# ---- LOCAL VERSION CHECKING ---- #
-def store_version_number(variables):
+# ANCHOR - Version Related Methods
+def store_version_data(variables, mod_index):
     version, log, inst_path = [
         variables['version'],
         variables['log'],
@@ -15,11 +15,25 @@ def store_version_number(variables):
 
     data = json.dumps({
         'name': version['name'],
-        'version': version['version']
+        'version': version['version'],
+        'mod_index': mod_index
     })
 
     log(f'[INFO] Storing new version ID for future ref: {version['name']} ({version['version']}).')
     open(os.path.join(inst_path, 'nazarick.json'), 'w').write(data)
+
+
+def get_version_data(variables):
+    inst_path = variables['instpath']
+
+    nazarick_path = os.path.join(inst_path, 'nazarick.json')
+
+    if os.path.exists(nazarick_path):
+        with open(nazarick_path, 'rb') as f:
+            data = json.loads(f.read().decode('UTF-8'))
+        return data
+    
+    return {}
 
 
 def on_latest_version(variables, initial_install_fn = None):
@@ -64,7 +78,7 @@ def convert_to_new_version_format(variables):
     if os.path.exists(nuver_path):
         with open(nuver_path, 'rb') as f:
             stored_version = f.read().decode('UTF-8').split(" ")
-            store_version_number({
+            store_version_data({
                 'version': {
                     'name': ' '.join(stored_version[:-1]),
                     'version': stored_version[-1]
@@ -77,7 +91,7 @@ def convert_to_new_version_format(variables):
         os.remove(nuver_path)
 
 
-# ---- FILE MANIPULATION ---- #
+# ANCHOR - File Manipulation
 def purge_files(variables, pool, whitelist):
     log, inst_path, tmp = [
         variables['log'],
@@ -95,7 +109,7 @@ def purge_files(variables, pool, whitelist):
             delete = obj.get('purge')
 
             if bool(delete):
-                log('[INFO] Purging obsolete files:')
+                log('[INFO] Purging requested files.')
                 futures = []
 
                 for file_ in delete:
@@ -179,10 +193,18 @@ def clean_update_directories(variables):
         variables['log']
     ]
             
-    # Delete any existing tmp directory
+    # Remove any files not in whitelist do_not_clean
     if os.path.exists(tmp):
         log('[INFO] Cleaning the tmp directory.')
-        shutil.rmtree(tmp)
+        do_not_clean = ['custommods']
+
+        # Cleanup tmp dir
+        files = os.listdir(tmp)
+        for f in files:
+            if f not in do_not_clean:
+                file_path = os.path.join(tmp, f)
+                rm_func = shutil.rmtree if os.path.isdir(file_path) else os.remove
+                rm_func(file_path)
     else:
         log('[INFO] Creating the tmp directory.')
 
@@ -190,7 +212,7 @@ def clean_update_directories(variables):
     os.makedirs(tmp, exist_ok=True)
 
 
-# ---- Finalize Methods ---- #
+# ANCHOR -  Finalize Methods
 def run_executable(exe_name, debug, log, command):
     # Debug mode stops exe from launching
     if not debug:
@@ -216,8 +238,9 @@ def autoclose_app(variables):
 
 
 def retrieve(mod_data, variables, local_paths, destination, progress_percent, stop_processing):
-    log, ModProvider, widgets = [
+    log, tmp, ModProvider, widgets = [
         variables['log'],
+        variables['tmp'],
         variables['modprovider'],
         variables['widgets']
     ]
@@ -235,6 +258,9 @@ def retrieve(mod_data, variables, local_paths, destination, progress_percent, st
             if not os.path.exists(destination):
                 log(f'[INFO] (M) {name}')
                 shutil.move(local_file_path, destination)
+
+    # Change to tmp to free all local paths
+    os.chdir(tmp)
 
     # Download the mod
     if not os.path.exists(destination):

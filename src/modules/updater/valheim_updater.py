@@ -41,7 +41,7 @@ def start(ctk, app, pool, widgets):
 
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar.
-    task_percent = 0.25 / 9
+    task_percent = 0.25 / 10
     progressbar = widgets.get('progressbar')
 
     if handle_errors(variables):
@@ -81,15 +81,26 @@ def start(ctk, app, pool, widgets):
             purge_files(variables, pool, whitelist=['BepInEx/config'])
             progressbar.add_percent(task_percent)
 
-            # Attempt to retrieve all of the mod files
-            retrieve_mods(variables, pool)
+            # Attempt to retrieve all of the mod files.
+            # Returns the mod index, aka a list of all mods in the pack; this is
+            # used for custom mods.
+            mod_index = retrieve_mods(variables, pool)
+
+            # Get version data and move custom mods
+            version_data = get_version_data(variables)
+            if version_data.get('mod_index'):
+                ModpackProvider.move_custom_mods(
+                    variables,
+                    version_data.get('mod_index')
+                )
+            progressbar.add_percent(task_percent)
 
             # Install the update into the instance
             install_update(variables, pool)
             progressbar.add_percent(task_percent)
 
             # Store update's version number
-            store_version_number(variables)
+            store_version_data(variables, mod_index)
             progressbar.add_percent(task_percent)
 
         except Exception as e:
@@ -175,7 +186,7 @@ def retrieve_mods(variables, pool):
 
         stop_processing = Event()
 
-        log('[INFO] Retrieving modpack dependencies:')
+        log('[INFO] Retrieving modpack dependencies.')
 
         for plugin in plugins:
             mod_data = {'name': plugin}
@@ -194,6 +205,8 @@ def retrieve_mods(variables, pool):
             stop_processing.set()
             exception = list(result.done)[-1].exception()
             raise Exception(exception)
+    
+    return os.listdir(plugins_tmp)
 
 
 def install_update(variables, pool):
@@ -252,6 +265,7 @@ def setup_bepinex(variables, pool):
     # Paths
     plugins_tmp = os.path.join(tmp, 'plugins')
     config_tmp = os.path.join(tmp, 'config')
+    custommods_tmp = os.path.join(tmp, 'custommods')
     install_tmp = os.path.join(tmp, 'install')
 
     # Make install directory
@@ -277,11 +291,12 @@ def setup_bepinex(variables, pool):
             
             # Remove BepInEx directory
             shutil.rmtree(os.path.join(plugins_tmp, plugin))
-    
+            break
 
     # Move plugins and configs to new BepInEx structure
     futures = []
 
+    # Move plugins
     for plugin in os.listdir(plugins_tmp):
         futures.append(pool.submit(
             shutil.move,
@@ -289,11 +304,21 @@ def setup_bepinex(variables, pool):
             os.path.join(install_tmp, 'BepInEx', 'plugins', plugin)
         ))
 
+    # Move configs
     for config in os.listdir(config_tmp):
         futures.append(pool.submit(
             shutil.move,
             os.path.join(config_tmp, config),
             os.path.join(install_tmp, 'BepInEx', 'config', config)
         ))
+
+    # Move custom plugins
+    if os.path.exists(custommods_tmp):
+        for plugin in os.listdir(custommods_tmp):
+            futures.append(pool.submit(
+                shutil.move,
+                os.path.join(custommods_tmp, plugin),
+                os.path.join(install_tmp, 'BepInEx', 'plugins', plugin)
+            ))
 
     wait(futures)
