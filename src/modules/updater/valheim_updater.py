@@ -7,7 +7,7 @@ from concurrent.futures import wait
 from modules import view, utility, store
 
 def start(ctk, app, pool, widgets):
-    # Definet he logging function
+    # Define the logging function
     log = widgets.get('logbox').get('log')
 
     # Start logs
