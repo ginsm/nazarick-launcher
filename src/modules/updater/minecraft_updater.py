@@ -43,7 +43,7 @@ def start(ctk, app, pool, widgets):
 
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar
-    task_percent = 0.25 / 10
+    task_percent = 0.25 / 9
     progressbar = widgets.get('progressbar')
 
     # Error Handling
@@ -88,13 +88,13 @@ def start(ctk, app, pool, widgets):
             mod_index = retrieve_mods(variables, pool)
 
             # Get version data and move custom mods
-            version_data = get_version_data(variables)
-            if version_data.get('mod_index'):
-                ModpackProvider.move_custom_mods(
-                    variables,
-                    version_data.get('mod_index')
-                )
-            progressbar.add_percent(task_percent)
+            # version_data = get_version_data(variables)
+            # if version_data.get('mod_index'):
+            #     ModpackProvider.move_custom_mods(
+            #         variables,
+            #         version_data.get('mod_index')
+            #     )
+            # progressbar.add_percent(task_percent)
 
             # Install the update into the instance
             install_update(variables)
