@@ -11,9 +11,7 @@ def create(ctk, parent, frames):
     pad=10
 
     # Create frame
-    sidebar = ctk.CTkFrame(master=parent, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'))
-    sidebar.grid_columnconfigure(0, weight=1)
-    sidebar.grid_rowconfigure(3, weight=1)
+    sidebar = ctk.CTkFrame(master=parent, width=icon_size + (pad * 2), fg_color=('#1d1e1e', '#1d1e1e'), border_width=-1)
 
     # Create buttons
     for frame in frames:
@@ -28,12 +26,28 @@ def create(ctk, parent, frames):
             frame=frame['frame'],
             size=icon_size
         )
-        
-        button.grid(column=0, row=len(frame_buttons), sticky='nsew', ipady=pad, ipadx=pad * 2)
+
+        if frame['name'] == 'Settings':
+            button.grid(column=0, row=len(frame_buttons) + 1, sticky='ew', ipady=pad, ipadx=pad * 2)
+        else:
+            button.grid(column=0, row=len(frame_buttons), sticky='ew', ipady=pad, ipadx=pad * 2)
 
         # Add button to global frame_buttons
         frame_buttons.append({'name': frame['name'], 'button': button})
 
+    # Add a spacer between the last two buttons and occupy as much space as possible to push the
+    # settings button down to the bottom of the column.
+    spacer = ctk.CTkFrame(
+        master=sidebar,
+        width=icon_size,
+        border_width=-1,
+        corner_radius=0,
+        fg_color=ThemeManager.theme.get('CTk').get('fg_color')
+    )
+
+    # Position the spacer/configure its row
+    spacer.grid(column=0, row=len(frame_buttons) - 1, sticky='nsew')
+    sidebar.grid_rowconfigure(len(frame_buttons) - 1, weight=1)
 
     return sidebar
 
@@ -58,7 +72,7 @@ def FrameButton(ctk, master, name, frames, frame, size):
         height=size,
         width=size,
         corner_radius=0,
-        border_width=0
+        border_width=-1
     )
 
 def clear_frame_Buttons():

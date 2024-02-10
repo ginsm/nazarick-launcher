@@ -47,6 +47,7 @@ def main():
 
     # Top level components
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), constants.APP_NAME)
+    app.grid_rowconfigure(0, weight=1)
 
     # Create frames
     create_frames(ctk, app, pool, initial_state)
@@ -94,7 +95,7 @@ def create_frames(ctk, app, pool, state, cover_frame = None):
     frames.append({'name': 'Sidebar', 'frame': sidebar, 'textbox': None})
 
     # Position frames
-    sidebar.grid(row=0, column=0, sticky='ns')
+    sidebar.grid(row=0, column=0, sticky='ns', rowspan=2)
     settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
 
     # Raise cover frame
