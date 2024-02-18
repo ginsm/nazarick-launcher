@@ -14,5 +14,3 @@ def start(ctk, app, pool, widgets):
     log(f'[INFO] This game doesn\'t require updates as it\'s vanilla only currently.')
 
     run_executable(exe_name='enshrouded.exe', debug=options['debug'], log=log, command=['cmd', '/c', 'start', 'steam://run/1203620'])
-
-    return;
