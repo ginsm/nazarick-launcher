@@ -3,11 +3,9 @@ import webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import game_list, utility, view, store, tufup, constants, version_upgrader, theme_list
-from modules.components import AppWindow, AppSideBar, SettingsFrame
-from modules.components.common import GameFrame, InfoModal
-
-frames = []
+from modules import utility, view, store, tufup, constants, version_upgrader, theme_list, frames
+from modules.components import AppWindow
+from modules.components.common import InfoModal
 
 def main():
     # Store the mod's path in environment
@@ -50,7 +48,7 @@ def main():
     app.grid_rowconfigure(0, weight=1)
 
     # Create frames
-    create_frames(ctk, app, pool, initial_state)
+    frames.create_frames(ctk, app, pool, initial_state)
 
     # Handle tufup running into issues
     if tufup_status == tufup.INIT_FAILED:
@@ -69,78 +67,10 @@ def main():
     app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
+    frames.broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
 
     # Main loop
     app.mainloop()
-
-
-def create_frames(ctk, app, pool, state, cover_frame = None):
-    global frames
-
-    # Create frames and add their data to frames
-    games = game_list.LIST
-    for game in games:
-        [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
-        frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
-        frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
-
-        # Raise cover frame whenever grid changes
-        if cover_frame: cover_frame.tkraise()
-
-    settings_frame = SettingsFrame.create(ctk, app, pool, state)
-    frames.append({'name': 'Settings', 'frame': settings_frame, 'textbox': None})
-
-    sidebar = AppSideBar.create(ctk, app, frames)
-    frames.append({'name': 'Sidebar', 'frame': sidebar, 'textbox': None})
-
-    # Position frames
-    sidebar.grid(row=0, column=0, sticky='ns', rowspan=2)
-    settings_frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
-
-    # Raise cover frame
-    if cover_frame: cover_frame.tkraise()
-
-    # Raise selected frame and set color
-    raise_selected_frame(frames)
-
-
-def raise_selected_frame(frames):
-    selected_frame = store.get_frame()
-    for frame_data in frames:
-        [name, frame] = utility.destructure(frame_data, ['name', 'frame'])
-        if name.lower() == selected_frame:
-            frame.tkraise()
-            AppSideBar.color_buttons(name)
-
-
-def broadcast(message):
-    global frames
-
-    for data in frames:
-        textbox = data['textbox']
-        if textbox:
-            textbox['log'](message)
-
-
-def reload_widgets(ctk, app, pool, state, cover_frame = None):
-    global frames
-
-    # Delete all frames
-    for data in frames:
-        frame = data['frame']
-        frame.destroy()
-
-    # Clear all stored widgets
-    frames.clear()
-    AppSideBar.clear_frame_Buttons()
-    view.clear_lockable_elements()
-
-    # Recreate the frames
-    create_frames(ctk, app, pool, state, cover_frame)
-
-    # Raise cover frame
-    if cover_frame: cover_frame.tkraise()
 
 
 # Run the script

@@ -1,6 +1,5 @@
 import os
-from app import reload_widgets
-from modules import store, theme_list
+from modules import store, theme_list, frames
 from customtkinter.windows.widgets.theme import ThemeManager
 
 from modules.components.common import CoverFrame
@@ -150,7 +149,7 @@ def set_mode(ctk, app, options, pool):
     store.set_menu_option('mode', options)
 
     # Reload the widgets
-    reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+    frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
 
     # Delete the cover frame
     cover_frame.destroy()
@@ -167,7 +166,7 @@ def set_theme(ctk, app, theme, options, pool):
 
     # Set theme and reload widgets
     ctk.set_default_color_theme(theme['name'])
-    reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+    frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
 
     # Set app background
     app.configure(fg_color=ThemeManager.theme.get('CTk').get('fg_color'))
