@@ -3,7 +3,7 @@ from modules.components.common import ChangesBox, ExplorerSearch, LogBox, Progre
 from customtkinter.windows.widgets.theme import ThemeManager
 
 
-def create(ctk, app, pool, name, settings, updater):
+def create(ctk, app, pool, name, settings, updater, modpacks = False):
     frame = ctk.CTkFrame(master=app, corner_radius=0, border_width=0)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
@@ -38,6 +38,17 @@ def create(ctk, app, pool, name, settings, updater):
     )
 
     tabs.grid(row=0, columnspan=2, padx=10, sticky='nsew')
+
+    # Add modpack dropdown
+    if modpacks:
+        modpack_dropdown = ctk.CTkOptionMenu(
+            master=tabs,
+            values=[modpack.get('name') for modpack in modpacks],
+            command=store.set_selected_pack,
+            width=200
+        )
+
+        modpack_dropdown.place(rely=0.0, relx=1.0, x=-5, y=14, anchor='ne')
 
     # Set the selected tab
     tabs.set(store.get_tab(name) or 'Settings')
@@ -95,7 +106,8 @@ def create(ctk, app, pool, name, settings, updater):
             'html_frame': html_frame,
             'progressbar': progressbar,
             'tabs': tabs
-        }
+        },
+        game=name
     )
     update_button.grid(row=len(settings) + 1, column=1, padx=(10, 15), pady=15, sticky='ew')
 

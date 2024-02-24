@@ -1,12 +1,10 @@
 import os, json, shutil
 from threading import Event
-from modules.providers.ModProviders import ThunderstoreModProvider
-from modules.providers.ModpackProviders import ThunderstoreModpackProvider
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
 
-def start(ctk, app, pool, widgets):
+def start(ctk, app, pool, widgets, modpack):
     # Define the logging function
     log = widgets.get('logbox').get('log')
 
@@ -19,8 +17,9 @@ def start(ctk, app, pool, widgets):
     view.lock(True)
 
     # Initiate providers
-    ModpackProvider = ThunderstoreModpackProvider()
-    ModProvider = ThunderstoreModProvider()
+    providers = modpack.get('providers')
+    ModpackProvider = providers.get('modpack')()
+    ModProvider = providers.get('mods')()
 
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('valheim')

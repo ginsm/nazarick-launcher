@@ -1,13 +1,12 @@
 import os, json, shutil
-from concurrent.futures import wait
 from threading import Event
-from modules import view, store, utility
 from modules.updater.common import *
-from modules.providers.ModpackProviders import SelfHostedMinecraftModpackProvider
-from modules.providers.ModProviders import ModrinthModProvider
+from concurrent.futures import wait
+from modules import view, utility, store
+
 
 # ----- Main Functions ----- #
-def start(ctk, app, pool, widgets):
+def start(ctk, app, pool, widgets, modpack):
     # Define the logging function
     log = widgets.get('logbox').get('log')
 
@@ -20,8 +19,9 @@ def start(ctk, app, pool, widgets):
     view.lock(True)
 
     # Initiate providers
-    ModpackProvider = SelfHostedMinecraftModpackProvider()
-    ModProvider = ModrinthModProvider()
+    providers = modpack.get('providers')
+    ModpackProvider = providers.get('modpack')()
+    ModProvider = providers.get('mods')()
 
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_game_state('minecraft')
@@ -38,7 +38,7 @@ def start(ctk, app, pool, widgets):
         'widgets': widgets,
         'modprovider': ModProvider,
         'log': log,
-        'version': ModpackProvider.get_latest_version('minecraft', 'nazarick-smp') if internet_connection else None,
+        'version': ModpackProvider.get_latest_version('minecraft', modpack.get('name')) if internet_connection else None,
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment

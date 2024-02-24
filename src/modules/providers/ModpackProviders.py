@@ -52,6 +52,19 @@ class SelfHostedMinecraftModpackProvider(SelfHostedModpackProvider):
         
         super().move_custom_mods(mods_dir, variables, mod_index)
 
+# ANCHOR CurseForge (Minecraft)
+class CurseForgeModpackProvider(ModpackProviderAbstract):
+    def download(self, variables):
+        pass
+    
+    def extract(self, variables, game):
+        pass
+    
+    def get_latest_version(self, game, pack):
+        pass
+    
+    def initial_install(self):
+        pass
 
 # ANCHOR Thunderstore (Valheim)
 class ThunderstoreModpackProvider(ModpackProviderAbstract):
