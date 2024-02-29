@@ -38,7 +38,7 @@ LIST = [
                 'name': 'Vault Hunters',
                 'providers': {
                     'modpack': CurseForgeMinecraftProvider,
-                    'mods': None,
+                    'mods': CurseForgeMinecraftProvider,
                 },
                 'type': 'curseforge',
                 'project': '711537',
