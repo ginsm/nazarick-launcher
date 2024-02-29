@@ -47,7 +47,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
         req = super().download_modpack(variables)
 
         if req.status_code != 200:
-            raise Exception(f'Invalid from Thunderstore while downloading package: {variables['version']['name']}.')
+            raise Exception(f'Invalid from Thunderstore while downloading modpack: {variables['version']['name']}.')
         
     def extract_modpack(self, variables, game):
         return super().extract_modpack(variables, game)
