@@ -15,5 +15,4 @@ APP_BUNDLED = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 load_dotenv(os.path.join(APP_BASE_DIR, '.env'))
 
 SELFHOSTED_WEBSITE=os.getenv('SELFHOSTED_WEBSITE')
-CURSEFORGE_API_KEY=os.getenv('CURSEFROGE_API_KEY')
-THUNDERSTORE_PACKAGE=os.getenv('THUNDERSTORE_PACKAGE')
+CURSEFORGE_API_KEY=os.getenv('CURSEFORGE_API_KEY')

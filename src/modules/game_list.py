@@ -32,7 +32,8 @@ LIST = [
                 },
                 'type': 'modrinth',
                 'project': 'nazarick-smp',
-                'file': 'latest'
+                'file': 'latest',
+                'game_version': '1.20.1'
             },
             {
                 'name': 'Vault Hunters',
@@ -42,7 +43,8 @@ LIST = [
                 },
                 'type': 'curseforge',
                 'project': '711537',
-                'file': '5076205'
+                'file': '5076205',
+                'game_version': '1.18.2'
             },
         ],
         'updater': minecraft_updater,
