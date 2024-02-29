@@ -142,7 +142,6 @@ def create(ctk, parent, pool, state):
 def set_mode(ctk, app, options, pool):
     # This frame essentially makes the app look pretty whilst loading/switching themes
     cover_frame = CoverFrame.create(ctk, app)
-    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
 
     # Set the mode
     ctk.set_appearance_mode(options['mode'].get())
@@ -158,7 +157,6 @@ def set_mode(ctk, app, options, pool):
 def set_theme(ctk, app, theme, options, pool):
     # This frame essentially makes the app look pretty whilst loading/switching themes
     cover_frame = CoverFrame.create(ctk, app)
-    cover_frame.grid(row=0, column=0, rowspan=5, columnspan=5, sticky='nsew')
 
     # Store new theme
     options['theme'] = ctk.StringVar(value=theme['title'])
