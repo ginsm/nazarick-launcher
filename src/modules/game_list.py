@@ -1,9 +1,12 @@
-from modules.providers.ModProviders import ModrinthModProvider, ThunderstoreModProvider
-from modules.providers.ModpackProviders import CurseForgeModpackProvider, SelfHostedMinecraftModpackProvider, ThunderstoreModpackProvider
+from modules.providers.CurseForgeProvider import CurseForgeMinecraftProvider
+from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
+from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
+from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
 from modules.updater import minecraft_updater, valheim_updater, enshrouded_updater
 
 
 LIST = [
+    # Minecraft
     {
         'name': 'Minecraft',
         'settings': [
@@ -24,21 +27,28 @@ LIST = [
             {
                 'name': 'nazarick-smp',
                 'providers': {
-                    'modpack': SelfHostedMinecraftModpackProvider,
-                    'mods': ModrinthModProvider
+                    'modpack': SelfHostedMinecraftProvider,
+                    'mods': ModrinthMinecraftProvider
                 },
-                'slug': '',
-                'url': ''
+                'type': 'modrinth',
+                'project': 'nazarick-smp',
+                'file': 'latest'
             },
             {
                 'name': 'Vault Hunters',
-                'provider': CurseForgeModpackProvider,
-                'slug': '',
-                'url': ''
+                'providers': {
+                    'modpack': CurseForgeMinecraftProvider,
+                    'mods': None,
+                },
+                'type': 'curseforge',
+                'project': '711537',
+                'file': '5076205'
             },
         ],
         'updater': minecraft_updater,
     },
+
+    # Valheim
     {
         'name': 'Valheim',
         'settings': [
@@ -53,15 +63,18 @@ LIST = [
             {
                 'name': 'nazarick-smp',
                 'providers': {
-                    'modpack': ThunderstoreModpackProvider,
-                    'mods': ThunderstoreModProvider
+                    'modpack': ThunderstoreValheimProvider,
+                    'mods': ThunderstoreValheimProvider
                 },
-                'slug': '',
-                'url': ''
+                'type': 'thunderstore',
+                'project': 'Syh/Nazarick_Core',
+                'file': 'latest'
             },
         ],
         'updater': valheim_updater,
     },
+
+    # Enshrouded
     {
         'name': 'Enshrouded',
         'settings': [
@@ -76,9 +89,9 @@ LIST = [
     }
 ]
 
-def get_modpack(game, modpack):
+def get_modpack_data(game, modpack):
     for game_dict in LIST:
-        if game_dict.get('name').lower() == game.lower():
+        if game_dict.get('name').lower() == game.lower() and game_dict.get('modpacks'):
             for pack in game_dict.get('modpacks'):
                 if pack.get('name').lower() == modpack.lower():
                     return pack

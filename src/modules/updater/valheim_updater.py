@@ -35,9 +35,9 @@ def start(ctk, app, pool, widgets, modpack):
         'widgets': widgets,
         'modprovider': ModProvider,
         'log': log,
-        'version': ModpackProvider.get_latest_version('valheim', 'nazarick-smp') if internet_connection else None
+        'version': ModpackProvider.get_latest_modpack_version('valheim', modpack) if internet_connection else None
     }
-
+    
     # This represents the percentage each task (other than retrieve_mods) will increment
     # the progress bar.
     task_percent = 0.25 / 10
@@ -69,11 +69,11 @@ def start(ctk, app, pool, widgets, modpack):
             progressbar.add_percent(task_percent)
 
             # Download latest modpack version
-            ModpackProvider.download(variables)
+            ModpackProvider.download_modpack(variables)
             progressbar.add_percent(task_percent)
 
             # Unzip update to temp directory
-            ModpackProvider.extract(variables, 'Valheim')
+            ModpackProvider.extract_modpack(variables, 'Valheim')
             progressbar.add_percent(task_percent)
 
             # Purge any files as instructed from modpack archive
@@ -88,7 +88,7 @@ def start(ctk, app, pool, widgets, modpack):
             # Get version data and move custom mods
             version_data = get_version_data(variables)
             if version_data.get('mod_index'):
-                ModpackProvider.move_custom_mods(
+                ModProvider.move_custom_mods(
                     variables,
                     version_data.get('mod_index')
                 )

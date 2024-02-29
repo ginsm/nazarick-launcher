@@ -38,7 +38,7 @@ def start(ctk, app, pool, widgets, modpack):
         'widgets': widgets,
         'modprovider': ModProvider,
         'log': log,
-        'version': ModpackProvider.get_latest_version('minecraft', modpack.get('name')) if internet_connection else None,
+        'version': ModpackProvider.get_latest_modpack_version('minecraft', modpack) if internet_connection else None,
     }
 
     # This represents the percentage each task (other than retrieve_mods) will increment
@@ -63,7 +63,7 @@ def start(ctk, app, pool, widgets, modpack):
     if internet_connection and variables.get('version'):
         try:
             # Skips update process if they're already on the latest version
-            if (on_latest_version(variables, ModpackProvider.initial_install)):
+            if (on_latest_version(variables, ModpackProvider.initial_modpack_install)):
                 progressbar.add_percent(1 - (task_percent * 2))
                 finalize(variables, task_percent)
                 return
@@ -73,11 +73,11 @@ def start(ctk, app, pool, widgets, modpack):
             progressbar.add_percent(task_percent)
 
             # Download latest modpack version
-            ModpackProvider.download(variables)
+            ModpackProvider.download_modpack(variables)
             progressbar.add_percent(task_percent)
 
             # Unzip update to temp directory
-            ModpackProvider.extract(variables, 'Minecraft')
+            ModpackProvider.extract_modpack(variables, 'Minecraft')
             progressbar.add_percent(task_percent)
 
             # Purge any files as instructed from modpack archive
@@ -87,10 +87,11 @@ def start(ctk, app, pool, widgets, modpack):
             # Attempt to retrieve all of the mod files
             mod_index = retrieve_mods(variables, pool)
 
+            # FIXME - This was causing the updater to stall.
             # Get version data and move custom mods
             # version_data = get_version_data(variables)
             # if version_data.get('mod_index'):
-            #     ModpackProvider.move_custom_mods(
+            #     ModProvider.move_custom_mods(
             #         variables,
             #         version_data.get('mod_index')
             #     )

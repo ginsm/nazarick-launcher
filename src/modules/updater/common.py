@@ -264,6 +264,6 @@ def retrieve(mod_data, variables, local_paths, destination, progress_percent, st
 
     # Download the mod
     if not os.path.exists(destination):
-        ModProvider.download(log, mod_data, destination)
+        ModProvider.download_mod(log, mod_data, destination)
 
     progressbar.add_percent(progress_percent)

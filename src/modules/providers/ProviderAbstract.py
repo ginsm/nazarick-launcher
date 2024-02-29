@@ -7,13 +7,10 @@ import requests
 
 from modules.updater.common import extract_modpack_changelog
 
-class ModpackProviderAbstract(ABC):
+class ProviderAbstract(ABC):
+    # Mod specific methods
     @abstractmethod
-    def get_latest_version(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def initial_install(self):
+    def download_mod(self, log, mod_data, destination):
         raise NotImplementedError
     
     @abstractmethod
@@ -42,27 +39,32 @@ class ModpackProviderAbstract(ABC):
                     os.path.join(mods_dir, mod),
                     os.path.join(destination, mod)
                 )
-
+    
+    # Modpack specific methods
     @abstractmethod
-    def download(self, variables):
+    def get_latest_modpack_version(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def download_modpack(self, variables):
         log, tmp, version = [
             variables['log'],
             variables['tmp'],
             variables['version']
         ]
 
-        log(f'[INFO] Downloading latest version: {version['name']} {version['version']}.')
+        log(f'[INFO] Downloading latest version: {version['name']} - {version['version']}.')
 
         # Download the file as .zip
         req = requests.get(version.get('url'), allow_redirects=True)
 
         if req.status_code == 200:
             open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
-        
+            
         return req
-
+    
     @abstractmethod
-    def extract(self, variables, game):
+    def extract_modpack(self, variables, game):
         log, tmp = [
             variables['log'],
             variables['tmp']
@@ -79,3 +81,7 @@ class ModpackProviderAbstract(ABC):
         os.remove(zip_file)
 
         extract_modpack_changelog(variables, game)
+    
+    @abstractmethod
+    def initial_modpack_install(self):
+        raise NotImplementedError
