@@ -1,5 +1,5 @@
-from modules import store, view
-from modules.components.common import ChangesBox, ExplorerSearch, LogBox, ProgressBar, UpdateButton
+from modules import frames, store, view
+from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, LogBox, ProgressBar, UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
 
@@ -41,12 +41,20 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
 
     # Add modpack dropdown
     if modpacks:
+        def select_pack(value):
+            store.set_selected_pack(value)
+            cover_frame = CoverFrame.create(ctk, app)
+            frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+            cover_frame.destroy()
+
         modpack_dropdown = ctk.CTkOptionMenu(
             master=tabs,
             values=[modpack.get('name') for modpack in modpacks],
-            command=store.set_selected_pack,
+            command=select_pack,
             width=200
         )
+
+        modpack_dropdown.set(store.get_selected_pack())
 
         modpack_dropdown.place(rely=0.0, relx=1.0, x=-5, y=14, anchor='ne')
 
