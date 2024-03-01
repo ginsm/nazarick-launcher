@@ -11,12 +11,13 @@ def main():
     # Store the mod's path in environment
     utility.set_env('nazpath', constants.APP_BASE_DIR.as_posix())
 
-    # Upgrade the app (converts old version conventions to newer ones)
-    version_upgrader.run()
 
     # Initialize the store
     store.init(tufup.DATA_DIR.as_posix())
     initial_state = store.get_state()
+    
+    # Upgrade the app (converts old version conventions to newer ones)
+    version_upgrader.run()
 
     # Check if elevated permission is necessary
     permission_check_failed = utility.some(

@@ -8,7 +8,7 @@ class ModrinthProviderBase(ProviderAbstract):
     def download_modpack(self, variables):
         raise NotImplementedError
         
-    def extract_modpack(self, variables, game):
+    def extract_modpack(self, variables, game, pack):
         raise NotImplementedError
 
     def download_mod(self, log, mod_data, destination):

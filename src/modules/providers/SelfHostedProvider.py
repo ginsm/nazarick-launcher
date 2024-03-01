@@ -33,8 +33,8 @@ class SelfHostedProviderBase(ProviderAbstract):
         if req.status_code != 200:
             raise Exception('Invalid response from SelfHosted (modpack)')
     
-    def extract_modpack(self, variables, game):
-        return super().extract_modpack(variables, game)
+    def extract_modpack(self, variables, game, pack):
+        return super().extract_modpack(variables, game, pack)
     
     def initial_modpack_install(self):
         raise NotImplementedError

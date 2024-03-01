@@ -77,7 +77,7 @@ def start(ctk, app, pool, widgets, modpack):
             progressbar.add_percent(task_percent)
 
             # Unzip update to temp directory
-            ModpackProvider.extract_modpack(variables, 'Minecraft')
+            ModpackProvider.extract_modpack(variables, 'Minecraft', modpack.get('name'))
             progressbar.add_percent(task_percent)
 
             # Purge any files as instructed from modpack archive

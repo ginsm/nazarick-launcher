@@ -1,6 +1,6 @@
 import os
 import webbrowser
-from modules import constants
+from modules import constants, store
 from customtkinter.windows.widgets.theme import ThemeManager
 from markdown2 import Markdown
 from tkinterweb import HtmlFrame
@@ -45,7 +45,8 @@ def create(ctk, parent, game):
 
 def load_changelog(ctk, changes, game, html_frame):
     # Check if CHANGELOG.md exists
-    changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', game, 'CHANGELOG.md')
+    changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', game, store.get_selected_pack(game), 'CHANGELOG.md')
+
     if os.path.exists(changelog_path):
         with open(changelog_path, 'rb') as f:
             contents = f.read().decode('UTF-8')

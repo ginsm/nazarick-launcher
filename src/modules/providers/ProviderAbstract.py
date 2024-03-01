@@ -64,7 +64,7 @@ class ProviderAbstract(ABC):
         return req
     
     @abstractmethod
-    def extract_modpack(self, variables, game):
+    def extract_modpack(self, variables, game, pack):
         log, tmp = [
             variables['log'],
             variables['tmp']
@@ -80,7 +80,7 @@ class ProviderAbstract(ABC):
         # Remove update.zip
         os.remove(zip_file)
 
-        extract_modpack_changelog(variables, game)
+        extract_modpack_changelog(variables, game, pack)
     
     @abstractmethod
     def initial_modpack_install(self):

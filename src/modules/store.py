@@ -90,7 +90,7 @@ def set_tab(tab):
 # Pack getter/setter
 def get_selected_pack(game=""):
     state = get_state()
-    game = game or get_frame()
+    game = game.lower() or get_frame()
     return state['games'][game]['selectedpack'] if game in state['games'] else 'nazarick-smp'
 
 def set_selected_pack(pack):

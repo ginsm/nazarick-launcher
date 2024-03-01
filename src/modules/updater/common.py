@@ -119,7 +119,7 @@ def purge_files(variables, pool, whitelist):
                 wait(futures)
 
 
-def extract_modpack_changelog(variables, game):
+def extract_modpack_changelog(variables, game, pack):
     tmp, ctk, widgets = [
         variables.get('tmp'),
         variables.get('ctk'),
@@ -128,13 +128,13 @@ def extract_modpack_changelog(variables, game):
 
     # Move the changelog to its destination
     changelog_tmp = os.path.join(tmp, 'CHANGELOG.md')
-    changelog_dest = os.path.join(constants.APP_BASE_DIR, 'assets', game, 'CHANGELOG.md')
+    changelog_dest = os.path.join(constants.APP_BASE_DIR, 'assets', game, pack, 'CHANGELOG.md')
 
     if os.path.exists(changelog_tmp):
         os.makedirs(os.path.split(changelog_dest)[0], exist_ok=True)
         shutil.move(changelog_tmp, changelog_dest)
 
-        ChangesBox.load_changelog(ctk, widgets.get('changebox'), 'Valheim', widgets.get('html_frame'))
+        ChangesBox.load_changelog(ctk, widgets.get('changebox'), game, widgets.get('html_frame'))
 
 
 def delete_path(base_path, path, whitelist, log):
