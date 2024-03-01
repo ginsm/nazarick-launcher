@@ -85,14 +85,15 @@ def start(ctk, app, pool, widgets, modpack):
             # used for custom mods.
             mod_index = retrieve_mods(variables, pool)
 
+            # FIXME - This was causing the updater to stall.
             # Get version data and move custom mods
-            version_data = get_version_data(variables)
-            if version_data.get('mod_index'):
-                ModProvider.move_custom_mods(
-                    variables,
-                    version_data.get('mod_index')
-                )
-            progressbar.add_percent(task_percent)
+            # version_data = get_version_data(variables)
+            # if version_data.get('mod_index'):
+            #     ModProvider.move_custom_mods(
+            #         variables,
+            #         version_data.get('mod_index')
+            #     )
+            # progressbar.add_percent(task_percent)
 
             # Install the update into the instance
             install_update(variables, pool)
