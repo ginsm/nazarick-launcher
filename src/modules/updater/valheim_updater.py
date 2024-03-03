@@ -1,4 +1,5 @@
 import os, shutil
+import traceback
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
@@ -108,6 +109,7 @@ def start(ctk, app, pool, widgets, modpack):
             widgets.get('tabs').set('Logs')
             log(f'[WARN] {e}; terminating update process.', 'warning')
             log('[WARN] You may have trouble connecting to the server.', 'warning')
+            traceback.print_exc()
         
     elif not variables.get('version'):
         widgets.get('tabs').set('Logs')
