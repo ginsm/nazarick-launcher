@@ -27,7 +27,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
             os.remove(plugin_zip)
         else:
-            raise Exception(f'Invalid response from Thunderstore while downloading plugin: {plugin}.')
+            raise Exception(plugin)
         
 
     def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):

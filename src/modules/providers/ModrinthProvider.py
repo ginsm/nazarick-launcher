@@ -21,25 +21,30 @@ class ModrinthProviderBase(ProviderAbstract):
         if req.status_code == 200:
             log(f'[INFO] (D) {mod_name}')
             open(destination, 'wb').write(req.content)
-
         else:
-            raise Exception(f'Invalid response from Modrinth while downloading mod: {mod_name}.')
+            raise Exception(mod_name)
         
+
     def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
         return super().move_custom_mods(mods_dir, variables, mod_index, ignore)
 
+
     def get_latest_modpack_version(self):
         raise NotImplementedError
-        
+
+
     def download_modpack(self, variables):
         raise NotImplementedError
         
+
     def extract_modpack(self, variables, game, pack):
         raise NotImplementedError
-    
+
+
     def get_modpack_modlist(self, game):
         raise NotImplementedError
-    
+
+
     def initial_modpack_install(self, variables):
         pass
 
@@ -58,6 +63,7 @@ class ModrinthMinecraftProvider(ModrinthProviderBase):
         move_existing_files(configpath)
         move_existing_files(modspath)
 
+
     def get_modpack_modlist(self, variables):
         modrinth_json_path = os.path.join(variables.get('tmp'), 'modrinth.index.json')
         content = open(modrinth_json_path, 'r').read()
@@ -68,6 +74,7 @@ class ModrinthMinecraftProvider(ModrinthProviderBase):
             mod.update(name=filename)
             
         return files
+
 
     def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
         raise NotImplementedError

@@ -23,7 +23,7 @@ class CurseForgeProviderBase(ProviderAbstract):
             log(f'[INFO] (D) {mod_name}')
             open(destination, 'wb').write(req.content)
         else:
-            raise Exception(f'Invalid response from CurseForge while downloading mod: {mod_name}.')
+            raise Exception(mod_name)
         
         
     def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
