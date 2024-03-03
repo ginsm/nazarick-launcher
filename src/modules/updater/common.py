@@ -211,34 +211,9 @@ def clean_update_directories(variables):
 
     # Create clean tmp directory
     os.makedirs(tmp, exist_ok=True)
-
-
-# ANCHOR -  Finalize Methods
-def run_executable(exe_name, debug, log, command):
-    # Debug mode stops exe from launching
-    if not debug:
-        log(f'[INFO] Launching {exe_name}.')
-        try:
-            subprocess.check_call(command)
-        except Exception as error:
-            log(f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.')
-    else:
-        log('[INFO] The executable is not launched whilst in debug mode.')
-
-
-def autoclose_app(variables):
-    options, log, app = [
-        variables['options'],
-        variables['log'],
-        variables['app']
-    ]
-
-    if options['autoclose']:
-        log('[INFO] Auto close is enabled; closing app.')
-        app.quit()
+    
 
 def retrieve_mods(variables, destination, local_paths, pool):
-    print("Reached")
     tmp, log, ModProvider = [
         variables.get('tmp'),
         variables.get('log'),
@@ -326,3 +301,29 @@ def check_local_mod_paths(log, local_paths, destination, filename):
     os.chdir(constants.APP_BASE_DIR)
 
     return found
+
+
+# ANCHOR -  Finalize Methods
+def run_executable(exe_name, debug, log, command):
+    # Debug mode stops exe from launching
+    if not debug:
+        log(f'[INFO] Launching {exe_name}.')
+        try:
+            subprocess.check_call(command)
+        except Exception as error:
+            log(f'[ERROR] {error.strerror.replace('%1', ' '.join(command))}.')
+    else:
+        log('[INFO] The executable is not launched whilst in debug mode.')
+
+
+def autoclose_app(variables):
+    options, log, app = [
+        variables['options'],
+        variables['log'],
+        variables['app']
+    ]
+
+    if options['autoclose']:
+        log('[INFO] Auto close is enabled; closing app.')
+        app.quit()
+
