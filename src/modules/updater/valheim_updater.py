@@ -1,5 +1,4 @@
-import os, json, shutil
-from threading import Event
+import os, shutil
 from modules.updater.common import *
 from concurrent.futures import wait
 from modules import view, utility, store
@@ -81,9 +80,11 @@ def start(ctk, app, pool, widgets, modpack):
             progressbar.add_percent(task_percent)
 
             # Attempt to retrieve all of the mod files.
-            # Returns the mod index, aka a list of all mods in the pack; this is
-            # used for custom mods.
-            mod_index = retrieve_mods(variables, pool)
+            destination = os.path.join(variables.get('tmp'), 'plugins')
+            local_paths = [
+                os.path.join(variables.get('instpath'), 'BepInEx', 'plugins')
+            ]
+            mod_index = retrieve_mods(variables, destination, local_paths, pool)
 
             # FIXME - This was causing the updater to stall.
             # Get version data and move custom mods
@@ -165,48 +166,6 @@ def handle_errors(variables):
         error = True
 
     return error
-
-
-def retrieve_mods(variables, pool):
-    tmp, log, inst_path = [
-        variables['tmp'],
-        variables['log'],
-        variables['instpath']
-    ]
-
-    # Make a plugins folder
-    plugins_tmp = os.path.join(tmp, 'plugins')
-    os.makedirs(plugins_tmp, exist_ok=True)
-
-    # Read manifest.json
-    with open(os.path.join(tmp, 'manifest.json'), 'rb') as f:
-        plugins = json.loads(f.read().decode('UTF-8'))['dependencies']
-        plugin_progress_percent = 0.75 / len(plugins)
-        futures = []
-
-        stop_processing = Event()
-
-        log('[INFO] Retrieving modpack dependencies.')
-
-        for plugin in plugins:
-            mod_data = {'name': plugin}
-            # These paths are checked for the mod in question; if it exists, it's moved
-            # to the destination.
-            local_paths = [
-                os.path.join(inst_path, 'BepInEx', 'plugins')
-            ]
-            destination = os.path.join(tmp, 'plugins', plugin)
-
-            futures.append(pool.submit(retrieve, mod_data, variables, local_paths, destination, plugin_progress_percent, stop_processing))
-
-        result = wait(futures, return_when="FIRST_EXCEPTION")
-
-        if len(result.not_done) > 0:
-            stop_processing.set()
-            exception = list(result.done)[-1].exception()
-            raise Exception(exception)
-    
-    return os.listdir(plugins_tmp)
 
 
 def install_update(variables, pool):

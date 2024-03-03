@@ -1,5 +1,6 @@
 import os, shutil, json, subprocess
 from concurrent.futures import wait
+from threading import Event
 from modules import utility
 from modules.components.common import ChangesBox
 from modules import constants
@@ -236,34 +237,92 @@ def autoclose_app(variables):
         log('[INFO] Auto close is enabled; closing app.')
         app.quit()
 
+def retrieve_mods(variables, destination, local_paths, pool):
+    print("Reached")
+    tmp, log, ModProvider = [
+        variables.get('tmp'),
+        variables.get('log'),
+        variables.get('modprovider')
+    ]
+
+    # Get the modlist
+    mods = ModProvider.get_modpack_modlist(variables)
+
+    # Update variables
+    plugin_progress_percent = 0.75 / len(mods)
+    futures = []
+
+    # Make sure the destination exists
+    os.makedirs(destination, exist_ok=True)
+
+    # Create stop processing event
+    stop_processing = Event()
+
+    log('[INFO] Retrieving modpack dependencies.')
+
+    for mod in mods:
+        futures.append(
+            pool.submit(retrieve, # Function being called
+                        # Variables being passed to function
+                        mod, variables, local_paths, destination, plugin_progress_percent, stop_processing
+            )
+        )
+
+    result = wait(futures)
+
+    # Handle any mods that could not be downloaded
+    notdownloaded = []
+
+    for task in list(result.done):
+        if task.exception():
+            notdownloaded.append(task.exception())
+
+    if len(notdownloaded):
+        log('[WARN] The launcher was unable to download the following mods:', 'warning')
+        for mod in notdownloaded:
+            log(f'[WARN] - {mod}', 'warning')
+        log('[WARN] You will need to download them manually.', 'warning')
+
+
+    os.chdir(tmp)
+        
+    return os.listdir(destination)
+
 
 def retrieve(mod_data, variables, local_paths, destination, progress_percent, stop_processing):
-    log, tmp, ModProvider, widgets = [
+    log, ModProvider, widgets = [
         variables['log'],
-        variables['tmp'],
         variables['modprovider'],
         variables['widgets']
     ]
 
-    name = mod_data.get('name')
-    progressbar = widgets.get('progressbar')
-
     if stop_processing.is_set():
         return
-    
-    # Move any local files to the destination
-    for local_path in local_paths:
-        local_file_path = os.path.join(local_path, name)
-        if os.path.exists(local_file_path):
-            if not os.path.exists(destination):
-                log(f'[INFO] (M) {name}')
-                shutil.move(local_file_path, destination)
-
-    # Change to tmp to free all local paths
-    os.chdir(tmp)
 
     # Download the mod
-    if not os.path.exists(destination):
-        ModProvider.download_mod(log, mod_data, destination)
+    ModProvider.download_mod(log, mod_data, local_paths, destination)
+    
+    # Increment progress bar
+    progress_bar = widgets.get('progressbar')
+    progress_bar.add_percent(progress_percent)
 
-    progressbar.add_percent(progress_percent)
+
+def check_local_mod_paths(log, local_paths, destination, filename):
+    found = False
+
+    for local_path in local_paths:
+        local_file_path = os.path.join(local_path, filename)
+
+        if os.path.exists(local_file_path):
+            if not os.path.exists(destination):
+                log(f'[INFO] (M) {filename}')
+                shutil.move(local_file_path, destination)
+
+                # Mark as found and break
+                found = True
+                break
+    
+    # Change to tmp to free all local paths
+    os.chdir(constants.APP_BASE_DIR)
+
+    return found

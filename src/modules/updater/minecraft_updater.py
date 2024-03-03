@@ -1,7 +1,6 @@
-import os, json, shutil
-from threading import Event
+import os, shutil
+import traceback
 from modules.updater.common import *
-from concurrent.futures import wait
 from modules import view, utility, store
 
 
@@ -85,7 +84,14 @@ def start(ctk, app, pool, widgets, modpack):
             progressbar.add_percent(task_percent)
 
             # Attempt to retrieve all of the mod files
-            mod_index = retrieve_mods(variables, pool)
+            destination = os.path.join(variables.get('tmp'), 'overrides', 'mods')
+            inst_path = variables.get('instpath')
+            local_paths = [
+                os.path.join(inst_path, 'mods'),
+                os.path.join(inst_path, 'mods-old'),
+                destination
+            ]
+            mod_index = retrieve_mods(variables, destination, local_paths, pool)
 
             # FIXME - This was causing the updater to stall.
             # Get version data and move custom mods
@@ -109,6 +115,7 @@ def start(ctk, app, pool, widgets, modpack):
             widgets.get('tabs').set('Logs')
             log(f'[WARN] {e}; terminating update process.', 'warning')
             log('[WARN] You may have trouble connecting to the server.', 'warning')
+            traceback.print_exc()
 
     elif not variables.get('version'):
         widgets.get('tabs').set('Logs')
@@ -183,55 +190,6 @@ def handle_errors(variables):
     return error
 
 
-def retrieve_mods(variables, pool):
-    tmp, log, inst_path = [
-        variables['tmp'],
-        variables['log'],
-        variables['instpath']
-    ]
-
-    mods_tmp = os.path.join(tmp, 'overrides', 'mods')
-
-    # read modrinth.index.json
-    with open(os.path.join(tmp, 'modrinth.index.json'), 'rb') as f:
-        mods = json.loads(f.read().decode('UTF-8'))['files']
-        mod_progress_percent = 0.75 / len(mods)
-        futures = []
-
-        stop_processing = Event()
-
-        log('[INFO] Retrieving modpack dependencies')
-
-        for mod in mods:
-            # Assign name key to mod data (used in retrieve and provider.download).
-            file_name = os.path.split(mod.get('path'))[1]
-            mod['name'] = file_name
-
-            # These paths are checked for the mod in question; if it exists, it's moved
-            # to the destination.
-            local_paths = [
-                os.path.join(inst_path, 'mods'),
-                os.path.join(inst_path, 'mods-old'),
-                mods_tmp
-            ]
-            destination = os.path.join(mods_tmp, file_name)
-
-            futures.append(pool.submit(retrieve, mod, variables, local_paths, destination, mod_progress_percent, stop_processing))
-
-        result = wait(futures, return_when="FIRST_EXCEPTION")
-
-        if len(result.not_done) > 0:
-            stop_processing.set()
-            exception = list(result.done)[-1].exception()
-            raise Exception(exception)
-        
-    all_mods = os.listdir(mods_tmp)
-    os.chdir(tmp)
-        
-    return all_mods
-
-
-# TODO - Move custom mods to the instance location when installing
 def install_update(variables):
     inst_path, tmp, log = [
         variables['instpath'],
@@ -293,4 +251,5 @@ def install_update(variables):
         # Handle top-level files by simply moving them (overwrites if it exists)
         else:
             target_path = os.path.join(config_dest, file_)
+            os.makedirs(os.path.split(target_path)[0], exist_ok=True)
             shutil.move(file_path, target_path)
