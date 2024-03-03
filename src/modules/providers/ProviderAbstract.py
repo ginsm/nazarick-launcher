@@ -10,7 +10,7 @@ from modules.updater.common import extract_modpack_changelog
 class ProviderAbstract(ABC):
     # Mod specific methods
     @abstractmethod
-    def download_mod(self, log, mod_data, destination):
+    def download_mod(self, log, mod_data, local_paths, destination):
         raise NotImplementedError
     
     @abstractmethod
@@ -53,7 +53,7 @@ class ProviderAbstract(ABC):
             variables['version']
         ]
 
-        log(f'[INFO] Downloading latest version: {version['name']} - {version['version']}.')
+        log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
 
         # Download the file as .zip
         req = requests.get(version.get('url'), allow_redirects=True)
@@ -81,7 +81,11 @@ class ProviderAbstract(ABC):
         os.remove(zip_file)
 
         extract_modpack_changelog(variables, game, pack)
+
+    @abstractmethod
+    def get_modpack_modlist(self, variables):
+        raise NotImplementedError
     
     @abstractmethod
-    def initial_modpack_install(self):
+    def initial_modpack_install(self, variables):
         raise NotImplementedError

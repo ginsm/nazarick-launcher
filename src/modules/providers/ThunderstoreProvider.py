@@ -52,18 +52,27 @@ class ThunderstoreProviderBase(ProviderAbstract):
     def extract_modpack(self, variables, game, pack):
         return super().extract_modpack(variables, game, pack)
     
-    def initial_modpack_install(self):
+    def get_modpack_modlist(self, variables):
+        raise NotImplementedError
+    
+    def initial_modpack_install(self, variables):
         raise NotImplementedError
 
 
 
 class ThunderstoreValheimProvider(ThunderstoreProviderBase):
-    def initial_modpack_install(self):
-        pass
-
     def move_custom_mods(self, variables={}, mod_index=[], ignore=[]):
         install_path = variables['instpath']
         plugins_dir = os.path.join(install_path, 'BepInEx', 'plugins')
         ignore = ['Valheim.DisplayBepInExInfo.dll']
 
         return super().move_custom_mods(plugins_dir, variables, mod_index, ignore)
+
+    def get_modpack_modlist(self, variables):
+        manifest_json_path = os.path.join(variables.get('tmp'), 'manifest.json')
+        contents = open(manifest_json_path, 'r').read()
+        dependencies = json.loads(contents).get('dependencies')
+        return dependencies
+
+    def initial_modpack_install(self, variables):
+        pass

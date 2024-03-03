@@ -6,7 +6,7 @@ from modules.providers.ProviderAbstract import ProviderAbstract
 
 
 class SelfHostedProviderBase(ProviderAbstract):
-    def download_mod(self, log, mod_data, destination):
+    def download_mod(self, log, mod_data, local_paths, destination):
         raise NotImplementedError
     
     def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
@@ -36,7 +36,10 @@ class SelfHostedProviderBase(ProviderAbstract):
     def extract_modpack(self, variables, game, pack):
         return super().extract_modpack(variables, game, pack)
     
-    def initial_modpack_install(self):
+    def get_modpack_modlist(self, variables):
+        raise NotImplementedError
+    
+    def initial_modpack_install(self, variables):
         raise NotImplementedError
 
 
