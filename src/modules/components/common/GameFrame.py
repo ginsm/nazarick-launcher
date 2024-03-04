@@ -40,7 +40,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     tabs.grid(row=0, columnspan=2, padx=10, sticky='nsew')
 
     # Add modpack dropdown
-    if modpacks:
+    if modpacks and len(modpacks) > 1:
         def select_pack(value):
             store.set_selected_pack(value)
             cover_frame = CoverFrame.create(ctk, app)
@@ -55,7 +55,6 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
         )
 
         modpack_dropdown.set(store.get_selected_pack())
-
         modpack_dropdown.place(rely=0.0, relx=1.0, x=-5, y=14, anchor='ne')
 
     # Set the selected tab
