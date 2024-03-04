@@ -49,7 +49,7 @@ def broadcast(message):
     for data in generated_frames:
         textbox = data['textbox']
         if textbox:
-            textbox['log'](message)
+            textbox['log'](message, broadcast=True)
 
 
 def reload_widgets(ctk, app, pool, state, cover_frame = None):
