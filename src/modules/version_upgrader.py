@@ -1,16 +1,17 @@
 import os
 import shutil
-from modules import constants, game_list, store, utility
+from modules import constants, game_list, store, theme_list, utility, store
 
 def run():
-    move_minecraft_tmp()
-    move_changelogs()
+    _move_minecraft_tmp_1_2_0()
+    _move_changelogs_1_4_6()
+    _update_state()
 
-
-# (v1.2.0) The _update_tmp folder needs to be shared between the various games; currently, that folder
+# ---- General Upgraders ---- #
+# The _update_tmp folder needs to be shared between the various games; currently, that folder
 # is used solely for Minecraft's updater. This method makes a new directory in _update_tmp named
 # 'Minecraft' and moves any existing files into it.
-def move_minecraft_tmp():
+def _move_minecraft_tmp_1_2_0():
     current_tmp = os.path.join(utility.get_env('nazpath'), '_update_tmp')
     minecraft_tmp = os.path.join(current_tmp, 'minecraft')
 
@@ -26,9 +27,9 @@ def move_minecraft_tmp():
             )
 
 
-# (v1.4.6) Adding multiple modpack support per game. As such, the changelog should be stored in a sub
+# Adding multiple modpack support per game. As such, the changelog should be stored in a sub
 # folder representing the pack.. not just in the game folder.
-def move_changelogs():
+def _move_changelogs_1_4_6():
     for game in game_list.LIST:
         name = game.get('name')
         pack = store.get_selected_pack(name)
@@ -41,5 +42,91 @@ def move_changelogs():
             shutil.move(old_changelog_path, new_changelog_path)
 
 
-def rename_nazarick_smp_state():
-    pass
+# ---- Store Updater ---- #
+def _update_state():
+    state = store.get_state()
+
+    # Run updaters
+    state = _update_1_0_7(state)
+    state = _update_1_3_0(state)
+    state = _update_1_4_1(state)
+
+    store.set_state_doc(state)
+
+
+def _update_1_4_1(state):
+    # Rename 'game' to frame
+    game = state.get('game')
+    if game:
+        state.update({'frame': game})
+        del state['game']
+
+    # Add tab state
+    if not state.get('tab'):
+        state.update({'tab': {
+            'minecraft': 'Settings',
+            'valheim': 'Settings'
+        }})
+        
+    return state
+
+
+def _update_1_3_0(state):
+    # Remove unused variables
+
+    # v1.4.1 - Removed since 'frame' is now used.
+    # if state.get('frame'):
+    #     del state['frame']
+
+    if state.get('accent'):
+        del state['accent']
+
+    # Move to new theme/mode convention
+    if state.get('theme') in ['System', 'Dark', 'Light']:
+        mode = state.get('theme')
+        state.update({'mode': mode, 'theme': 'Blue'})
+
+    # Prevent malformed/invalid theme name issues
+    themes = list(map(lambda o: o.get('title'), theme_list.get_themes()))
+    if state.get('theme') not in themes:
+        state.update({'theme': 'Blue'})
+
+    return state
+
+
+# Version 1.0.7 state updater
+def _update_1_0_7(state):
+    # Check if the state is old 1.0.6 format
+    if state.get('executable'):
+        executable = state['executable']
+        instance = state['instance']
+
+        # Update data
+        stateUpdate = {
+            'game': 'minecraft',
+            'games': {
+                'minecraft': {
+                    'selectedpack': 'nazarick-smp',
+                    'nazarick-smp': {
+                        'instance': instance,
+                        'executable': executable
+                    }
+                },
+                'valheim': {
+                    'selectedpack': 'nazarick-smp',
+                    'nazarick-smp': {
+                        'install': ''
+                    }
+                }
+            }
+        }
+
+        # Remove old unused keys
+        del state['executable']
+        del state['instance']
+
+        # Update the state
+        state.update(stateUpdate)
+
+    # Return the updated state
+    return state
