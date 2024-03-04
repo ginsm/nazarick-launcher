@@ -3,7 +3,7 @@ import webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import utility, view, store, tufup, constants, version_upgrader, theme_list, frames
+from modules import app_upgrader, utility, view, store, tufup, constants, theme_list, frames
 from modules.components import AppWindow
 from modules.components.common import InfoModal
 
@@ -11,13 +11,12 @@ def main():
     # Store the mod's path in environment
     utility.set_env('nazpath', constants.APP_BASE_DIR.as_posix())
 
-
     # Initialize the store
     store.init(tufup.DATA_DIR.as_posix())
     initial_state = store.get_state()
     
     # Upgrade the app (converts old version conventions to newer ones)
-    version_upgrader.run()
+    app_upgrader.run()
 
     # Check if elevated permission is necessary
     permission_check_failed = utility.some(
