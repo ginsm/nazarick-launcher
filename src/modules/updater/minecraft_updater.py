@@ -19,8 +19,16 @@ def start(ctk, app, pool, widgets, modpack):
 
     # Initiate providers
     providers = modpack.get('providers')
-    ModpackProvider = providers.get('modpack')()
-    ModProvider = providers.get('mods')()
+    try:
+        ModpackProvider = providers.get('modpack')()
+        ModProvider = providers.get('mods')()
+    except Exception as e:
+        log('[ERROR] Unable to initialize provider:', 'error')
+        log(f'[ERROR] {e}', 'error')
+        log('[INFO] Terminating update process.')
+        traceback.print_exc()
+        view.lock(False)
+        return
 
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_pack_state('minecraft')
