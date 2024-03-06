@@ -22,7 +22,7 @@ def start(ctk, app, pool, widgets, modpack):
     ModProvider = providers.get('mods')()
 
     # Bundling all variables to pass them around throughout the script
-    game_state = store.get_game_state('valheim')
+    game_state = store.get_pack_state('valheim')
     options = store.get_state()
     internet_connection = utility.internet_check()
     variables = {

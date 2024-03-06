@@ -106,10 +106,20 @@ def get_game_state(game=""):
     else:
         return {}
 
-def set_game_state(obj):
+# Pack state getter/setter
+def get_pack_state(game="", pack=""):
+    game = game.lower() or get_frame()
+    state = get_state()
+    if game in state['games']: 
+        pack = pack or get_selected_pack(game)
+        if pack:
+            return state['games'][game][pack]
+    return {}
+
+def set_pack_state(obj, game="", pack=""):
     if bool(obj):
-        game = get_frame()
-        pack = get_selected_pack()
+        game = game.lower() or get_frame()
+        pack = pack or get_selected_pack(game)
         state = get_state()
         if game in state['games']:
             state['games'][game][pack].update(obj)
