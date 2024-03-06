@@ -56,6 +56,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
 
         modpack_dropdown.set(store.get_selected_pack())
         modpack_dropdown.place(rely=0.0, relx=1.0, x=-5, y=14, anchor='ne')
+        view.add_lockable(modpack_dropdown)
 
     # Set the selected tab
     tabs.set(store.get_tab(name) or 'Settings')
@@ -73,19 +74,23 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     logbox['get']().grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
-    for index, setting in enumerate(settings):
-        entry = ExplorerSearch.create(
-            ctk=ctk,
-            master=tabs.tab('Settings'),
-            game=name.lower(),
-            app=app,
-            label=setting.get('label'),
-            placeholder=setting.get('placeholder'),
-            name=setting.get('name'),
-            find=setting.get('type')
-        )
-        entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
-        view.add_lockable([*entry[:-1]])
+    if modpacks:
+        for index, setting in enumerate(settings):
+            entry = ExplorerSearch.create(
+                ctk=ctk,
+                master=tabs.tab('Settings'),
+                game=name.lower(),
+                app=app,
+                label=setting.get('label'),
+                placeholder=setting.get('placeholder'),
+                name=setting.get('name'),
+                find=setting.get('type')
+            )
+            entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
+            view.add_lockable([*entry[:-1]])
+    else:
+        label = ctk.CTkLabel(tabs.tab('Settings'), text="This game doesn't require setup.")
+        label.grid(row=0, columnspan=2, pady=6, padx=(10, 6), sticky='w')
 
     # ---- Progress Bar ---- #
     progress_frame = ctk.CTkFrame( master=frame, fg_color='transparent', border_width=0)
