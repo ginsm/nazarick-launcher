@@ -33,13 +33,13 @@ def _move_changelogs_1_4_6():
     for game in game_list.LIST:
         name = game.get('name')
         pack = store.get_selected_pack(name)
+        if pack:
+            old_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, 'CHANGELOG.md')
+            new_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, pack, 'CHANGELOG.md')
 
-        old_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, 'CHANGELOG.md')
-        new_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, pack, 'CHANGELOG.md')
-
-        if os.path.exists(old_changelog_path):
-            os.makedirs(os.path.split(new_changelog_path)[0], exist_ok=True)
-            shutil.move(old_changelog_path, new_changelog_path)
+            if os.path.exists(old_changelog_path):
+                os.makedirs(os.path.split(new_changelog_path)[0], exist_ok=True)
+                shutil.move(old_changelog_path, new_changelog_path)
 
 
 # ---- Store Updater ---- #
