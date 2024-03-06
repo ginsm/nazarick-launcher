@@ -60,6 +60,12 @@ def reload_widgets(ctk, app, pool, state, cover_frame = None):
         frame = data['frame']
         frame.destroy()
 
+    # Delete all extra widgets
+    children = app.winfo_children()
+    for widget in children:
+        if widget is not cover_frame:
+            widget.destroy()
+
     # Clear all stored widgets
     generated_frames.clear()
     AppSideBar.clear_frame_Buttons()
