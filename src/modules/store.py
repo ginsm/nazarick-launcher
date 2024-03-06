@@ -10,22 +10,13 @@ default_state={
         'minecraft': 'Settings',
         'valheim': 'Settings'
     },
-    'games': {
-        'minecraft': {
-            'selectedpack': 'nazarick-smp',
-            'nazarick-smp': { 'instance': '', 'executable': '' }
-        },
-        'valheim': {
-            'selectedpack': 'nazarick-smp',
-            'nazarick-smp': { 'install': '' }
-        }
-    },
     'geometry': '1280x720',
     'logging': True,
     'mode': 'System',
     'theme': 'Blue',
     'threadamount': 4,
     'debug': False,
+    'games': {},
 }
 
 
@@ -86,7 +77,11 @@ def set_tab(tab):
 def get_selected_pack(game=""):
     state = get_state()
     game = game.lower() or get_frame()
-    return state['games'][game]['selectedpack'] if game in state['games'] else 'nazarick-smp'
+    games = state.get('games')
+    if games and game in games:
+        return games.get(game).get('selectedpack')
+    else:
+        return ''
 
 def set_selected_pack(pack):
     if bool(pack):
@@ -98,13 +93,31 @@ def set_selected_pack(pack):
 
 # Game state getter/setter
 def get_game_state(game=""):
-    game = game or get_frame()
+    game = game.lower() or get_frame()
     state = get_state()
-    if game in state['games']: 
-        pack = get_selected_pack(game)
-        return state['games'][game][pack]
-    else:
+
+    if not 'games' in state or game not in state.get('games'):
         return {}
+
+    return state.get('games').get(game)
+    
+def set_game_state(data, game=""):
+    if bool(data):
+        game = game.lower() or get_frame()
+        state = get_state()
+        
+        # Create games object
+        if not 'games' in state:
+            state['games'] = {}
+
+        # Add data to game object
+        if game in state['games']:
+            state['games'][game].update(data)
+        else:
+            state['games'][game] = data
+
+        set_state(state)
+
 
 # Pack state getter/setter
 def get_pack_state(game="", pack=""):
@@ -132,21 +145,46 @@ def set_pack_state(obj, game="", pack=""):
             })
         set_state(state)
 
+
+def create_game_state(game):
+    name = game.get('name')
+    modpacks = game.get('modpacks')
+    state = get_game_state(name)
+
+    # Get game setting names
+    game_settings = [setting.get('name') for setting in game.get('settings')]
+
+    # Add modpacks to state
+    if modpacks:
+        state.update({'selectedpack': modpacks[0].get('name')})
+        for modpack in modpacks:
+            pack = modpack.get('name')
+            if not state.get(pack):
+                state.update({
+                    pack: {key: '' for key in game_settings}
+                })
+
+    if not state.get('selectedpack'):
+        state.update({'selectedpack': ''})
+    
+    set_game_state(state, name)
+
+
 def get_game_paths():
     state = get_state()
     games = state.get('games')
     paths = []
-
-    for game in games:
-        game_data = games.get(game)
-        for pack in game_data:
-            # Ignore selectedpack key
-            if pack != 'selectedpack':
-                pack_data = game_data.get(pack)
-                for path in pack_data:
-                    # TODO normalize to just install
-                    if path in ['instance', 'install']:
-                        paths.append(pack_data.get(path))
+    if games:
+        for game in games:
+            game_data = games.get(game)
+            for pack in game_data:
+                # Ignore selectedpack key
+                if pack != 'selectedpack':
+                    pack_data = game_data.get(pack)
+                    for path in pack_data:
+                        # TODO normalize to just install
+                        if path in ['instance', 'install']:
+                            paths.append(pack_data.get(path))
 
     return paths
 

@@ -7,6 +7,9 @@ def run():
     _move_changelogs_1_4_6()
     _update_state()
 
+    for game in game_list.LIST:
+        store.create_game_state(game)
+
 # ---- General Upgraders ---- #
 # The _update_tmp folder needs to be shared between the various games; currently, that folder
 # is used solely for Minecraft's updater. This method makes a new directory in _update_tmp named
