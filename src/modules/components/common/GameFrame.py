@@ -42,10 +42,12 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     # Add modpack dropdown
     if modpacks and len(modpacks) > 1:
         def select_pack(value):
-            store.set_selected_pack(value)
-            cover_frame = CoverFrame.create(ctk, app)
-            frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
-            cover_frame.destroy()
+            current_pack = store.get_selected_pack()
+            if value != current_pack:
+                store.set_selected_pack(value)
+                cover_frame = CoverFrame.create(ctk, app)
+                frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+                cover_frame.destroy()
 
         modpack_dropdown = ctk.CTkOptionMenu(
             master=tabs,
