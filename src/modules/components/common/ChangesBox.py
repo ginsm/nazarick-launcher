@@ -58,7 +58,7 @@ def load_changelog(ctk, changes, game, html_frame):
             # Create scrollbar and bind necessary events
             scrollbar = ctk.CTkScrollbar(
                 master=changes,
-                command=lambda _, location: scroll_drag(html_frame, scrollbar, location)
+                command=lambda scroll_type, location, units=None: scroll(html_frame, scrollbar, location, scroll_type, units)
             )
             scrollbar.grid(row=0, column=1, pady=12, padx=12, sticky='ns')
             scrollbar.set(*html_frame.yview()) # Set initial value
@@ -80,9 +80,23 @@ def scroll_event(event, frame, scrollbar):
     scrollbar.set(*frame.yview())
     frame.scroll(event)
 
-def scroll_drag(frame, scrollbar, new_location):
-    frame.yview_moveto(new_location)
-    scrollbar.set(*frame.yview())
+def scroll(frame, scrollbar, location, scroll_type, _):
+    scrollbar_y, _ = scrollbar.get()
+    yview = frame.yview()
+    increment = location > 0 and yview[1] < 1
+    decrement = location < 0 and yview[0] > 0
+
+    if scroll_type == "scroll":
+        speed = .03
+        if increment:
+            location = scrollbar_y + speed
+            yview = [val + speed for val in yview] # manually set new yview as frame.yview was unreliably updating
+        if decrement:
+            location = scrollbar_y - speed
+            yview = [val - speed for val in yview] # manually set new yview as frame.yview was unreliably updating
+
+    frame.yview_moveto(location)
+    scrollbar.set(*yview)
 
 
 def get_stylesheet(colors, mode):
