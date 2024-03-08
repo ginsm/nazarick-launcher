@@ -289,11 +289,19 @@ def check_local_mod_paths(log, local_paths, destination, filename):
         local_file_path = os.path.join(local_path, filename)
 
         if os.path.exists(local_file_path):
+            # Move local files
             if not os.path.exists(destination):
                 log(f'[INFO] (M) {filename}')
                 shutil.move(local_file_path, destination)
+                found = True
+                break
+            
+            # Mods found in overrides should be marked as found; otherwise, if the download
+            # fails, it'll prompt the user to download the mod manually.. when they already
+            # have it installed.
+            if local_file_path == destination:
+                log(f'[INFO] (E) {filename}')
 
-                # Mark as found and break
                 found = True
                 break
     
