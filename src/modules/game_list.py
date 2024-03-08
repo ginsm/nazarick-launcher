@@ -38,12 +38,12 @@ LIST = [
             {
                 'name': 'Vault Hunters',
                 'providers': {
-                    'modpack': CurseForgeMinecraftProvider,
+                    'modpack': SelfHostedMinecraftProvider,
                     'mods': CurseForgeMinecraftProvider,
                 },
                 'type': 'curseforge',
-                'project': '711537',
-                'file': '5076205',
+                'project': 'Vault Hunters',
+                'file': 'latest',
                 'game_version': '1.18.2'
             },
         ],
