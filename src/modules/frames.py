@@ -1,3 +1,4 @@
+from tktooltip import ToolTip
 from modules import game_list, store, utility, view
 from modules.components import AppSideBar, SettingsFrame
 from modules.components.common import GameFrame
@@ -60,11 +61,8 @@ def reload_widgets(ctk, app, pool, state, cover_frame = None):
         frame = data['frame']
         frame.destroy()
 
-    # Delete all extra widgets
-    children = app.winfo_children()
-    for widget in children:
-        if widget is not cover_frame:
-            widget.destroy()
+    # Prevents an issue with tooltips when reloading
+    cleanup_tooltips(app)
 
     # Clear all stored widgets
     generated_frames.clear()
@@ -76,3 +74,47 @@ def reload_widgets(ctk, app, pool, state, cover_frame = None):
 
     # Raise cover frame
     if cover_frame: cover_frame.tkraise()
+
+
+def reload_frame(ctk, app, pool, name, cover_frame = None):
+    global generated_frames
+    found = False
+
+    # Search for frame
+    for index, frame in enumerate(generated_frames):
+        if frame.get('name') == name:
+            found = True
+            frame.get('frame').destroy()
+            generated_frames.pop(index)
+
+    # Destroy and rebuild frame
+    if found:
+        games = game_list.LIST
+        
+        for game in games:
+            if game.get('name') == name:
+                [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
+                generated_frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
+                frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
+
+                # Raise the cover frame
+                if cover_frame: cover_frame.tkraise()
+
+    # Prevents an issue with tooltips when reloading
+    cleanup_tooltips(app)
+
+    # Raise selected frame and set color
+    raise_selected_frame(generated_frames)
+
+    pass
+
+
+def cleanup_tooltips(app):
+    children = app.winfo_children()
+    for child in children:
+        if type(child) is ToolTip:
+            master_exists = child.widget.master.winfo_exists()
+            if master_exists:
+                child.on_leave()
+            else:
+                child.destroy()
