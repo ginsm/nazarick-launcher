@@ -156,7 +156,9 @@ def create_game_state(game):
 
     # Add modpacks to state
     if modpacks:
-        state.update({'selectedpack': modpacks[0].get('name')})
+        if not state.get('selectedpack'):
+            state.update({'selectedpack': modpacks[0].get('name')})
+
         for modpack in modpacks:
             pack = modpack.get('name')
             if not state.get(pack):
