@@ -104,8 +104,9 @@ def reload_frame(ctk, app, pool, name, cover_frame = None):
                 # Raise the cover frame
                 if cover_frame: cover_frame.tkraise()
 
-    # Prevents an issue with tooltips when reloading
+    # Clean up unused widgets
     cleanup_tooltips(app)
+    cleanup_lockable_elements()
 
     # Raise selected frame and set color
     raise_selected_frame(generated_frames)
@@ -130,6 +131,12 @@ def add_lockable(lockable):
             lockable_elements.append(element)
     else:
         lockable_elements.append(lockable)
+
+
+def cleanup_lockable_elements():
+    global lockable_elements
+    element_exists = lambda element: element.winfo_exists()
+    lockable_elements = list(filter(element_exists, lockable_elements))
 
 
 def lock(should_lock):
