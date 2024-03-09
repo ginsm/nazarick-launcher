@@ -113,17 +113,19 @@ def clear_frame_Buttons():
 
 def color_buttons(selected_frame):
     global frame_buttons
+    selected_frame = selected_frame.lower()
 
     normal=ThemeManager.theme.get('CTk').get('fg_color')
     text=ThemeManager.theme.get('Sidebar').get('text_color')
     selected=ThemeManager.theme.get('CTkFrame').get('fg_color')
 
     for frame_button in frame_buttons:
-        button = frame_button['button']
+        button = frame_button.get('button')
         button.configure(hover_color=selected)
         button.configure(text_color=text)
-        
-        if frame_button['name'] == selected_frame:
+        name = frame_button.get('name').lower()
+
+        if name == selected_frame:
             button.configure(fg_color=selected)
         else:
             button.configure(fg_color=normal)
