@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tktooltip import ToolTip
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import store, utility, constants
+from modules import store, system_check, constants
 from modules.debounce import debounce
 from modules.components.common import InfoModal
 
@@ -58,7 +58,7 @@ def handle_key_press(ctk, entry, name, app):
     
     if (stored != value):
         store.set_pack_state({name: value})
-        if utility.permission_check(value) == utility.NEED_ADMIN:
+        if system_check.check_perms(value) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, value, app)
 
 
@@ -91,7 +91,7 @@ def search_for_dir(entry, name, ctk, app):
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
         store.set_pack_state({name: path})
-        if utility.permission_check(path) == utility.NEED_ADMIN:
+        if system_check.check_perms(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 
 
@@ -100,7 +100,7 @@ def search_for_file(entry, name, ctk, app):
     if (path is not None):
         set_entry(entry=entry, string=path.name)
         store.set_pack_state({name: path.name})
-        if utility.permission_check(path) == utility.NEED_ADMIN:
+        if system_check.check_perms(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 
 

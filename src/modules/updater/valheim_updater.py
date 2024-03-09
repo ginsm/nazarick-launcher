@@ -2,7 +2,7 @@ import os, shutil
 import traceback
 from modules.updater.common import *
 from concurrent.futures import wait
-from modules import view, utility, store
+from modules import system_check, view, utility, store
 
 def start(ctk, app, pool, widgets, modpack):
     # Define the logging function
@@ -34,7 +34,7 @@ def start(ctk, app, pool, widgets, modpack):
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_pack_state('valheim')
     options = store.get_state()
-    internet_connection = utility.internet_check()
+    internet_connection = system_check.check_internet()
     variables = {
         'app': app,
         'ctk': ctk,
@@ -173,7 +173,7 @@ def handle_errors(variables):
         log("[ERROR] The provided path to your Valheim instance doesn't exist.", 'error')
         error = True
 
-    if utility.permission_check(inst_path) == utility.NEED_ADMIN:
+    if system_check.check_perms(inst_path) == system_check.NEED_ADMIN:
         log('[ERROR] The install path requires administrative privileges. Please restart your launcher.', 'error')
         error = True
 

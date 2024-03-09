@@ -1,9 +1,8 @@
 import os, shutil, json, subprocess
 from concurrent.futures import wait
 from threading import Event
-from modules import utility
+from modules import filesystem, constants
 from modules.components.common import ChangesBox
-from modules import constants
 
 
 # ANCHOR - Version Related Methods
@@ -154,7 +153,7 @@ def can_delete_path(base_path, path, whitelist = []):
     result = False
             
     # Determine if the path is within the base path
-    if not utility.path_is_relative(base_path, path_abs):
+    if not filesystem.path_is_relative(base_path, path_abs):
         return False
 
     # Ensure the path exists
@@ -165,7 +164,7 @@ def can_delete_path(base_path, path, whitelist = []):
     # while ensuring the target isn't the directory itself.
     for dir_ in whitelist:
         base_whitelist_path = os.path.join(base_path, dir_)
-        if utility.path_is_relative(base_whitelist_path, path_abs) and base_whitelist_path != path_abs:
+        if filesystem.path_is_relative(base_whitelist_path, path_abs) and base_whitelist_path != path_abs:
             result = True
 
     # 

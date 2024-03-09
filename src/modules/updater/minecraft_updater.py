@@ -1,7 +1,7 @@
 import os, shutil
 import traceback
 from modules.updater.common import *
-from modules import filesystem, view, utility, store
+from modules import filesystem, system_check, view, utility, store
 
 
 # ----- Main Functions ----- #
@@ -33,7 +33,7 @@ def start(ctk, app, pool, widgets, modpack):
     # Bundling all variables to pass them around throughout the script
     game_state = store.get_pack_state('minecraft')
     options = store.get_state()
-    internet_connection = utility.internet_check()
+    internet_connection = system_check.check_internet()
     variables = {
         'app': app,
         'ctk': ctk,
@@ -191,7 +191,7 @@ def handle_errors(variables):
             log("[ERROR] The provided path to your launcher doesn't exist.", 'error')
             error =  True
 
-    if utility.permission_check(inst_path) == utility.NEED_ADMIN:
+    if system_check.check_perms(inst_path) == system_check.NEED_ADMIN:
         log("[ERROR] The instance path requires administrative privileges. Please restart your launcher.", 'error')
         error = True
         

@@ -35,3 +35,15 @@ def move_files(source, target, overwrite=True):
 
             if overwrite or not os.path.exists(target_path):
                 shutil.move(file_path, target_path)
+
+
+def path_is_relative(base, path):
+    # Get the absolute paths
+    base_path = os.path.abspath(base)
+    abs_path = os.path.abspath(path)
+
+    # Determine if the path is within the base path
+    base_len = len(base_path)
+    if abs_path[0:base_len] != base_path:
+        return False
+    return True

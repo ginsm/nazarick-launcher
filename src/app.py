@@ -3,7 +3,7 @@ import webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import app_upgrader, utility, view, store, tufup, constants, theme_list, frames
+from modules import app_upgrader, system_check, utility, view, store, tufup, constants, theme_list, frames
 from modules.components import AppWindow
 from modules.components.common import InfoModal
 
@@ -21,7 +21,7 @@ def main():
     # Check if elevated permission is necessary
     permission_check_failed = utility.some(
         store.get_game_paths(),
-        lambda v: utility.permission_check(v) == utility.NEED_ADMIN
+        lambda v: system_check.check_perms(v) == system_check.NEED_ADMIN
     )
     if (permission_check_failed):
         elevate(show_console=False)
