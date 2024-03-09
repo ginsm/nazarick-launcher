@@ -22,8 +22,6 @@ def create(ctk, parent, frames):
             ctk=ctk,
             master=sidebar,
             name=frame['name'],
-            frames=frames,
-            frame=frame['frame'],
             size=icon_size
         )
 
@@ -33,7 +31,7 @@ def create(ctk, parent, frames):
             button.grid(column=0, row=len(frame_buttons), sticky='ew', ipady=pad, ipadx=pad * 2)
 
         # Add button to global frame_buttons
-        frame_buttons.append({'name': frame['name'], 'button': button})
+        frame_buttons.append({'name': frame['name'], 'frame': frame.get('frame'), 'button': button})
 
     # Add a spacer between the last two buttons and occupy as much space as possible to push the
     # settings button down to the bottom of the column.
@@ -52,7 +50,7 @@ def create(ctk, parent, frames):
     return sidebar
 
 
-def FrameButton(ctk, master, name, frames, frame, size):
+def FrameButton(ctk, master, name, size):
     # Image directory
     IMAGE_DIR = constants.APP_BASE_DIR / 'assets' / 'icons'
 
@@ -68,16 +66,50 @@ def FrameButton(ctk, master, name, frames, frame, size):
         image=frame_image,
         text=name,
         compound='top',
-        command=lambda: select_frame(name, frames, frame),
+        command=lambda: select_frame(name),
         height=size,
         width=size,
         corner_radius=0,
         border_width=-1
     )
 
+
+def select_frame(frame_name):
+    global frame_buttons
+    frame_name = frame_name.lower()
+
+    # Raise the frame in the app
+    for button in frame_buttons:
+        name = button.get('name').lower()
+        frame = button.get('frame')
+
+        if name == frame_name:
+            frame.grid(row=0, column=1, rowspan=len(frame_buttons), sticky='nsew')
+        else:
+            frame.grid_forget()
+
+    # Set the frame in store
+    state_manager.set_frame(frame_name.lower())
+
+    # Color the frame button differently
+    color_buttons(frame_name)
+
+
+def update_button_frame(name, new_frame):
+    global frame_buttons
+    name = name.lower()
+
+    for frame in frame_buttons:
+        frame_name = frame.get('name').lower()
+
+        if frame_name == name:
+            frame.update({'frame': new_frame})
+
+
 def clear_frame_Buttons():
     global frame_buttons
     frame_buttons = []
+
 
 def color_buttons(selected_frame):
     global frame_buttons
@@ -95,18 +127,3 @@ def color_buttons(selected_frame):
             button.configure(fg_color=selected)
         else:
             button.configure(fg_color=normal)
-
-
-def select_frame(frame_name, frames, frame):
-    # Raise the frame in the app
-    frame.grid(row=0, column=1, rowspan=len(frames), sticky='nsew')
-
-    for f in frames:
-        if f['name'] != frame_name and f['name'] != 'Sidebar':
-            f['frame'].grid_forget()
-
-    # Set the frame in store
-    state_manager.set_frame(frame_name.lower())
-
-    # Color the frame button differently
-    color_buttons(frame_name)

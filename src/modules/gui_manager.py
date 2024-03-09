@@ -97,9 +97,13 @@ def reload_frame(ctk, app, pool, name, cover_frame = None):
         
         for game in games:
             if game.get('name') == name:
+                # Rebuild the frame
                 [frame, textbox] = GameFrame.create(ctk, app, pool, **game)
                 generated_frames.append({'name': game.get('name'), 'frame': frame, 'textbox': textbox})
                 frame.grid(row=0, column=1, rowspan=len(games) + 2, sticky='nsew')
+
+                # Reconfigure AppSideBar
+                AppSideBar.update_button_frame(game.get('name'), frame)
 
                 # Raise the cover frame
                 if cover_frame: cover_frame.tkraise()
