@@ -1,11 +1,11 @@
-from modules import store, utility
+from modules import state_manager, utility
 from modules.updater.common import run_executable
 
 # This game currently has no mods; thus the 'update' function is going to be pretty
 # barren for now.
 def start(ctk, app, pool, widgets, modpack):
     log = widgets.get('logbox').get('log')
-    options = store.get_state()
+    options = state_manager.get_state()
 
     log(f'')
     log(f'[INFO] Beginning process at {utility.get_time()}.')

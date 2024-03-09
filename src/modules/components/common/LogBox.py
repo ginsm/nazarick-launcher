@@ -1,4 +1,4 @@
-from modules import store
+from modules import state_manager
 
 logs = {}
 broadcasts = []
@@ -15,7 +15,7 @@ def create(ctk, master, game):
     textbox.tag_config('warning', foreground='yellow')
 
     # Add game & pack to logs
-    name = f'{game}-{store.get_selected_pack(game)}'
+    name = f'{game}-{state_manager.get_selected_pack(game)}'
 
     if not logs.get(name):
         logs[name] = [[message, ''] for message in broadcasts]

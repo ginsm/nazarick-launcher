@@ -1,7 +1,7 @@
 import os, shutil
 import traceback
 from modules.updater.common import *
-from modules import filesystem, system_check, view, utility, store
+from modules import filesystem, state_manager, system_check, gui_manager, utility
 
 
 # ----- Main Functions ----- #
@@ -15,7 +15,7 @@ def start(ctk, app, pool, widgets, modpack):
 
     # Lock user input
     log(f'[INFO] Locking user input.')
-    view.lock(True)
+    gui_manager.lock(True)
 
     # Initiate providers
     providers = modpack.get('providers')
@@ -27,12 +27,12 @@ def start(ctk, app, pool, widgets, modpack):
         log(f'[ERROR] {e}', 'error')
         log('[INFO] Terminating update process.')
         traceback.print_exc()
-        view.lock(False)
+        gui_manager.lock(False)
         return
 
     # Bundling all variables to pass them around throughout the script
-    game_state = store.get_pack_state('minecraft')
-    options = store.get_state()
+    game_state = state_manager.get_pack_state('minecraft')
+    options = state_manager.get_state()
     internet_connection = system_check.check_internet()
     variables = {
         'app': app,
@@ -60,7 +60,7 @@ def start(ctk, app, pool, widgets, modpack):
 
         # Unlock user input
         log(f'[INFO] Unlocking user input.')
-        view.lock(False)
+        gui_manager.lock(False)
         log(f'[INFO] Finished process at {utility.get_time()}.')
         return
     
@@ -150,7 +150,7 @@ def finalize(variables, task_percent):
     progressbar = widgets.get('progressbar')
 
     log(f'[INFO] Unlocking user input.')
-    view.lock(False)
+    gui_manager.lock(False)
 
     run_executable(exe_name=os.path.split(exe_path)[-1], debug=options['debug'], log=log, command=[exe_path]) 
     progressbar.add_percent(task_percent)

@@ -1,11 +1,15 @@
 from tktooltip import ToolTip
-from modules import game_list, store, utility, view
+from modules import game_list, state_manager, utility
+from modules.debounce import debounce
 from modules.components import AppSideBar, SettingsFrame
 from modules.components.common import GameFrame
 
 generated_frames = []
+lockable_elements = []
+window_width = 0
+window_height = 0
 
-def create_frames(ctk, app, pool, state, cover_frame = None):
+def create_gui(ctk, app, pool, state, cover_frame = None):
     global generated_frames
 
     # Create frames and add their data to frames
@@ -36,7 +40,7 @@ def create_frames(ctk, app, pool, state, cover_frame = None):
 
 
 def raise_selected_frame(frames):
-    selected_frame = store.get_frame()
+    selected_frame = state_manager.get_frame()
     for frame_data in frames:
         [name, frame] = utility.destructure(frame_data, ['name', 'frame'])
         if name.lower() == selected_frame:
@@ -67,10 +71,10 @@ def reload_widgets(ctk, app, pool, state, cover_frame = None):
     # Clear all stored widgets
     generated_frames.clear()
     AppSideBar.clear_frame_Buttons()
-    view.clear_lockable_elements()
+    clear_lockable_elements()
 
     # Recreate the frames
-    create_frames(ctk, app, pool, state, cover_frame)
+    create_gui(ctk, app, pool, state, cover_frame)
 
     # Raise cover frame
     if cover_frame: cover_frame.tkraise()
@@ -106,8 +110,6 @@ def reload_frame(ctk, app, pool, name, cover_frame = None):
     # Raise selected frame and set color
     raise_selected_frame(generated_frames)
 
-    pass
-
 
 def cleanup_tooltips(app):
     children = app.winfo_children()
@@ -118,3 +120,41 @@ def cleanup_tooltips(app):
                 child.on_leave()
             else:
                 child.destroy()
+
+
+def add_lockable(lockable):
+    global lockable_elements
+
+    if type(lockable) is list:
+        for element in lockable:
+            lockable_elements.append(element)
+    else:
+        lockable_elements.append(lockable)
+
+
+def lock(should_lock):
+    global lockable_elements
+
+    if should_lock:
+        for element in lockable_elements:
+            element.configure(state='disabled')
+    else:
+        for element in lockable_elements:
+            element.configure(state='normal')
+
+
+def clear_lockable_elements():
+    global lockable_elements
+    lockable_elements.clear()
+
+
+@debounce(0.4)
+def resize(app):
+    global window_width, window_height
+    if (window_width != app.winfo_width() or window_height != app.winfo_height()):
+        # Store new width/height in memory
+        window_width = app.winfo_width()
+        window_height = app.winfo_height()
+        
+        # Store geometry in persistent database
+        state_manager.set_state({'geometry': f'{window_width}x{window_height}'})

@@ -2,7 +2,7 @@ import os, shutil
 import traceback
 from modules.updater.common import *
 from concurrent.futures import wait
-from modules import system_check, view, utility, store
+from modules import state_manager, system_check, gui_manager, utility
 
 def start(ctk, app, pool, widgets, modpack):
     # Define the logging function
@@ -14,7 +14,7 @@ def start(ctk, app, pool, widgets, modpack):
 
     # Lock user input
     log(f'[INFO] Locking user input.')
-    view.lock(True)
+    gui_manager.lock(True)
 
     # Initiate providers
     providers = modpack.get('providers')
@@ -27,13 +27,13 @@ def start(ctk, app, pool, widgets, modpack):
         log(f'[ERROR] {e}', 'error')
         log('[INFO] Terminating update process.')
         traceback.print_exc()
-        view.lock(False)
+        gui_manager.lock(False)
         return
 
 
     # Bundling all variables to pass them around throughout the script
-    game_state = store.get_pack_state('valheim')
-    options = store.get_state()
+    game_state = state_manager.get_pack_state('valheim')
+    options = state_manager.get_state()
     internet_connection = system_check.check_internet()
     variables = {
         'app': app,
@@ -59,7 +59,7 @@ def start(ctk, app, pool, widgets, modpack):
 
         # Unlock user input
         log(f'[INFO] Unlocking user input.')
-        view.lock(False)
+        gui_manager.lock(False)
         log(f'[INFO] Finished process at {utility.get_time()}.')
         return
     
@@ -144,7 +144,7 @@ def finalize(variables, task_percent):
     progressbar = widgets.get('progressbar')
 
     log(f'[INFO] Unlocking user input.')
-    view.lock(False)
+    gui_manager.lock(False)
     
     # TODO - Support launching with mac as well
     run_executable(exe_name='valheim.exe', debug=options['debug'], log=log, command=['cmd', '/c', 'start', 'steam://run/892970'])

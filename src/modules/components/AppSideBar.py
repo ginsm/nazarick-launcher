@@ -2,7 +2,7 @@ import os
 from PIL import Image
 from customtkinter.windows.widgets.theme import ThemeManager
 from modules import constants
-from modules import store
+from modules import state_manager
 
 frame_buttons = []
 
@@ -106,7 +106,7 @@ def select_frame(frame_name, frames, frame):
             f['frame'].grid_forget()
 
     # Set the frame in store
-    store.set_frame(frame_name.lower())
+    state_manager.set_frame(frame_name.lower())
 
     # Color the frame button differently
     color_buttons(frame_name)

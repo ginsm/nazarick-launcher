@@ -90,11 +90,3 @@ LIST = [
         'updater': enshrouded_updater,
     }
 ]
-
-def get_modpack_data(game, modpack):
-    for game_dict in LIST:
-        if game_dict.get('name').lower() == game.lower() and game_dict.get('modpacks'):
-            for pack in game_dict.get('modpacks'):
-                if pack.get('name').lower() == modpack.lower():
-                    return pack
-    return None

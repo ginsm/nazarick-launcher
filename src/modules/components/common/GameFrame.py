@@ -1,4 +1,4 @@
-from modules import frames, store, view
+from modules import gui_manager, state_manager
 from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, LogBox, ProgressBar, UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
@@ -16,7 +16,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
         border_width=0,
         corner_radius=0,
         fg_color='transparent',
-        command=lambda: store.set_tab(tabs.get())
+        command=lambda: state_manager.set_tab(tabs.get())
     )
 
     # Add tabs
@@ -42,11 +42,11 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     # Add modpack dropdown
     if modpacks and len(modpacks) > 1:
         def select_pack(value):
-            current_pack = store.get_selected_pack()
+            current_pack = state_manager.get_selected_pack()
             if value != current_pack:
-                store.set_selected_pack(value)
+                state_manager.set_selected_pack(value)
                 cover_frame = CoverFrame.create(ctk, app)
-                frames.reload_frame(ctk, app, pool, name, cover_frame)
+                gui_manager.reload_frame(ctk, app, pool, name, cover_frame)
                 cover_frame.destroy()
 
 
@@ -57,12 +57,12 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
             width=200
         )
 
-        modpack_dropdown.set(store.get_selected_pack())
+        modpack_dropdown.set(state_manager.get_selected_pack())
         modpack_dropdown.place(rely=0.0, relx=1.0, x=-5, y=14, anchor='ne')
-        view.add_lockable(modpack_dropdown)
+        gui_manager.add_lockable(modpack_dropdown)
 
     # Set the selected tab
-    tabs.set(store.get_tab(name) or 'Settings')
+    tabs.set(state_manager.get_tab(name) or 'Settings')
 
     # ---- Changes Tab ---- #
     [changebox, html_frame] = ChangesBox.create(ctk=ctk, parent=tabs.tab('Changes'), game=name)
@@ -90,7 +90,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
                 find=setting.get('type')
             )
             entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
-            view.add_lockable([*entry[:-1]])
+            gui_manager.add_lockable([*entry[:-1]])
     else:
         label = ctk.CTkLabel(tabs.tab('Settings'), text="This game doesn't require setup.")
         label.grid(row=0, columnspan=2, pady=6, padx=(10, 6), sticky='w')

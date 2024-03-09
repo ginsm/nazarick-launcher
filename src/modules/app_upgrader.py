@@ -1,6 +1,6 @@
 import os
 import shutil
-from modules import constants, game_list, store, theme_list, utility, store
+from modules import constants, game_list, state_manager, theme_list, utility
 
 def run():
     _move_minecraft_tmp_1_2_0()
@@ -8,7 +8,7 @@ def run():
     _update_state()
 
     for game in game_list.LIST:
-        store.create_game_state(game)
+        state_manager.create_game_state(game)
 
 # ---- General Upgraders ---- #
 # The _update_tmp folder needs to be shared between the various games; currently, that folder
@@ -35,7 +35,7 @@ def _move_minecraft_tmp_1_2_0():
 def _move_changelogs_1_4_6():
     for game in game_list.LIST:
         name = game.get('name')
-        pack = store.get_selected_pack(name)
+        pack = state_manager.get_selected_pack(name)
         if pack:
             old_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, 'CHANGELOG.md')
             new_changelog_path = os.path.join(constants.APP_BASE_DIR, 'assets', name, pack, 'CHANGELOG.md')
@@ -47,14 +47,14 @@ def _move_changelogs_1_4_6():
 
 # ---- Store Updater ---- #
 def _update_state():
-    state = store.get_state()
+    state = state_manager.get_state()
 
     # Run updaters
     state = _update_1_0_7(state)
     state = _update_1_3_0(state)
     state = _update_1_4_1(state)
 
-    store.set_state_doc(state)
+    state_manager.set_state_doc(state)
 
 
 def _update_1_4_1(state):

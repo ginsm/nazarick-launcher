@@ -1,8 +1,8 @@
-from modules import store, view
-from modules.game_list import get_modpack_data
+from modules import gui_manager, state_manager
+from modules.utility import get_modpack_data
 
 def create(ctk, parent, pool, update_fn, widgets, game):
-    modpack_data = get_modpack_data(game, store.get_selected_pack())
+    modpack_data = get_modpack_data(game, state_manager.get_selected_pack())
 
     update = ctk.CTkButton(
         master=parent,
@@ -13,6 +13,6 @@ def create(ctk, parent, pool, update_fn, widgets, game):
         border_width=0
     )
 
-    view.add_lockable(update)
+    gui_manager.add_lockable(update)
 
     return update

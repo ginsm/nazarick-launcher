@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tktooltip import ToolTip
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import store, system_check, constants
+from modules import state_manager, system_check, constants
 from modules.debounce import debounce
 from modules.components.common import InfoModal
 
@@ -43,7 +43,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
     ToolTip(open_button, msg=f'Open the {name} path.', delay=0.01, follow=True)
 
     # Get entry state from storage and set it
-    state = store.get_pack_state(game)
+    state = state_manager.get_pack_state(game)
     if bool(state.get(name)):
         set_entry(entry, state[name])
 
@@ -53,11 +53,11 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 # Helper Functions
 @debounce(1)
 def handle_key_press(ctk, entry, name, app):
-    stored = store.get_pack_state()[name]
+    stored = state_manager.get_pack_state()[name]
     value = entry.get()
     
     if (stored != value):
-        store.set_pack_state({name: value})
+        state_manager.set_pack_state({name: value})
         if system_check.check_perms(value) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, value, app)
 
@@ -90,7 +90,7 @@ def search_for_dir(entry, name, ctk, app):
     path = filedialog.askdirectory()
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
-        store.set_pack_state({name: path})
+        state_manager.set_pack_state({name: path})
         if system_check.check_perms(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 
@@ -99,7 +99,7 @@ def search_for_file(entry, name, ctk, app):
     path = filedialog.askopenfile()
     if (path is not None):
         set_entry(entry=entry, string=path.name)
-        store.set_pack_state({name: path.name})
+        state_manager.set_pack_state({name: path.name})
         if system_check.check_perms(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 

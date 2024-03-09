@@ -3,7 +3,7 @@ import webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import app_upgrader, system_check, utility, view, store, tufup, constants, theme_list, frames
+from modules import app_upgrader, gui_manager, state_manager, system_check, utility, tufup, constants, theme_list
 from modules.components import AppWindow
 from modules.components.common import InfoModal
 
@@ -12,15 +12,15 @@ def main():
     utility.set_env('nazpath', constants.APP_BASE_DIR.as_posix())
 
     # Initialize the store
-    store.init(tufup.DATA_DIR.as_posix())
-    initial_state = store.get_state()
+    state_manager.init(tufup.DATA_DIR.as_posix())
+    initial_state = state_manager.get_state()
     
     # Upgrade the app (converts old version conventions to newer ones)
     app_upgrader.run()
 
     # Check if elevated permission is necessary
     permission_check_failed = utility.some(
-        store.get_game_paths(),
+        state_manager.get_game_paths(),
         lambda v: system_check.check_perms(v) == system_check.NEED_ADMIN
     )
     if (permission_check_failed):
@@ -47,8 +47,8 @@ def main():
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), constants.APP_NAME)
     app.grid_rowconfigure(0, weight=1)
 
-    # Create frames
-    frames.create_frames(ctk, app, pool, initial_state)
+    # Create GUI
+    gui_manager.create_gui(ctk, app, pool, initial_state)
 
     # Handle tufup running into issues
     if tufup_status == tufup.INIT_FAILED:
@@ -64,10 +64,10 @@ def main():
             ])
 
     # UI Events
-    app.bind('<Configure>', lambda _ : view.resize(app)) # Handles saving the window size upon resize
+    app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    frames.broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
+    gui_manager.broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
 
     # Main loop
     app.mainloop()

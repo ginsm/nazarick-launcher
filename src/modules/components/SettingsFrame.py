@@ -1,5 +1,5 @@
 import os
-from modules import store, theme_list, frames
+from modules import gui_manager, state_manager, theme_list
 from customtkinter.windows.widgets.theme import ThemeManager
 
 from modules.components.common import CoverFrame
@@ -56,7 +56,7 @@ def create(ctk, parent, pool, state):
     autoclose_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Close after launching game',
-        command=lambda: store.set_menu_option('autoclose', options),
+        command=lambda: state_manager.set_menu_option('autoclose', options),
         variable=options['autoclose'],
         onvalue=True,
         offvalue=False,
@@ -67,7 +67,7 @@ def create(ctk, parent, pool, state):
     autorestart_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Restart after updating the launcher',
-        command=lambda: store.set_menu_option('autorestart', options),
+        command=lambda: state_manager.set_menu_option('autorestart', options),
         variable=options['autorestart'],
         onvalue=True,
         offvalue=False,
@@ -95,7 +95,7 @@ def create(ctk, parent, pool, state):
     logging_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Store application logs',
-        command=lambda: store.set_menu_option('logging', options),
+        command=lambda: state_manager.set_menu_option('logging', options),
         variable=options['logging'],
         onvalue=True,
         offvalue=False,
@@ -105,7 +105,7 @@ def create(ctk, parent, pool, state):
     debug_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Run in debug mode',
-        command=lambda: store.set_menu_option('debug', options),
+        command=lambda: state_manager.set_menu_option('debug', options),
         variable=options['debug'],
         onvalue=True,
         offvalue=False,
@@ -145,10 +145,10 @@ def set_mode(ctk, app, options, pool):
 
     # Set the mode
     ctk.set_appearance_mode(options['mode'].get())
-    store.set_menu_option('mode', options)
+    state_manager.set_menu_option('mode', options)
 
     # Reload the widgets
-    frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+    gui_manager.reload_widgets(ctk, app, pool, state_manager.get_state(), cover_frame)
 
     # Delete the cover frame
     cover_frame.destroy()
@@ -160,11 +160,11 @@ def set_theme(ctk, app, theme, options, pool):
 
     # Store new theme
     options['theme'] = ctk.StringVar(value=theme['title'])
-    store.set_menu_option('theme', options)
+    state_manager.set_menu_option('theme', options)
 
     # Set theme and reload widgets
     ctk.set_default_color_theme(theme['name'])
-    frames.reload_widgets(ctk, app, pool, store.get_state(), cover_frame)
+    gui_manager.reload_widgets(ctk, app, pool, state_manager.get_state(), cover_frame)
 
     # Set app background
     app.configure(fg_color=ThemeManager.theme.get('CTk').get('fg_color'))
@@ -177,4 +177,4 @@ def set_theme(ctk, app, theme, options, pool):
 def set_thread_count(options, value, label):
     options['threadamount'] = value
     label.configure(text=f"Thread Amount: {value.get()}/{os.cpu_count()}")
-    store.set_menu_option('threadamount', options)
+    state_manager.set_menu_option('threadamount', options)
