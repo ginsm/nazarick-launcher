@@ -1,7 +1,7 @@
 import os, shutil
 import traceback
 from modules.updater.common import *
-from modules import view, utility, store
+from modules import filesystem, view, utility, store
 
 
 # ----- Main Functions ----- #
@@ -112,7 +112,7 @@ def start(ctk, app, pool, widgets, modpack):
             # progressbar.add_percent(task_percent)
 
             # Install the update into the instance
-            install_update(variables)
+            install_update(variables, pool)
             progressbar.add_percent(task_percent)
 
             # Store update's version number
@@ -198,19 +198,13 @@ def handle_errors(variables):
     return error
 
 
-def install_update(variables):
-    inst_path, tmp, log = [
-        variables['instpath'],
+def install_update(variables, pool):
+    tmp, log = [
         variables['tmp'],
         variables['log']
     ]
 
-    # Paths
-    mods_dest = os.path.join(inst_path, 'mods')
-    config_dest = os.path.join(inst_path, 'config')
-    yosbr_path = os.path.join(inst_path, 'config', 'yosbr')
     mods_tmp = os.path.join(tmp, 'overrides', 'mods')
-    config_tmp = os.path.join(tmp, 'overrides', 'config')
     custommods_tmp = os.path.join(tmp, 'custommods')
 
     log('[INFO] Installing the modpack to the specified instance path.')
@@ -226,38 +220,35 @@ def install_update(variables):
                 os.path.join(mods_tmp, mod)
             )
 
-    # Remove old mods path and move updated mods to instance
-    if (os.path.exists(mods_dest)):
-        os.chdir(tmp) # Make sure program is not in mods dest
-        shutil.rmtree(mods_dest)
+    # Move overrides to main destination
+    futures = []
 
-    shutil.move(mods_tmp, mods_dest)
+    override_directory = os.path.join(tmp, 'overrides')
+    for override in os.listdir(override_directory):
+        futures.append(
+            pool.submit(move_override, variables, override)
+        )
 
-    # Remove yosbr and move updated configs to instance
-    if (os.path.exists(yosbr_path)):
-        shutil.rmtree(yosbr_path)
+    wait(futures)
 
-    for file_ in os.listdir(config_tmp):
-        file_path = os.path.join(config_tmp, file_)
 
-        # Handle directories recursively (if they're not yosbr)
-        if (os.path.isdir(file_path) and file_ != 'yosbr'):
-            for root, _, files in os.walk(file_path):
-                for name in files:
-                    root_path = os.path.join(root, name)
+def move_override(variables, override):
+    inst_path, tmp_path = [
+        variables.get('instpath'),
+        variables.get('tmp')
+    ]
 
-                    # Pass everything after config as arguments for os.path.join
-                    target_path = os.path.join(config_dest, root_path.replace(config_tmp, '')[1:])
-                    target_root, _ = os.path.split(target_path)
+    override_path = os.path.join(tmp_path, 'overrides', override)
+    destination = os.path.join(inst_path, override)
 
-                    # Ensure file's root folder exists (shutil.move gets sad about nested folders not existing)
-                    if (not os.path.exists(target_root)):
-                        os.makedirs(target_root)
+    # Ensure program is not operating in override or destination locations
+    if os.getcwd() in [override_path, destination]:
+        os.chdir(tmp_path)
 
-                    shutil.move(root_path, target_path)
-
-        # Handle top-level files by simply moving them (overwrites if it exists)
-        else:
-            target_path = os.path.join(config_dest, file_)
-            os.makedirs(os.path.split(target_path)[0], exist_ok=True)
-            shutil.move(file_path, target_path)
+    # Move files without overwriting user-added files
+    match override:
+        case 'mods' | 'scripts' | 'packmenu' | 'patchouli_books':
+            print('Reached overwrite: ', override)
+            filesystem.move_files(override_path, destination)
+        case _:
+            filesystem.move_files(override_path, destination, overwrite=False)
