@@ -2,7 +2,7 @@ from modules import gui_manager, state_manager
 from modules.utility import get_modpack_data
 
 def create(ctk, parent, pool, update_fn, widgets, game):
-    modpack_data = get_modpack_data(game, state_manager.get_selected_pack())
+    modpack_data = get_modpack_data(game, state_manager.get_selected_pack(game))
 
     update = ctk.CTkButton(
         master=parent,
