@@ -248,7 +248,6 @@ def move_override(variables, override):
     # Move files without overwriting user-added files
     match override:
         case 'mods' | 'scripts' | 'packmenu' | 'patchouli_books':
-            print('Reached overwrite: ', override)
             filesystem.move_files(override_path, destination)
         case _:
             filesystem.move_files(override_path, destination, overwrite=False)
