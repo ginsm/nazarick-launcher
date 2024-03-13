@@ -1,6 +1,6 @@
 from tktooltip import ToolTip
-from modules import game_list, state_manager, utility
-from modules.debounce import debounce
+from modules import game_list, state_manager
+from modules.decorators.debounce import debounce
 from modules.components import AppSideBar, SettingsFrame
 from modules.components.common import GameFrame
 

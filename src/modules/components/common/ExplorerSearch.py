@@ -5,7 +5,7 @@ from tktooltip import ToolTip
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
 from modules import state_manager, system_check, constants
-from modules.debounce import debounce
+from modules.decorators.debounce import debounce
 from modules.components.common import InfoModal
 
 def create(ctk, master, app, label, placeholder, name, find, game=''):
