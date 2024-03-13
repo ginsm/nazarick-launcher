@@ -5,18 +5,19 @@ from modules.utility import destructure
 # The default state for the store
 default_state={
     'autoclose': False,
+    'autorestart': False,
+    'debug': False,
     'frame': 'minecraft',
+    'games': {},
+    'geometry': '1280x720',
+    'logging': True,
+    'mode': 'System',
     'tab': {
         'minecraft': 'Settings',
         'valheim': 'Settings'
     },
-    'geometry': '1280x720',
-    'logging': True,
-    'mode': 'System',
     'theme': 'Blue',
     'threadamount': 4,
-    'debug': False,
-    'games': {},
 }
 
 
