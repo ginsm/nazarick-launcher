@@ -23,10 +23,8 @@ def main():
     if system_check.elevation_needed(game_paths):
         elevate(show_console=False)
 
-    # Set mode
+    # Set appearance
     ctk.set_appearance_mode(initial_state.get('mode') or 'System')
-
-    # Set theme
     theme = theme_list.get_theme_from_title(initial_state.get('theme'))
     ctk.set_default_color_theme(theme.get('name'))
 
@@ -40,11 +38,11 @@ def main():
     threadamount = initial_state.get('threadamount') or 4
     pool = ThreadPoolExecutor(max_workers=threadamount - 1)
 
-    # Top level components
+    # Create the top level component
     app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), constants.APP_NAME)
     app.grid_rowconfigure(0, weight=1)
 
-    # Create GUI
+    # Creates the rest of the GUI dynamically
     gui_manager.create_gui(ctk, app, pool, initial_state)
 
     # Handle tufup running into issues
@@ -60,7 +58,7 @@ def main():
                 {'text': 'Download', 'command': lambda _: webbrowser.open('https://github.com/ginsm/nazarick-launcher/releases/latest/download/Nazarick.Launcher.zip'), 'border': border_color}
             ])
 
-    # UI Events
+    # UI Event Handlers
     app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
