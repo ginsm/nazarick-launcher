@@ -191,7 +191,7 @@ def handle_errors(variables):
             log("[ERROR] The provided path to your launcher doesn't exist.", 'error')
             error =  True
 
-    if system_check.check_perms(inst_path) == system_check.NEED_ADMIN:
+    if system_check.check_access(inst_path) == system_check.NEED_ADMIN:
         log("[ERROR] The instance path requires administrative privileges. Please restart your launcher.", 'error')
         error = True
         

@@ -58,7 +58,7 @@ def handle_key_press(ctk, entry, name, app):
     
     if (stored != value):
         state_manager.set_pack_state({name: value})
-        if system_check.check_perms(value) == system_check.NEED_ADMIN:
+        if system_check.check_access(value) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, value, app)
 
 
@@ -91,7 +91,7 @@ def search_for_dir(entry, name, ctk, app):
     if (path is not None and path != ''):
         set_entry(entry=entry, string=path)
         state_manager.set_pack_state({name: path})
-        if system_check.check_perms(path) == system_check.NEED_ADMIN:
+        if system_check.check_access(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 
 
@@ -100,7 +100,7 @@ def search_for_file(entry, name, ctk, app):
     if (path is not None):
         set_entry(entry=entry, string=path.name)
         state_manager.set_pack_state({name: path.name})
-        if system_check.check_perms(path) == system_check.NEED_ADMIN:
+        if system_check.check_access(path) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, path, app)
 
 

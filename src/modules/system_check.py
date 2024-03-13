@@ -10,6 +10,9 @@ def check_perms(path):
     if (os.path.exists(path)):
         test_file = os.path.join(path, 'NazarickPermissionTest')
 
+def check_access(path):
+    if (os.path.exists(path)):
+        test_file = os.path.join(path, 'NazarickAccessTest')
         try:
             open(test_file, 'x')
             os.remove(test_file)
