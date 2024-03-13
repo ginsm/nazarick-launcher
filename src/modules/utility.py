@@ -23,13 +23,6 @@ def destructure(obj={}, args=[]):
     return output
 
 
-def some(list_, func):
-    for element in list_:
-        if (func(element)):
-            return True
-    return False
-
-
 def get_time():
     return datetime.now().strftime('%m/%d/%Y %H:%M:%S')
 

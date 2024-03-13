@@ -18,12 +18,9 @@ def main():
     # Upgrade the app (converts old version conventions to newer ones)
     app_upgrader.run()
 
-    # Check if elevated permission is necessary
-    permission_check_failed = utility.some(
-        state_manager.get_game_paths(),
-        lambda v: system_check.check_perms(v) == system_check.NEED_ADMIN
-    )
-    if (permission_check_failed):
+    # Check if launcher needs to be elevated
+    game_paths = state_manager.get_game_paths()
+    if system_check.elevation_needed(game_paths):
         elevate(show_console=False)
 
     # Set mode

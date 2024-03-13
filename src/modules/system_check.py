@@ -6,9 +6,8 @@ NEED_ADMIN = 'need-admin'
 HAVE_PERM = 'have-perm'
 UNKNOWN = 'unknown'
 
-def check_perms(path):
-    if (os.path.exists(path)):
-        test_file = os.path.join(path, 'NazarickPermissionTest')
+def elevation_needed(game_paths):
+    return any(check_access(v) == NEED_ADMIN for v in game_paths)
 
 def check_access(path):
     if (os.path.exists(path)):
