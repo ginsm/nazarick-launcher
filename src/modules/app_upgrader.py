@@ -1,6 +1,6 @@
 import os
 import shutil
-from modules import constants, game_list, state_manager, theme_list, utility
+from modules import constants, game_list, state_manager, theme_list
 
 def run():
     _move_minecraft_tmp_1_2_0()
@@ -15,7 +15,7 @@ def run():
 # is used solely for Minecraft's updater. This method makes a new directory in _update_tmp named
 # 'Minecraft' and moves any existing files into it.
 def _move_minecraft_tmp_1_2_0():
-    current_tmp = os.path.join(utility.get_env('nazpath'), '_update_tmp')
+    current_tmp = os.path.join(os.environ.get('nazpath'), '_update_tmp')
     minecraft_tmp = os.path.join(current_tmp, 'minecraft')
 
     # Check if modrinth.index.json exists in _update_tmp

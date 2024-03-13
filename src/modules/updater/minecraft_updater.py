@@ -34,14 +34,16 @@ def start(ctk, app, pool, widgets, modpack):
     game_state = state_manager.get_pack_state('minecraft')
     options = state_manager.get_state()
     internet_connection = system_check.check_internet()
+    root = os.environ.get('nazpath')
+    
     variables = {
         'app': app,
         'ctk': ctk,
         'exepath': game_state['executable'],
         'instpath': game_state['instance'],
         'options': options,
-        'root': utility.get_env('nazpath'),
-        'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'minecraft'),
+        'root': root,
+        'tmp': os.path.join(root, '_update_tmp', 'minecraft'),
         'widgets': widgets,
         'modprovider': ModProvider,
         'log': log,

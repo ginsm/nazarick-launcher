@@ -42,7 +42,10 @@ def create_gui(ctk, app, pool, state, cover_frame = None):
 def raise_selected_frame(frames):
     selected_frame = state_manager.get_frame()
     for frame_data in frames:
-        [name, frame] = utility.destructure(frame_data, ['name', 'frame'])
+        name, frame = [
+            frame_data.get('name'),
+            frame_data.get('frame')
+        ]
         if name.lower() == selected_frame:
             frame.tkraise()
             AppSideBar.color_buttons(name)

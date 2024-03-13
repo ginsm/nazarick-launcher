@@ -1,6 +1,5 @@
 import os
 from tinydb import TinyDB
-from modules.utility import destructure
 
 # The default state for the store
 default_state={
@@ -195,7 +194,7 @@ def get_game_paths():
 # Generic state getter/setter
 def get_state(*args):
     state = get_state_doc().get(doc_id=1)
-    output = destructure(state, args=args)
+    output = [state.get(v) for v in args]
     return output if bool(output) else state
 
 def set_state(data={}):

@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-import webbrowser
+import os, webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
@@ -9,7 +9,8 @@ from modules.components.common import InfoModal
 
 def main():
     # Store the mod's path in environment
-    utility.set_env('nazpath', constants.APP_BASE_DIR.as_posix())
+    BASE_DIR = constants.APP_BASE_DIR.as_posix()
+    os.environ['nazpath'] = BASE_DIR
 
     # Initialize the store
     state_manager.init(tufup.DATA_DIR.as_posix())
@@ -39,7 +40,7 @@ def main():
     pool = ThreadPoolExecutor(max_workers=threadamount - 1)
 
     # Create the top level component
-    app = AppWindow.create(ctk, initial_state, utility.get_env('nazpath'), constants.APP_NAME)
+    app = AppWindow.create(ctk, initial_state, BASE_DIR, constants.APP_NAME)
     app.grid_rowconfigure(0, weight=1)
 
     # Creates the rest of the GUI dynamically

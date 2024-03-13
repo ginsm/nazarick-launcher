@@ -35,13 +35,15 @@ def start(ctk, app, pool, widgets, modpack):
     game_state = state_manager.get_pack_state('valheim')
     options = state_manager.get_state()
     internet_connection = system_check.check_internet()
+    root = os.environ.get('nazpath')
+
     variables = {
         'app': app,
         'ctk': ctk,
         'instpath': game_state['install'],
         'options': options,
-        'root': utility.get_env('nazpath'),
-        'tmp': os.path.join(utility.get_env('nazpath'), '_update_tmp', 'valheim'),
+        'root': root,
+        'tmp': os.path.join(root, '_update_tmp', 'valheim'),
         'widgets': widgets,
         'modprovider': ModProvider,
         'log': log,

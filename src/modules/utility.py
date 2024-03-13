@@ -1,26 +1,5 @@
-import os
 from datetime import datetime
-
 from modules import game_list
-
-
-def set_env(name, value):
-    os.environ[name] = value
-
-
-def get_env(name):
-    return os.environ.get(name)
-
-
-def destructure(obj={}, args=[]):
-    output = []
-
-    if len(args):
-        for arg in args:
-            value = obj.get(arg) if isinstance(obj, dict) else obj[arg]
-            output.append(value)
-
-    return output
 
 
 def get_time():
