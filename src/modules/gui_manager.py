@@ -119,7 +119,7 @@ def reload_frame(ctk, app, pool, name, cover_frame = None):
 def cleanup_tooltips(app):
     children = app.winfo_children()
     for child in children:
-        if type(child) is ToolTip:
+        if isinstance(child, ToolTip):
             master_exists = child.widget.master.winfo_exists()
             if master_exists:
                 child.on_leave()
@@ -130,7 +130,7 @@ def cleanup_tooltips(app):
 def add_lockable(lockable):
     global lockable_elements
 
-    if type(lockable) is list:
+    if isinstance(lockable, list):
         for element in lockable:
             lockable_elements.append(element)
     else:
