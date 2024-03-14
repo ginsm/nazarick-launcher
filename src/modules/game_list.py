@@ -3,6 +3,7 @@ from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
 from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
 from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
 from modules.updater.MinecraftUpdater import MinecraftUpdater
+from modules.updater.ValheimUpdater import ValheimUpdater
 
 
 LIST = [
@@ -73,7 +74,7 @@ LIST = [
                 'file': 'latest'
             },
         ],
-        'updater': None,
+        'updater': ValheimUpdater,
     },
 
     # Enshrouded
