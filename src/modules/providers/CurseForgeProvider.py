@@ -3,15 +3,14 @@ import os
 import requests
 from modules import constants
 from modules.providers.ProviderAbstract import ProviderAbstract
-from modules.updater.common import check_local_mod_paths
 
 class CurseForgeProviderBase(ProviderAbstract):
-    def download_mod(self, log, mod_data, local_paths, destination):
+    def download_mod(self, updater, mod_data, local_paths, destination):
         mod_data = self.get_download_info(mod_data)
         mod_name = mod_data.get('file')
         destination = os.path.join(destination, mod_name)
 
-        if check_local_mod_paths(log, local_paths, destination, mod_name):
+        if updater.check_local_mod_paths(local_paths, destination, mod_name):
             return
         
         if not mod_data.get('url'):
@@ -20,13 +19,13 @@ class CurseForgeProviderBase(ProviderAbstract):
         req = requests.get(mod_data.get('url'), allow_redirects=True)
 
         if req.status_code == 200:
-            log(f'[INFO] (D) {mod_name}')
+            updater.log(f'[INFO] (D) {mod_name}')
             open(destination, 'wb').write(req.content)
         else:
             raise Exception(mod_name)
         
-        
-    def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
+
+    def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
         
 
@@ -58,25 +57,25 @@ class CurseForgeProviderBase(ProviderAbstract):
         } if download_info else False
         
 
-    def download_modpack(self, variables):
-        req = super().download_modpack(variables)
+    def download_modpack(self, updater):
+        req = super().download_modpack(updater)
 
         if req.status_code != 200:
-            raise Exception(f'Invalid response from SelfHosted while downloading modpack: {variables['version']['name']}.')
+            raise Exception(f'Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.')
         
 
-    def extract_modpack(self, variables, game, pack):
-        return super().extract_modpack(variables, game, pack)
+    def extract_modpack(self, updater, game, pack):
+        return super().extract_modpack(updater, game, pack)
     
 
-    def get_modpack_modlist(self, variables):
-        manifest_json_path = os.path.join(variables.get('tmp'), 'manifest.json')
+    def get_modpack_modlist(self, updater):
+        manifest_json_path = os.path.join(updater.temp_path, 'manifest.json')
         contents = open(manifest_json_path, 'r').read()
         files = json.loads(contents).get('files')
         return files
 
 
-    def initial_modpack_install(self, variables):
+    def initial_modpack_install(self, updater):
         pass
     
 
@@ -120,8 +119,8 @@ class CurseForgeProviderBase(ProviderAbstract):
 
 
 class CurseForgeMinecraftProvider(CurseForgeProviderBase):
-    def initial_modpack_install(self, variables):
-        inst_path = variables['instpath']
+    def initial_modpack_install(self, updater):
+        inst_path = updater.install_path
         configpath = os.path.join(inst_path, 'config')
         modspath = os.path.join(inst_path, 'mods')
 
@@ -131,7 +130,3 @@ class CurseForgeMinecraftProvider(CurseForgeProviderBase):
 
         move_existing_files(configpath)
         move_existing_files(modspath)
-
-
-    def move_custom_mods(self, variables={}, mod_index=[], ignore=[]):
-        raise NotImplementedError

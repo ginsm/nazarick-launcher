@@ -113,7 +113,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
         ctk=ctk,
         parent=frame,
         pool=pool,
-        update_fn=updater.start,
+        updater=updater,
         widgets={
             'logbox': logbox,
             'changebox': changebox,

@@ -2,7 +2,7 @@ from modules.providers.CurseForgeProvider import CurseForgeMinecraftProvider
 from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
 from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
 from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
-from modules.updater import minecraft_updater, valheim_updater, enshrouded_updater
+from modules.updater.MinecraftUpdater import MinecraftUpdater
 
 
 LIST = [
@@ -47,7 +47,7 @@ LIST = [
                 'game_version': '1.18.2'
             },
         ],
-        'updater': minecraft_updater,
+        'updater': MinecraftUpdater,
     },
 
     # Valheim
@@ -73,7 +73,7 @@ LIST = [
                 'file': 'latest'
             },
         ],
-        'updater': valheim_updater,
+        'updater': None,
     },
 
     # Enshrouded
@@ -87,6 +87,6 @@ LIST = [
                 'placeholder': 'Enter the path to your Enshrouded install.',
             }
         ],
-        'updater': enshrouded_updater,
+        'updater': None,
     }
 ]

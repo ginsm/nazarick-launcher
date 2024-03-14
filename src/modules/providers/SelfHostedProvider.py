@@ -6,10 +6,10 @@ from modules.providers.ProviderAbstract import ProviderAbstract
 
 
 class SelfHostedProviderBase(ProviderAbstract):
-    def download_mod(self, log, mod_data, local_paths, destination):
+    def download_mod(self, updater, mod_data, local_paths, destination):
         raise NotImplementedError
     
-    def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
+    def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
 
     def get_latest_modpack_version(self, game, modpack):
@@ -21,32 +21,31 @@ class SelfHostedProviderBase(ProviderAbstract):
             return False
         
         content = json.loads(req.text)
-
-        version_data = content.get(game).get(pack).get('versions')[0]
+        version_data = content.get(game.lower()).get(pack).get('versions')[0]
         version_data.update({'url': f'{website}{version_data.get('url')}'})
 
-        return content.get(game).get(pack).get('versions')[0]
+        return content.get(game.lower()).get(pack).get('versions')[0]
     
-    def download_modpack(self, variables):
-        req = super().download_modpack(variables)
+    def download_modpack(self, updater):
+        req = super().download_modpack(updater)
 
         if req.status_code != 200:
             raise Exception('Invalid response from SelfHosted (modpack)')
     
-    def extract_modpack(self, variables, game, pack):
-        return super().extract_modpack(variables, game, pack)
+    def extract_modpack(self, updater, game, pack):
+        return super().extract_modpack(updater, game, pack)
     
-    def get_modpack_modlist(self, variables):
+    def get_modpack_modlist(self, updater):
         raise NotImplementedError
     
-    def initial_modpack_install(self, variables):
+    def initial_modpack_install(self, updater):
         raise NotImplementedError
 
 
 
 class SelfHostedMinecraftProvider(SelfHostedProviderBase):
-    def initial_modpack_install(self, variables):
-        inst_path = variables['instpath']
+    def initial_modpack_install(self, updater):
+        inst_path = updater.install_path
         configpath = os.path.join(inst_path, 'config')
         modspath = os.path.join(inst_path, 'mods')
 
@@ -57,8 +56,8 @@ class SelfHostedMinecraftProvider(SelfHostedProviderBase):
         move_existing_files(configpath)
         move_existing_files(modspath)
 
-    def move_custom_mods(self, variables, mod_index):
-        instance_path = variables['instpath']
+    def move_custom_mods(self, updater, mod_index):
+        instance_path = updater.install_path
         mods_dir = os.path.join(instance_path, 'mods')
                 
-        super().move_custom_mods(mods_dir, variables, mod_index)
+        super().move_custom_mods(mods_dir, updater, mod_index)

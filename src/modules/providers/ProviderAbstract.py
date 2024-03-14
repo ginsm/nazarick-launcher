@@ -5,19 +5,17 @@ import zipfile
 
 import requests
 
-from modules.updater.common import extract_modpack_changelog
-
 class ProviderAbstract(ABC):
     # Mod specific methods
     @abstractmethod
-    def download_mod(self, log, mod_data, local_paths, destination):
+    def download_mod(self, updater, mod_data, local_paths, destination):
         raise NotImplementedError
     
     @abstractmethod
-    def move_custom_mods(self, mods_dir = '', variables = {}, mod_index = [], ignore = []):
+    def move_custom_mods(self, mods_dir, updater, mod_index, ignore = []):
         log, tmp = [
-            variables['log'],
-            variables['tmp']
+            updater.log,
+            updater.temp_path
         ]
 
         log('[INFO] Moving user added mods.')
@@ -46,11 +44,11 @@ class ProviderAbstract(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def download_modpack(self, variables):
+    def download_modpack(self, updater):
         log, tmp, version = [
-            variables['log'],
-            variables['tmp'],
-            variables['version']
+            updater.log,
+            updater.temp_path,
+            updater.version
         ]
 
         log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
@@ -64,10 +62,10 @@ class ProviderAbstract(ABC):
         return req
     
     @abstractmethod
-    def extract_modpack(self, variables, game, pack):
+    def extract_modpack(self, updater, game, pack):
         log, tmp = [
-            variables['log'],
-            variables['tmp']
+            updater.log,
+            updater.temp_path
         ]
 
         zip_file = os.path.join(tmp, 'update.zip')
@@ -80,12 +78,12 @@ class ProviderAbstract(ABC):
         # Remove update.zip
         os.remove(zip_file)
 
-        extract_modpack_changelog(variables, game, pack)
+        updater.extract_modpack_changelog(game, pack)
 
     @abstractmethod
-    def get_modpack_modlist(self, variables):
+    def get_modpack_modlist(self, updater):
         raise NotImplementedError
     
     @abstractmethod
-    def initial_modpack_install(self, variables):
+    def initial_modpack_install(self, updater):
         raise NotImplementedError

@@ -3,7 +3,7 @@ import os, webbrowser
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
-from modules import app_upgrader, gui_manager, state_manager, system_check, utility, tufup, constants, theme_list
+from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list
 from modules.components import AppWindow
 from modules.components.common import InfoModal
 

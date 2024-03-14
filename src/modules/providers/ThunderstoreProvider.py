@@ -3,11 +3,10 @@ import os
 import zipfile
 import requests
 from modules.providers.ProviderAbstract import ProviderAbstract
-from modules.updater.common import check_local_mod_paths
 
 
 class ThunderstoreProviderBase(ProviderAbstract):
-    def download_mod(self, log, mod_data, local_paths, destination):
+    def download_mod(self, updater, mod_data, local_paths, destination):
         plugin = mod_data
         plugin_url = f"https://thunderstore.io/package/download/{plugin.replace('-', '/')}"
         plugin_dest = os.path.join(destination, plugin)
@@ -15,11 +14,11 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
         req = requests.get(plugin_url, allow_redirects=True)
 
-        if check_local_mod_paths(log, local_paths, destination, plugin):
+        if updater.check_local_mod_paths(local_paths, destination, plugin):
             return
 
         if req.status_code == 200:
-            log(f'[INFO] (D) {plugin}')
+            updater.log(f'[INFO] (D) {plugin}')
             open(plugin_zip, 'wb').write(req.content)
 
             with zipfile.ZipFile(plugin_zip, 'r') as ref:
@@ -30,7 +29,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
             raise Exception(plugin)
         
 
-    def move_custom_mods(self, mods_dir='', variables={}, mod_index=[], ignore=[]):
+    def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
 
 
@@ -51,41 +50,41 @@ class ThunderstoreProviderBase(ProviderAbstract):
         }
     
 
-    def download_modpack(self, variables):
-        req = super().download_modpack(variables)
+    def download_modpack(self, updater):
+        req = super().download_modpack(updater)
 
         if req.status_code != 200:
-            raise Exception(f'Invalid from Thunderstore while downloading modpack: {variables['version']['name']}.')
+            raise Exception(f'Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.')
 
 
-    def extract_modpack(self, variables, game, pack):
-        return super().extract_modpack(variables, game, pack)
+    def extract_modpack(self, updater, game, pack):
+        return super().extract_modpack(updater, game, pack)
     
 
-    def get_modpack_modlist(self, variables):
+    def get_modpack_modlist(self, updater):
         raise NotImplementedError
     
 
-    def initial_modpack_install(self, variables):
+    def initial_modpack_install(self, updater):
         raise NotImplementedError
 
 
 
 class ThunderstoreValheimProvider(ThunderstoreProviderBase):
-    def move_custom_mods(self, variables={}, mod_index=[], ignore=[]):
-        install_path = variables['instpath']
+    def move_custom_mods(self, updater, mod_index, ignore=[]):
+        install_path = updater.install_path
         plugins_dir = os.path.join(install_path, 'BepInEx', 'plugins')
         ignore = ['Valheim.DisplayBepInExInfo.dll']
 
-        return super().move_custom_mods(plugins_dir, variables, mod_index, ignore)
+        return super().move_custom_mods(plugins_dir, updater, mod_index, ignore)
 
 
-    def get_modpack_modlist(self, variables):
-        manifest_json_path = os.path.join(variables.get('tmp'), 'manifest.json')
+    def get_modpack_modlist(self, updater):
+        manifest_json_path = os.path.join(updater.temp_path, 'manifest.json')
         contents = open(manifest_json_path, 'r').read()
         dependencies = json.loads(contents).get('dependencies')
         return dependencies
 
 
-    def initial_modpack_install(self, variables):
+    def initial_modpack_install(self, updater):
         pass
