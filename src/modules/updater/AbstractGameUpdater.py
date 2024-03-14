@@ -26,6 +26,8 @@ class AbstractGameUpdater(ABC):
         self.install_path = ''
         self.nazarick_json_path = ''
         self.temp_path = ''
+        self.temp_mods_path = ''
+        self.local_paths = []
         self.game = ''
         self.modprovider = None
         self.version = None
@@ -115,7 +117,7 @@ class AbstractGameUpdater(ABC):
                 progressbar.add_percent(task_percent)
 
                 # Unzip update to temp directory
-                ModpackProvider.extract_modpack(self, 'Minecraft', self.modpack.get('name'))
+                ModpackProvider.extract_modpack(self, self.game, self.modpack.get('name'))
                 progressbar.add_percent(task_percent)
 
                 # Purge any files as instructed from modpack archive
@@ -123,13 +125,7 @@ class AbstractGameUpdater(ABC):
                 progressbar.add_percent(task_percent)
 
                 # Attempt to retrieve all of the mod files
-                destination = os.path.join(self.temp_path, 'overrides', 'mods')
-                local_paths = [
-                    os.path.join(self.install_path, 'mods'),
-                    os.path.join(self.install_path, 'mods-old'),
-                    destination
-                ]
-                mod_index = self.retrieve_mods(destination, local_paths)
+                mod_index = self.retrieve_mods(self.temp_mods_path, self.local_paths)
 
                 # FIXME - This was causing the updaters to stall.
                 # Get version data and move custom mods
@@ -322,6 +318,9 @@ class AbstractGameUpdater(ABC):
         else:
             self.log('[INFO] Creating the update directory.')
 
+        # Create clean tmp directory
+        os.makedirs(self.temp_path, exist_ok=True)
+        
     
     def retrieve_mods(self, destination, local_paths):
         self.log('[INFO] Retrieving modpack dependencies.')

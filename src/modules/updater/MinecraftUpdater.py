@@ -13,6 +13,12 @@ class MinecraftUpdater(AbstractGameUpdater):
         # Initialize variables
         self.game = 'Minecraft'
         self.temp_path = os.path.join(self.root, '_update_tmp', 'minecraft')
+        self.temp_mods_path = os.path.join(self.temp_path, 'overrides', 'mods')
+        self.local_paths = [
+            os.path.join(self.install_path, 'mods'),
+            os.path.join(self.install_path, 'mods-old'),
+            self.temp_mods_path
+        ]
         self.install_path = game_state.get('instance')
         self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
         self.executable_path = game_state.get('executable')
@@ -46,11 +52,8 @@ class MinecraftUpdater(AbstractGameUpdater):
         self.log('[INFO] Installing the modpack to specified destination.')
 
         # Move user added mods to the tmp path
-        custommods = os.listdir(custommods_tmp)
-        os.chdir(self.temp_path)
-
         if os.path.exists(custommods_tmp):
-            for mod in custommods:
+            for mod in os.listdir(custommods_tmp):
                 shutil.move(
                     os.path.join(custommods_tmp, mod),
                     os.path.join(mods_tmp, mod)
