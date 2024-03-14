@@ -23,18 +23,18 @@ class AbstractGameUpdater(ABC):
         self.options = state_manager.get_state()
 
         # These get initialized later on in each game updater
+        self.game = ''
+        self.temp_path = ''
         self.install_path = ''
         self.nazarick_json_path = ''
-        self.temp_path = ''
+        self.user_input_checks = []
+        self.purge_whitelist = []
         self.temp_mods_path = ''
         self.local_paths = []
-        self.game = ''
-        self.modprovider = None
-        self.version = None
-        self.purge_whitelist = []
         self.exe_name = ''
         self.command = []
-        self.user_input_checks = []
+        self.modprovider = None
+        self.version = None
 
 
     # ---- ABSTRACT METHODS ---- #    

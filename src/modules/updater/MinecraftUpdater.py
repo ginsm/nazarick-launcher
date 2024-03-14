@@ -10,21 +10,16 @@ class MinecraftUpdater(AbstractGameUpdater):
         # Get game state
         game_state = state_manager.get_pack_state('Minecraft')
 
-        # Initialize variables
+        # Begin initializing variables
         self.game = 'Minecraft'
+
+        # Paths used throughout update
         self.temp_path = os.path.join(self.root, '_update_tmp', 'minecraft')
-        self.temp_mods_path = os.path.join(self.temp_path, 'overrides', 'mods')
-        self.local_paths = [
-            os.path.join(self.install_path, 'mods'),
-            os.path.join(self.install_path, 'mods-old'),
-            self.temp_mods_path
-        ]
         self.install_path = game_state.get('instance')
-        self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
         self.executable_path = game_state.get('executable')
-        self.purge_whitelist=['config', 'shaderpacks']
-        self.exe_name = os.path.split(self.executable_path)[-1]
-        self.command = [self.executable_path]
+        self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
+
+        # Used by super.user_input_has_errors
         self.user_input_checks = [
             {
                 'value': self.install_path,
@@ -43,6 +38,21 @@ class MinecraftUpdater(AbstractGameUpdater):
                 'access_failed': ''
             },
         ]
+
+        # Used by super.purge
+        self.purge_whitelist=['config', 'shaderpacks']
+
+        # Used by super.retrieve_mods
+        self.temp_mods_path = os.path.join(self.temp_path, 'overrides', 'mods')
+        self.local_paths = [
+            os.path.join(self.install_path, 'mods'),
+            os.path.join(self.install_path, 'mods-old'),
+            self.temp_mods_path
+        ]
+
+        # Used by super.run_executable
+        self.exe_name = os.path.split(self.executable_path)[-1]
+        self.command = [self.executable_path]
 
 
     def install_update(self):

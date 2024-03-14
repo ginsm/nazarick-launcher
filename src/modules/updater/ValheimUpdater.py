@@ -11,18 +11,15 @@ class ValheimUpdater(AbstractGameUpdater):
         # Get game state
         game_state = state_manager.get_pack_state('Valheim')
 
-        # Initialize variables
+        # Begin initializing variables
         self.game = 'Valheim'
+
+        # Paths used throughout update
         self.temp_path = os.path.join(self.root, '_update_tmp', 'valheim')
-        self.temp_mods_path = os.path.join(self.temp_path, 'plugins')
-        self.local_paths = [
-                os.path.join(self.install_path, 'BepInEx', 'plugins')
-        ]
         self.install_path = game_state.get('install')
         self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
-        self.purge_whitelist = ['BepInEx/config']
-        self.exe_name = 'valheim.exe'
-        self.command = ['cmd', '/c', 'start', 'steam://run/892970']
+
+        # Used by super.user_input_has_errors
         self.user_input_checks = [
             {
                 'value': self.install_path,
@@ -33,6 +30,19 @@ class ValheimUpdater(AbstractGameUpdater):
                 'access_failed': 'The install path requires administrative privileges. Please restart your launcher.'
             }
         ]
+
+        # Used by super.purge
+        self.purge_whitelist = ['BepInEx/config']
+
+        # Used by super.retrieve_mods
+        self.temp_mods_path = os.path.join(self.temp_path, 'plugins')
+        self.local_paths = [
+                os.path.join(self.install_path, 'BepInEx', 'plugins')
+        ]
+
+        # Used by super.run_executable
+        self.exe_name = 'valheim.exe'
+        self.command = ['cmd', '/c', 'start', 'steam://run/892970']
         
 
     def install_update(self):
