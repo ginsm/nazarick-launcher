@@ -2,9 +2,9 @@ from modules.providers.CurseForgeProvider import CurseForgeMinecraftProvider
 from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
 from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
 from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
-from modules.updater.EnshroudedUpdater import EnshroudedUpdater
-from modules.updater.MinecraftUpdater import MinecraftUpdater
-from modules.updater.ValheimUpdater import ValheimUpdater
+from modules.updaters.EnshroudedUpdater import EnshroudedUpdater
+from modules.updaters.MinecraftUpdater import MinecraftUpdater
+from modules.updaters.ValheimUpdater import ValheimUpdater
 
 
 LIST = [

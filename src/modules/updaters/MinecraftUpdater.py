@@ -2,7 +2,7 @@ from concurrent.futures import wait
 import os
 import shutil
 from modules import filesystem, state_manager
-from modules.updater.AbstractGameUpdater import AbstractGameUpdater
+from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 
 class MinecraftUpdater(AbstractGameUpdater):

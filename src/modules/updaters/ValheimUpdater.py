@@ -3,7 +3,7 @@ import os
 import shutil
 from modules import state_manager
 from modules.filesystem import overwrite
-from modules.updater.AbstractGameUpdater import AbstractGameUpdater
+from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 
 class ValheimUpdater(AbstractGameUpdater):

@@ -1,5 +1,5 @@
 from modules import utility
-from modules.updater.AbstractGameUpdater import AbstractGameUpdater
+from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 # Enshrouded doesn't have mod support yet; this updater simply launches the game.
 class EnshroudedUpdater(AbstractGameUpdater):
