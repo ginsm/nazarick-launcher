@@ -1,5 +1,6 @@
 from modules import gui_manager, state_manager
-from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, LogBox, ProgressBar, UpdateButton
+from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, LogBox, ProgressBar
+from modules.components.common.UpdateButton import UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
 
@@ -109,7 +110,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     progress_frame.grid(row=len(settings) + 1, column=0, sticky='nswe', pady=5, padx=(15, 5))
 
     # ---- Update button ---- #
-    update_button = UpdateButton.create(
+    update_button = UpdateButton().create(
         ctk=ctk,
         parent=frame,
         pool=pool,

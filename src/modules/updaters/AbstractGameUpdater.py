@@ -21,6 +21,7 @@ class AbstractGameUpdater(ABC):
         self.log = widgets.get('logbox').get('log')
         self.root = os.environ.get('nazpath')
         self.options = state_manager.get_state()
+        self.cancel = False
 
         # These get initialized later on in each game updater
         self.game = ''
@@ -48,9 +49,10 @@ class AbstractGameUpdater(ABC):
     
 
     # ---- COMMON METHODS ---- #
-    def start(self):
+    def start(self, update_button):
         # Run the game-specific initialize method (see __init__ for unitialized variables)
         self.initialize()
+        self.update_button = update_button
 
         # Begin logging and lock gui
         self.log('')
@@ -58,6 +60,9 @@ class AbstractGameUpdater(ABC):
 
         self.log(f'[INFO] Locking user input.')
         gui_manager.lock(True)
+
+        # Unlock this update process' button
+        update_button.configure(state='normal')
 
         # Initialize providers
         providers = self.modpack.get('providers')
@@ -71,7 +76,6 @@ class AbstractGameUpdater(ABC):
             traceback.print_exc()
             gui_manager.lock(False)
             return
-        
 
         # Get progress bar and divide 25% of progress bar by amount of tasks
         progressbar = self.widgets.get('progressbar')
@@ -107,25 +111,31 @@ class AbstractGameUpdater(ABC):
                 if self.on_latest_version(ModpackProvider.initial_modpack_install):
                     progressbar.add_percent(1 - (task_percent * 2))
                     self.finalize(task_percent)
+                    return
 
                 # Clean up temp directory
-                self.clean_update_directories()
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    self.clean_update_directories()
+                    progressbar.add_percent(task_percent)
 
                 # Download latest modpack version
-                ModpackProvider.download_modpack(self)
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    ModpackProvider.download_modpack(self)
+                    progressbar.add_percent(task_percent)
 
                 # Unzip update to temp directory
-                ModpackProvider.extract_modpack(self, self.game, self.modpack.get('name'))
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    ModpackProvider.extract_modpack(self, self.game, self.modpack.get('name'))
+                    progressbar.add_percent(task_percent)
 
                 # Purge any files as instructed from modpack archive
-                self.purge_files()
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    self.purge_files()
+                    progressbar.add_percent(task_percent)
 
                 # Attempt to retrieve all of the mod files
-                mod_index = self.retrieve_mods(self.temp_mods_path, self.local_paths)
+                if not self.cancel:
+                    mod_index = self.retrieve_mods(self.temp_mods_path, self.local_paths)
 
                 # FIXME - This was causing the updaters to stall.
                 # Get version data and move custom mods
@@ -138,12 +148,14 @@ class AbstractGameUpdater(ABC):
                 # progressbar.add_percent(task_percent)
 
                 # Run game-specific install method
-                self.install_update()
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    self.install_update()
+                    progressbar.add_percent(task_percent)
 
                 # Store update's version number
-                self.store_version_data(mod_index)
-                progressbar.add_percent(task_percent)
+                if not self.cancel:
+                    self.store_version_data(mod_index)
+                    progressbar.add_percent(task_percent)
             
             # Handle update process failing
             except Exception as e:
@@ -174,12 +186,19 @@ class AbstractGameUpdater(ABC):
         self.log(f'[INFO] Unlocking user input.')
         gui_manager.lock(False)
 
-        self.run_executable()
-        progressbar.add_percent(task_percent)
+        if not self.cancel:
+            self.run_executable()
+            progressbar.add_percent(task_percent)
 
+        if not self.cancel:
+            self.auto_close_app()
+            
+        # Reset values
         self.log(f'[INFO] Finished process at {utility.get_time()}.')
         progressbar.reset_percent()
-        self.auto_close_app()
+        self.update_button.configure(text='Play')
+        self.cancel = False
+        
 
 
     def user_input_has_errors(self):
@@ -241,7 +260,7 @@ class AbstractGameUpdater(ABC):
                 name, ver = [data['name'], data['version']]
 
                 # If modpack version and name are the same, you're on the latest version
-                if name == self.version.get('name') and ver == self.version('version'):
+                if name == self.version.get('name') and ver == self.version.get('version'):
                     self.log(f'[INFO] You are already on the latest version: {name} ({ver}).')
                     return True
         else:
@@ -358,9 +377,10 @@ class AbstractGameUpdater(ABC):
     
 
     def retrieve(self, mod_data, local_paths, destination, task_percent):
-        self.modprovider.download_mod(self, mod_data, local_paths, destination)
-        progress_bar = self.widgets.get('progressbar')
-        progress_bar.add_percent(task_percent)
+        if not self.cancel:
+            self.modprovider.download_mod(self, mod_data, local_paths, destination)
+            progress_bar = self.widgets.get('progressbar')
+            progress_bar.add_percent(task_percent)
 
 
     def check_local_mod_paths(self, local_paths, destination, filename):
@@ -403,7 +423,12 @@ class AbstractGameUpdater(ABC):
         else:
             self.log(f'[INFO] The game is not launched whilst in debug mode.')
 
+
     def auto_close_app(self):
         if self.options.get('autoclose'):
             self.log('[INFO] Auto close is enabled; closing app.')
             self.app.quit()
+
+
+    def cancel_update(self):
+        self.cancel = True

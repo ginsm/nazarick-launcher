@@ -1,18 +1,40 @@
 from modules import gui_manager, state_manager
 from modules.utility import get_modpack_data
 
-def create(ctk, parent, pool, updater, widgets, game):
-    modpack_data = get_modpack_data(game, state_manager.get_selected_pack(game))
+class UpdateButton():
+    def create(self, ctk, parent, pool, updater, widgets, game):
+        modpack_data = get_modpack_data(game, state_manager.get_selected_pack(game))
 
-    update = ctk.CTkButton(
-        master=parent,
-        text='Play',
-        height=46,
-        width=180,
-        command=lambda: pool.submit(updater(ctk, parent, pool, widgets, modpack_data).start) if updater else print('No update function'),
-        border_width=0
-    )
+        if updater:
+            self.updater = updater(ctk, parent, pool, widgets, modpack_data)
 
-    gui_manager.add_lockable(update)
+        self.update_button = ctk.CTkButton(
+            master=parent,
+            text='Play',
+            height=46,
+            width=180,
+            command=lambda: self.handle_button_press(self.updater, pool, widgets),
+            border_width=0
+        )
 
-    return update
+        gui_manager.add_lockable(self.update_button)
+
+        return self.update_button
+    
+
+    def handle_button_press(self, updater, pool, widgets):
+        button_text = self.update_button.cget('text')
+        log = widgets.get('logbox').get('log')
+
+        if button_text == 'Play':
+            # Check if updater exists
+            if updater:
+                pool.submit(updater.start, self.update_button)
+                self.update_button.configure(text='Cancel')
+
+            # Handle non-existent updater
+            else:
+                log('[INFO] Update process could not start; no updater found.')
+        elif button_text == 'Cancel':
+            log('[INFO] Stopping process, this may take a second...')
+            updater.cancel_update()
