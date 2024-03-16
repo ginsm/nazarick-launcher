@@ -9,7 +9,7 @@ from modules.components.common import InfoModal
 
 def main():
     # Store the mod's path in environment
-    BASE_DIR = constants.APP_BASE_DIR.as_posix()
+    BASE_DIR = os.path.abspath(constants.APP_BASE_DIR)
     os.environ['nazpath'] = BASE_DIR
 
     # Initialize the store
