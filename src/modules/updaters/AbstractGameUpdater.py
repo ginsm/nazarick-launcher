@@ -28,6 +28,7 @@ class AbstractGameUpdater(ABC):
         self.temp_path = ''
         self.install_path = ''
         self.nazarick_json_path = ''
+        self.temp_nazarick_json_path = ''
         self.user_input_checks = []
         self.purge_whitelist = []
         self.temp_mods_path = ''
@@ -42,17 +43,18 @@ class AbstractGameUpdater(ABC):
     @abstractmethod
     def initialize(self):
         raise NotImplementedError
-    
+
     @abstractmethod
     def install_update(self):
         raise NotImplementedError
-    
+
 
     # ---- COMMON METHODS ---- #
     def start(self, update_button):
         # Run the game-specific initialize method (see __init__ for unitialized variables)
         self.initialize()
         self.update_button = update_button
+        self.temp_nazarick_json_path = os.path.join(self.temp_path, 'nazarick.json')
 
         # Begin logging and lock gui
         self.log('')
@@ -79,7 +81,7 @@ class AbstractGameUpdater(ABC):
 
         # Get progress bar and divide 25% of progress bar by amount of tasks
         progressbar = self.widgets.get('progressbar')
-        task_percent = 0.25 / 9 # tasks are 25% of the progress, mod download is 75%
+        task_percent = 0.25 / 11 # tasks are 25% of the progress, mod download is 75%
 
         # Print each error present for user input and end the update process.
         errors = self.user_input_has_errors()
@@ -94,7 +96,6 @@ class AbstractGameUpdater(ABC):
 
             self.log(f'[INFO] Finished process at {utility.get_time()}.')
             return
-        
         
         # Check for internet
         internet_connection = system_check.check_internet()
@@ -115,12 +116,21 @@ class AbstractGameUpdater(ABC):
 
                 # Clean up temp directory
                 if not self.cancel:
-                    self.clean_update_directories()
+                    self.clean_update_directory(initial_clean=True)
+                    progressbar.add_percent(task_percent)
+
+                # Store version data in temporary update directory (needed to resume updates)
+                if not self.cancel:
+                    self.store_version_data([], self.temp_nazarick_json_path)
                     progressbar.add_percent(task_percent)
 
                 # Download latest modpack version
                 if not self.cancel:
-                    ModpackProvider.download_modpack(self)
+                    # This is necessary to prevent downloading the modpack a second time if the
+                    # previous update was cancelled. If there's more than just nazarick.json in
+                    # the temp_path, the modpack has already been downloaded.
+                    if not len(os.listdir(self.temp_path)) > 1:
+                        ModpackProvider.download_modpack(self)
                     progressbar.add_percent(task_percent)
 
                 # Unzip update to temp directory
@@ -155,6 +165,11 @@ class AbstractGameUpdater(ABC):
                 # Store update's version number
                 if not self.cancel:
                     self.store_version_data(mod_index)
+                    progressbar.add_percent(task_percent)
+
+                # Clean up after the update
+                if not self.cancel:
+                    self.clean_update_directory()
                     progressbar.add_percent(task_percent)
             
             # Handle update process failing
@@ -198,7 +213,6 @@ class AbstractGameUpdater(ABC):
         progressbar.reset_percent()
         self.update_button.configure(text='Play')
         self.cancel = False
-        
 
 
     def user_input_has_errors(self):
@@ -226,7 +240,7 @@ class AbstractGameUpdater(ABC):
 
 
     # These methods do not vary per updater.
-    def store_version_data(self, mod_index):
+    def store_version_data(self, mod_index, path = ''):
         version_name = self.version.get('name')
         version = self.version.get('version')
 
@@ -236,27 +250,28 @@ class AbstractGameUpdater(ABC):
             'mod_index': mod_index
         })
 
-        self.log(f'[INFO] Storing new version ID for future ref: {version_name} ({version}).')
-        with open(self.nazarick_json_path, 'w') as f:
+        if not path:
+            self.log(f'[INFO] Storing version information: {version_name} ({version}).')
+        with open(path or self.nazarick_json_path, 'w') as f:
             f.write(data)
 
 
     def get_version_data(self):
         if os.path.exists(self.nazarick_json_path):
-            with open(self.nazarick_json_path, 'rb') as f:
-                data = json.loads(f.read().decode('UTF-8'))
+            with open(self.nazarick_json_path, 'r') as f:
+                data = json.loads(f.read())
             return data
         
         return {}
-    
+
 
     def on_latest_version(self, initial_install_fn = None):
         # Switch from old nuver to nazarick.json format
         self.convert_to_new_version_format()
 
         if os.path.exists(self.nazarick_json_path):
-            with open(self.nazarick_json_path, 'rb') as f:
-                data = json.loads(f.read().decode('UTF-8'))
+            with open(self.nazarick_json_path, 'r') as f:
+                data = json.loads(f.read())
                 name, ver = [data['name'], data['version']]
 
                 # If modpack version and name are the same, you're on the latest version
@@ -270,14 +285,14 @@ class AbstractGameUpdater(ABC):
                 initial_install_fn(self)
 
         return False
-            
+   
 
     def convert_to_new_version_format(self):
         nuver_path = os.path.join(self.install_path, 'nuver')
 
         if os.path.exists(nuver_path):
-            with open(nuver_path, 'rb') as f:
-                stored_version = f.read().decode('UTF-8').split(" ")
+            with open(nuver_path, 'r') as f:
+                stored_version = f.read().split(" ")
                 self.store_version_data({
                     'version': {
                         'name': ' '.join(stored_version[:-1]),
@@ -287,13 +302,13 @@ class AbstractGameUpdater(ABC):
 
             os.remove(nuver_path)
 
-    
+
     def purge_files(self):
         launcher_json_path = os.path.join(self.temp_path, 'launcher.json')
 
         if os.path.exists(launcher_json_path):
-            with open(launcher_json_path, 'rb') as f:
-                data = json.loads(f.read().decode('UTF-8'))
+            with open(launcher_json_path, 'r') as f:
+                data = json.loads(f.read())
                 purge = data.get('purge')
 
                 if purge:
@@ -323,24 +338,34 @@ class AbstractGameUpdater(ABC):
             ChangesBox.load_changelog(self.ctk, changebox, game, html_frame)
 
 
-    def clean_update_directories(self):
-        if os.path.exists(self.temp_path):
-            self.log('[INFO] Cleaning the update directory.')
-            do_not_clean = ['custommods']
-            files = os.listdir(self.temp_path)
+    def clean_update_directory(self, initial_clean=False):
+        # Release the temp path to allow its deletion
+        if os.getcwd() == self.temp_path:
+            os.chdir(constants.APP_BASE_DIR)
 
-            for f in files:
-                if f not in do_not_clean:
-                    file_path = os.path.join(self.temp_path, f)
-                    rm_func = shutil.rmtree if os.path.isdir(file_path) else os.remove
-                    rm_func(file_path)
+        # This is ran at the beginning of the update process.
+        if initial_clean:
+            if os.path.exists(self.temp_nazarick_json_path):
+                if self.check_for_unfinished_update():
+                    self.log('[INFO] An update has already been started for that version; continuing...')
+                    return
+
+            # The path should be empty if there's no previously started update; recreate it.
+            if os.path.exists(self.temp_path):
+                if len(os.listdir(self.temp_path)):
+                    self.log('[INFO] Recreating temporary update directory.')
+                    shutil.rmtree(self.temp_path)
+                    os.makedirs(self.temp_path)
+            else:
+                self.log('[INFO] Creating temporary update directory')
+                os.makedirs(self.temp_path)
+
+        # This is ran at the end of the update process.
         else:
-            self.log('[INFO] Creating the update directory.')
+            self.log('[INFO] Removing temporary update directory.')
+            shutil.rmtree(self.temp_path)
 
-        # Create clean tmp directory
-        os.makedirs(self.temp_path, exist_ok=True)
-        
-    
+
     def retrieve_mods(self, destination, local_paths):
         self.log('[INFO] Retrieving modpack dependencies.')
 
@@ -374,7 +399,7 @@ class AbstractGameUpdater(ABC):
         os.chdir(self.temp_path)
 
         return os.listdir(destination)
-    
+
 
     def retrieve(self, mod_data, local_paths, destination, task_percent):
         if not self.cancel:
@@ -411,6 +436,17 @@ class AbstractGameUpdater(ABC):
 
         return found
     
+
+    def check_for_unfinished_update(self):
+        if os.path.exists(self.temp_nazarick_json_path):
+            # Check if name and version are matching; if they are, consider it an unfinished update.
+            with open(self.temp_nazarick_json_path, 'r') as f:
+                content = json.loads(f.read())
+                matching_name = content.get('name') == self.version.get('name')
+                matching_version = content.get('version') == self.version.get('version')
+                return matching_name and matching_version
+        return False
+
 
     def run_executable(self):
         # Debug mode stops exe from launching
