@@ -71,6 +71,9 @@ class ProviderAbstract(ABC):
 
         zip_file = os.path.join(tmp, 'update.zip')
 
+        if not os.path.exists(zip_file):
+            return
+
         log('[INFO] Extracting the modpack zip.')
 
         with zipfile.ZipFile(zip_file, 'r') as ref:
