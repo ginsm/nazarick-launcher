@@ -67,7 +67,7 @@ def main():
     app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    gui_manager.broadcast(f'[INFO] The app has finished initializing ({constants.APP_VERSION}).')
+    gui_manager.broadcast(f'The app has finished initializing ({constants.APP_VERSION}).')
 
     # Main loop
     app.mainloop()

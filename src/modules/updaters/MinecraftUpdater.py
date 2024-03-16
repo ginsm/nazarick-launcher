@@ -59,7 +59,7 @@ class MinecraftUpdater(AbstractGameUpdater):
         mods_tmp = os.path.join(self.temp_path, 'overrides', 'mods')
         custommods_tmp = os.path.join(self.temp_path, 'custommods')
 
-        self.log('[INFO] Installing the modpack to specified destination.')
+        self.log('Installing the modpack to specified destination.')
 
         # Move user added mods to the tmp path
         if os.path.exists(custommods_tmp):

@@ -58,9 +58,9 @@ class AbstractGameUpdater(ABC):
 
         # Begin logging and lock gui
         self.log('')
-        self.log(f'[INFO] Beginning update process at {utility.get_time()}.')
+        self.log(f'Beginning update process at {utility.get_time()}.')
 
-        self.log(f'[INFO] Locking user input.')
+        self.log(f'Locking user input.')
         gui_manager.lock(True)
 
         # Unlock this update process' button
@@ -72,9 +72,9 @@ class AbstractGameUpdater(ABC):
             ModpackProvider = providers.get('modpack')()
             self.modprovider = providers.get('mods')()
         except Exception as e:
-            self.log('[ERROR] Unable to initialize provider:', 'error')
-            self.log(f'[ERROR] {e}', 'error')
-            self.log('[INFO] Terminating update process.')
+            self.log('Unable to initialize provider:', 'error')
+            self.log(f'{e}', 'error')
+            self.log('Terminating update process.')
             traceback.print_exc()
             gui_manager.lock(False)
             return
@@ -89,12 +89,12 @@ class AbstractGameUpdater(ABC):
         if errors:
             self.widgets.get('tabs').set('Logs')
             for error in errors:
-                self.log(f'[ERROR] {error}', 'error')
+                self.log(f'{error}', 'error')
 
-            self.log(f'[INFO] Unlocking user input.')
+            self.log(f'Unlocking user input.')
             gui_manager.lock(False)
 
-            self.log(f'[INFO] Finished process at {utility.get_time()}.')
+            self.log(f'Finished process at {utility.get_time()}.')
             return
 
         # Check for internet
@@ -175,21 +175,18 @@ class AbstractGameUpdater(ABC):
             # Handle update process failing
             except Exception as e:
                 self.widgets.get('tabs').set('Logs')
-                self.log(f'[WARN] {e}; terminating update process.', 'warning')
-                self.log('[WARN] You may have trouble connecting to the server.', 'warning')
+                self.log(f'{e}; terminating update process.', 'error')
                 traceback.print_exc()
 
         # Warn the user if self.version couldn't be retrieved
         elif not self.version:
             self.widgets.get('tabs').set('Logs')
-            self.log('[WARN] Invalid response from the modpack\'s provider; skipping update process.', 'warning')
-            self.log('[WARN] You may have trouble connecting to the server.', 'warning')
+            self.log('Invalid response from the modpack\'s provider; skipping update process.', 'error')
 
         # If self.version exists, the failure was internet_connection; warn the user.
         else:
             self.widgets.get('tabs').set('Logs')
-            self.log('[WARN] No internet connection; skipping update process.', 'warning')
-            self.log('[WARN] You may have trouble connecting to the server with an outdated modpack.', 'warning')
+            self.log('No internet connection; skipping update process.', 'warning')
 
         # Finish up the update process.
         self.finalize(task_percent)
@@ -198,7 +195,7 @@ class AbstractGameUpdater(ABC):
     def finalize(self, task_percent):
         progressbar = self.widgets.get('progressbar')
 
-        self.log(f'[INFO] Unlocking user input.')
+        self.log(f'Unlocking user input.')
         gui_manager.lock(False)
 
         if not self.cancel:
@@ -209,14 +206,14 @@ class AbstractGameUpdater(ABC):
             self.auto_close_app()
 
         # Reset values
-        self.log(f'[INFO] Finished process at {utility.get_time()}.')
+        self.log(f'Finished process at {utility.get_time()}.')
         progressbar.reset_percent()
         self.update_button.configure(text='Play')
         self.cancel = False
 
 
     def user_input_has_errors(self):
-        self.log('[INFO] Validating the provided executable and instance paths.')
+        self.log('Validating the provided executable and instance paths.')
 
         # Errors are appended to the list, returned, and logged in the start method
         errors = []
@@ -251,7 +248,7 @@ class AbstractGameUpdater(ABC):
         })
 
         if not path:
-            self.log(f'[INFO] Storing version information: {version_name} ({version}).')
+            self.log(f'Storing version information: {version_name} ({version}).')
         with open(path or self.nazarick_json_path, 'w') as f:
             f.write(data)
 
@@ -276,12 +273,12 @@ class AbstractGameUpdater(ABC):
 
                 # If modpack version and name are the same, you're on the latest version
                 if name == self.version.get('name') and ver == self.version.get('version'):
-                    self.log(f'[INFO] You are already on the latest version: {name} ({ver}).')
+                    self.log(f'You are already on the latest version: {name} ({ver}).')
                     return True
         else:
             # Run the function that handles existing files on initial install
             if initial_install_fn:
-                self.log('[INFO] Preparing instance for initial install.')
+                self.log('Preparing instance for initial install.')
                 initial_install_fn(self)
 
         return False
@@ -312,7 +309,7 @@ class AbstractGameUpdater(ABC):
                 purge = data.get('purge')
 
                 if purge:
-                    self.log('[INFO] Purging requested files.')
+                    self.log('Purging requested files.')
                     futures = []
 
                     for f in purge:
@@ -347,27 +344,27 @@ class AbstractGameUpdater(ABC):
         if initial_clean:
             if os.path.exists(self.temp_nazarick_json_path):
                 if self.check_for_unfinished_update():
-                    self.log('[INFO] An update has already been started for that version; continuing...')
+                    self.log('An update has already been started for that version; continuing...')
                     return
 
             # The path should be empty if there's no previously started update; recreate it.
             if os.path.exists(self.temp_path):
                 if len(os.listdir(self.temp_path)):
-                    self.log('[INFO] Recreating temporary update directory.')
+                    self.log('Recreating temporary update directory.')
                     shutil.rmtree(self.temp_path)
                     os.makedirs(self.temp_path)
             else:
-                self.log('[INFO] Creating temporary update directory')
+                self.log('Creating temporary update directory')
                 os.makedirs(self.temp_path)
 
         # This is ran at the end of the update process.
         else:
-            self.log('[INFO] Removing temporary update directory.')
+            self.log('Removing temporary update directory.')
             shutil.rmtree(self.temp_path)
 
 
     def retrieve_mods(self, destination, local_paths):
-        self.log('[INFO] Retrieving modpack dependencies.')
+        self.log('Retrieving modpack dependencies.')
 
         mods = self.modprovider.get_modpack_modlist(self)
         task_percent = 0.75 / len(mods)
@@ -391,10 +388,10 @@ class AbstractGameUpdater(ABC):
                 notdownloaded.apend(task.exception())
 
         if notdownloaded:
-            self.log('[WARN] The launcher was unable to download the following mods:', 'warning')
+            self.log('The launcher was unable to download the following mods:', 'warning')
             for mod in notdownloaded:
-                self.log(f'[WARN] - {mod}', 'warning')
-            self.log('[WARN] You will need to download the files manually.', 'warning')
+                self.log(f'- {mod}', 'warning')
+            self.log('You will need to download the files manually.', 'warning')
 
         os.chdir(self.temp_path)
 
@@ -417,7 +414,7 @@ class AbstractGameUpdater(ABC):
             if os.path.exists(local_file_path):
                 # Move local files
                 if not os.path.exists(destination):
-                    self.log(f'[INFO] (M) {filename}')
+                    self.log(f'(M) {filename}')
                     shutil.move(local_file_path, destination)
                     found = True
                     break
@@ -426,7 +423,7 @@ class AbstractGameUpdater(ABC):
                 # fails, it'll prompt the user to download the mod manually.. when they already
                 # have it installed.
                 if local_file_path == destination:
-                    self.log(f'[INFO] (E) {filename}')
+                    self.log(f'(E) {filename}')
 
                     found = True
                     break
@@ -451,18 +448,18 @@ class AbstractGameUpdater(ABC):
     def run_executable(self):
         # Debug mode stops exe from launching
         if not self.options.get('debug'):
-            self.log(f'[INFO] Launching {self.exe_name}.')
+            self.log(f'Launching {self.exe_name}.')
             try:
                 subprocess.check_call(self.command)
             except Exception as error:
-                self.log(f'[ERROR] {error.strerror.replace('%1', ' '.join(self.command))}.')
+                self.log(f'{error.strerror.replace('%1', ' '.join(self.command))}.')
         else:
-            self.log(f'[INFO] The game is not launched whilst in debug mode.')
+            self.log(f'The game is not launched whilst in debug mode.')
 
 
     def auto_close_app(self):
         if self.options.get('autoclose'):
-            self.log('[INFO] Auto close is enabled; closing app.')
+            self.log('Auto close is enabled; closing app.')
             self.app.quit()
 
 

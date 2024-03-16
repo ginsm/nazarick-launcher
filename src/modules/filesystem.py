@@ -41,7 +41,7 @@ def delete_path(base_path, path, whitelist, log):
     if can_delete_path(base_path, path, whitelist):
         rm_func = shutil.rmtree if os.path.isdir(path) else os.remove
         rm_func(path)
-        log(f'[INFO] (R) {path.replace(base_path, "")[1:]}')
+        log(f'(R) {path.replace(base_path, "")[1:]}')
 
 
 def overwrite(source, target):

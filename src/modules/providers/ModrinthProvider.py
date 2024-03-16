@@ -18,7 +18,7 @@ class ModrinthProviderBase(ProviderAbstract):
         req = requests.get(mod_download_url, allow_redirects=True)
 
         if req.status_code == 200:
-            updater.log(f'[INFO] (D) {mod_name}')
+            updater.log(f'(D) {mod_name}')
             with open(destination, 'wb') as file:
                 file.write(req.content)
         else:

@@ -13,12 +13,12 @@ class EnshroudedUpdater(AbstractGameUpdater):
         self.initialize()
 
         self.log('')
-        self.log(f'[INFO] Beginning process at {utility.get_time()}.')
-        self.log(f'[INFO] This game doesn\'t require updates as it\'s vanilla only currently.')
+        self.log(f'Beginning process at {utility.get_time()}.')
+        self.log(f'This game doesn\'t require updates as it\'s vanilla only currently.')
 
         self.run_executable()
 
-        self.log(f'[INFO] Finished process at {utility.get_time()}.')
+        self.log(f'Finished process at {utility.get_time()}.')
 
     def install_update(self):
         raise NotImplementedError

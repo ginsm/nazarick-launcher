@@ -18,7 +18,7 @@ class ProviderAbstract(ABC):
             updater.temp_path
         ]
 
-        log('[INFO] Moving user added mods.')
+        log('Moving user added mods.')
 
         destination = os.path.join(tmp, 'custommods')
 
@@ -32,7 +32,7 @@ class ProviderAbstract(ABC):
 
         for mod in mods:
             if mod not in mod_index and mod not in ignore:
-                log(f'[INFO] (M) {mod}')
+                log(f'(M) {mod}')
                 shutil.move(
                     os.path.join(mods_dir, mod),
                     os.path.join(destination, mod)
@@ -51,7 +51,7 @@ class ProviderAbstract(ABC):
             updater.version
         ]
 
-        log(f'[INFO] Downloading latest version: {version['name']} ({version['version']}).')
+        log(f'Downloading latest version: {version['name']} ({version['version']}).')
 
         # Download the file as .zip
         req = requests.get(version.get('url'), allow_redirects=True)
@@ -74,7 +74,7 @@ class ProviderAbstract(ABC):
         if not os.path.exists(zip_file):
             return
 
-        log('[INFO] Extracting the modpack zip.')
+        log('Extracting the modpack zip.')
 
         with zipfile.ZipFile(zip_file, 'r') as ref:
             ref.extractall(tmp)

@@ -34,7 +34,7 @@ class UpdateButton():
 
             # Handle non-existent updater
             else:
-                log('[INFO] Update process could not start; no updater found.')
+                log('Update process could not start; no updater found.')
         elif button_text == 'Cancel':
-            log('[INFO] Stopping process, this may take a second...')
+            log('Stopping process, this may take a second...')
             updater.cancel_update()
