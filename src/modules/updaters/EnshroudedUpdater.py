@@ -1,3 +1,4 @@
+from typing import override
 from modules import utility
 from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
@@ -7,7 +8,7 @@ class EnshroudedUpdater(AbstractGameUpdater):
         self.exe_name = 'enshrouded.exe'
         self.command = ['cmd', '/c', 'start', 'steam://run/1203620']
 
-    # Override AbstractGameUpdater's start method
+    @override
     def start(self):
         self.initialize()
 
