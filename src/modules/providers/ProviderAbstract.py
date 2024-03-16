@@ -51,7 +51,7 @@ class ProviderAbstract(ABC):
             updater.version
         ]
 
-        log(f'Downloading latest version: {version['name']} ({version['version']}).')
+        log(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
 
         # Download the file as .zip
         req = requests.get(version.get('url'), allow_redirects=True)
