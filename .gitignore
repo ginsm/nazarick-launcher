@@ -13,3 +13,4 @@ keystore
 src/assets/Valheim
 src/assets/Minecraft
 .env
+logs

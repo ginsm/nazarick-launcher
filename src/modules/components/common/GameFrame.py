@@ -74,7 +74,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
         master=tabs.tab('Logs'),
         game=name
     )
-    logbox['get']().grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
+    logbox.textbox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
     if modpacks:

@@ -24,7 +24,7 @@ class UpdateButton():
 
     def handle_button_press(self, updater, pool, widgets):
         button_text = self.update_button.cget('text')
-        log = widgets.get('logbox').get('log')
+        log = widgets.get('logbox').log
 
         if button_text == 'Play':
             # Check if updater exists

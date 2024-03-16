@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 APP_VERSION = '1.4.6'
 APP_NAME = 'Nazarick_Launcher'
 APP_BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+LOGGER_NAME = 'Nazarick'
 
 # Are we running in a Pyinstaller bundle?
 # https://pyinstaller.org/en/stable/runtime-information.html

@@ -78,14 +78,14 @@ def init(initial_state):
 
                 client.download_and_apply_update(
                     skip_confirmation=True,
-                    log_file_name='update.log',
+                    log_file_name='logs/app-update.log',
                     batch_template=custom_batch_template,
                     batch_template_extra_kwargs=dict(app_exe_path=sys.executable),
                 )
             else:
                 client.download_and_apply_update(
                     skip_confirmation=True,
-                    log_file_name='update.log'
+                    log_file_name='logs/app-update.log'
                 )
 
         return INIT_SUCCESS

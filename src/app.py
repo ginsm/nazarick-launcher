@@ -6,11 +6,15 @@ from elevate import elevate
 from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list
 from modules.components import AppWindow
 from modules.components.common import InfoModal
+from modules.logging import logger
 
 def main():
     # Store the mod's path in environment
     BASE_DIR = os.path.abspath(constants.APP_BASE_DIR)
     os.environ['nazpath'] = BASE_DIR
+
+    # Initialize the logger
+    logger.init()
 
     # Initialize the store
     state_manager.init(tufup.DATA_DIR.as_posix())

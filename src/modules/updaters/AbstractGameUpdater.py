@@ -18,7 +18,7 @@ class AbstractGameUpdater(ABC):
         self.pool = pool
         self.modpack = modpack
         self.widgets = widgets
-        self.log = widgets.get('logbox').get('log')
+        self.log = widgets.get('logbox').log
         self.root = os.environ.get('nazpath')
         self.options = state_manager.get_state()
         self.cancel = False

@@ -1,7 +1,10 @@
-from modules import state_manager
+from modules import constants, state_manager
+import logging
 
 logs = {}
 broadcasts = []
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 def create(ctk, master, game):
     textbox = ctk.CTkTextbox(
@@ -17,15 +20,36 @@ def create(ctk, master, game):
     # Add game & pack to logs
     name = f'{game}-{state_manager.get_selected_pack(game)}'
 
+    # Create LogBoxLogger
+    LogBox = TextboxLogger(textbox, name)
+
     if not logs.get(name):
         logs[name] = [[message, ''] for message in broadcasts]
 
-    # Methods to return
-    def log(message, tag = '', store_message = True, broadcast = False):
-        textbox.configure(state='normal')
-        textbox.insert(index='end', text=message + '\n', tags=tag)
-        textbox.configure(state='disabled')
-        textbox.see('end')
+    # Restore previous logs
+    if len(logs.get(name)):
+        for stored_log in logs.get(name):
+            message, tag = stored_log
+            LogBox.log(message, tag=tag, store_message=False)
+
+    return LogBox
+
+
+class TextboxLogger():
+    def __init__(self, textbox, name):
+        self.textbox = textbox
+        self.name = name
+
+
+    def log(self, message, tag = '', store_message = True, broadcast = False):
+        self.textbox.configure(state='normal')
+        self.textbox.insert(index='end', text=message + '\n', tags=tag)
+        self.textbox.configure(state='disabled')
+        self.textbox.see('end')
+
+        if not broadcast and message:
+            log_message = getattr(logger, tag) if tag else logger.info
+            log_message(message)
 
         # NOTE - This could be improved by adding the broadcast to all
         # non-active logs.
@@ -35,21 +59,4 @@ def create(ctk, master, game):
                 broadcasts.append(message)
 
         if store_message:
-            logs[name].append([message, tag])
-
-
-
-
-    def get():
-        return textbox
-
-    # Restore previous logs
-    if len(logs.get(name)):
-        for stored_log in logs.get(name):
-            message, tag = stored_log
-            log(message, tag=tag, store_message=False)
-
-    return {
-        'log': log,
-        'get': get
-    }
+            logs[self.name].append([message, tag])
