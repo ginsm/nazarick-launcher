@@ -9,11 +9,13 @@ UNKNOWN = 'unknown'
 def elevation_needed(game_paths):
     return any(check_access(v) == NEED_ADMIN for v in game_paths)
 
+
 def check_access(path):
     if (os.path.exists(path)):
         test_file = os.path.join(path, 'NazarickAccessTest')
         try:
-            open(test_file, 'x')
+            with open(test_file, 'w') as fp:
+                fp.write('Access Test')
             os.remove(test_file)
             return HAVE_PERM
         except:

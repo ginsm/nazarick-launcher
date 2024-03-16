@@ -20,7 +20,8 @@ class CurseForgeProviderBase(ProviderAbstract):
 
         if req.status_code == 200:
             updater.log(f'[INFO] (D) {mod_name}')
-            open(destination, 'wb').write(req.content)
+            with open(destination, 'wb') as file:
+                file.write(req.content)
         else:
             raise Exception(mod_name)
         
@@ -70,9 +71,9 @@ class CurseForgeProviderBase(ProviderAbstract):
 
     def get_modpack_modlist(self, updater):
         manifest_json_path = os.path.join(updater.temp_path, 'manifest.json')
-        contents = open(manifest_json_path, 'r').read()
-        files = json.loads(contents).get('files')
-        return files
+        with open(manifest_json_path, 'r') as file:
+            contents = file.read()
+            return json.loads(contents).get('files')
 
 
     def initial_modpack_install(self, updater):

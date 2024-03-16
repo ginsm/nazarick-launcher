@@ -19,7 +19,8 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
         if req.status_code == 200:
             updater.log(f'[INFO] (D) {plugin}')
-            open(plugin_zip, 'wb').write(req.content)
+            with open(plugin_zip, 'wb') as file:
+                file.write(req.content)
 
             with zipfile.ZipFile(plugin_zip, 'r') as ref:
                 ref.extractall(plugin_dest)

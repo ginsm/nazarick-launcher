@@ -57,7 +57,8 @@ class ProviderAbstract(ABC):
         req = requests.get(version.get('url'), allow_redirects=True)
 
         if req.status_code == 200:
-            open(os.path.join(tmp, 'update.zip'), 'wb').write(req.content)
+            with open(os.path.join(tmp, 'update.zip'), 'wb') as file:
+                file.write(req.content)
             
         return req
     

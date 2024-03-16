@@ -19,7 +19,8 @@ class ModrinthProviderBase(ProviderAbstract):
 
         if req.status_code == 200:
             updater.log(f'[INFO] (D) {mod_name}')
-            open(destination, 'wb').write(req.content)
+            with open(destination, 'wb') as file:
+                file.write(req.content)
         else:
             raise Exception(mod_name)
         
