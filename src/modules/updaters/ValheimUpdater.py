@@ -15,7 +15,7 @@ class ValheimUpdater(AbstractGameUpdater):
         self.game = 'Valheim'
 
         # Paths used throughout update
-        self.temp_path = os.path.join(self.root, '_update_tmp', 'valheim')
+        self.temp_path = os.path.join(self.root, '_update_tmp', 'valheim', self.modpack.get('name'))
         self.install_path = game_state.get('install')
         self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
 

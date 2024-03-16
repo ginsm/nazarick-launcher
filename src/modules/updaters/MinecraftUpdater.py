@@ -14,7 +14,7 @@ class MinecraftUpdater(AbstractGameUpdater):
         self.game = 'Minecraft'
 
         # Paths used throughout update
-        self.temp_path = os.path.join(self.root, '_update_tmp', 'minecraft')
+        self.temp_path = os.path.join(self.root, '_update_tmp', 'minecraft', self.modpack.get('name'))
         self.install_path = game_state.get('instance')
         self.executable_path = game_state.get('executable')
         self.nazarick_json_path = os.path.join(self.install_path, 'nazarick.json')
