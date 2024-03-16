@@ -12,7 +12,7 @@ class CurseForgeProviderBase(ProviderAbstract):
 
         if updater.check_local_mod_paths(local_paths, destination, mod_name):
             return
-        
+
         if not mod_data.get('url'):
             raise Exception(mod_name)
 
@@ -24,11 +24,11 @@ class CurseForgeProviderBase(ProviderAbstract):
                 file.write(req.content)
         else:
             raise Exception(mod_name)
-        
+
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
-        
+
 
     def get_latest_modpack_version(self, _, modpack):
         project_id, file_id, game_version = [
@@ -44,7 +44,7 @@ class CurseForgeProviderBase(ProviderAbstract):
                 project_id,
                 game_version
             )
-        
+
         # Get download info
         download_info = self.get_download_info({
             'projectID': project_id,
@@ -56,18 +56,18 @@ class CurseForgeProviderBase(ProviderAbstract):
             'version': download_info.get('file'),
             'url': download_info.get('url')
         } if download_info else False
-        
+
 
     def download_modpack(self, updater):
         req = super().download_modpack(updater)
 
         if req.status_code != 200:
             raise Exception(f'Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.')
-        
+
 
     def extract_modpack(self, updater, game, pack):
         return super().extract_modpack(updater, game, pack)
-    
+
 
     def get_modpack_modlist(self, updater):
         manifest_json_path = os.path.join(updater.temp_path, 'manifest.json')
@@ -78,7 +78,7 @@ class CurseForgeProviderBase(ProviderAbstract):
 
     def initial_modpack_install(self, updater):
         pass
-    
+
 
     # NOTE - Below are helper methods, that aren't part of the ProviderAbstract interface.
     def get_download_info(self, mod_data):
@@ -103,14 +103,14 @@ class CurseForgeProviderBase(ProviderAbstract):
             }
         else:
             raise Exception(f'Invalid response from CurseForge API while retrieving file data for mod {mod_id}, file {file_id}.')
-        
+
 
     def get_latest_version_file(self, project_id, game_version):
             # Get project data
             req = requests(f'https://api.curseforge.com/v1/mods/{project_id}')
             if req.status_code != 200:
                 return False
-            
+
             # Look for latest mod version (for respective game_version)
             content = json.loads(req.text)
             for version in content.get('latestFilesIndexes'):

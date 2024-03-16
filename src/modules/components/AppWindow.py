@@ -14,5 +14,5 @@ def create(ctk, state, root, APP_NAME):
     # Configure title and icons
     app.title(APP_NAME.replace('_', ' '))
     app.wm_iconbitmap(os.path.join(root, 'nazaricklauncher.ico'))
-    
+
     return app

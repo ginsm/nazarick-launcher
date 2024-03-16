@@ -77,7 +77,7 @@ def init():
         if private_key_path.exists():
             dst_dir.mkdir(exist_ok=True)
             private_key_path.rename(dst_dir / private_key_name)
-            
+
     print("Done.")
 
 def bundle():

@@ -28,7 +28,7 @@ def init(path):
     # Assign database variable globally (module scope)
     global database
     database = TinyDB(os.path.join(path, 'state.json'))
-    
+
     # Initialize the state
     state = database.table('state')
     if state.get(doc_id=1) is None:
@@ -100,12 +100,12 @@ def get_game_state(game=""):
         return {}
 
     return state.get('games').get(game)
-    
+
 def set_game_state(data, game=""):
     if bool(data):
         game = game.lower() or get_frame()
         state = get_state()
-        
+
         # Create games object
         if not 'games' in state:
             state['games'] = {}
@@ -168,7 +168,7 @@ def create_game_state(game):
 
     if not state.get('selectedpack'):
         state.update({'selectedpack': ''})
-    
+
     set_game_state(state, name)
 
 

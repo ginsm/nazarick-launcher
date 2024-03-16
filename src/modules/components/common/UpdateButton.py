@@ -20,7 +20,7 @@ class UpdateButton():
         gui_manager.add_lockable(self.update_button)
 
         return self.update_button
-    
+
 
     def handle_button_press(self, updater, pool, widgets):
         button_text = self.update_button.cget('text')

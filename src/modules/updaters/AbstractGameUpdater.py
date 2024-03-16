@@ -96,13 +96,13 @@ class AbstractGameUpdater(ABC):
 
             self.log(f'[INFO] Finished process at {utility.get_time()}.')
             return
-        
+
         # Check for internet
         internet_connection = system_check.check_internet()
 
         if internet_connection:
             self.version = ModpackProvider.get_latest_modpack_version(self.game, self.modpack)
-        
+
         # This is ran after each task (aside from retrieve_mods)
         progressbar.add_percent(task_percent)
 
@@ -171,7 +171,7 @@ class AbstractGameUpdater(ABC):
                 if not self.cancel:
                     self.clean_update_directory()
                     progressbar.add_percent(task_percent)
-            
+
             # Handle update process failing
             except Exception as e:
                 self.widgets.get('tabs').set('Logs')
@@ -193,8 +193,8 @@ class AbstractGameUpdater(ABC):
 
         # Finish up the update process.
         self.finalize(task_percent)
-        
-    
+
+
     def finalize(self, task_percent):
         progressbar = self.widgets.get('progressbar')
 
@@ -207,7 +207,7 @@ class AbstractGameUpdater(ABC):
 
         if not self.cancel:
             self.auto_close_app()
-            
+
         # Reset values
         self.log(f'[INFO] Finished process at {utility.get_time()}.')
         progressbar.reset_percent()
@@ -261,7 +261,7 @@ class AbstractGameUpdater(ABC):
             with open(self.nazarick_json_path, 'r') as f:
                 data = json.loads(f.read())
             return data
-        
+
         return {}
 
 
@@ -285,7 +285,7 @@ class AbstractGameUpdater(ABC):
                 initial_install_fn(self)
 
         return False
-   
+
 
     def convert_to_new_version_format(self):
         nuver_path = os.path.join(self.install_path, 'nuver')
@@ -421,7 +421,7 @@ class AbstractGameUpdater(ABC):
                     shutil.move(local_file_path, destination)
                     found = True
                     break
-                            
+
                 # Mods found in overrides should be marked as found; otherwise, if the download
                 # fails, it'll prompt the user to download the mod manually.. when they already
                 # have it installed.
@@ -435,7 +435,7 @@ class AbstractGameUpdater(ABC):
         os.chdir(constants.APP_BASE_DIR)
 
         return found
-    
+
 
     def check_for_unfinished_update(self):
         if os.path.exists(self.temp_nazarick_json_path):

@@ -8,7 +8,7 @@ from modules.providers.ProviderAbstract import ProviderAbstract
 class SelfHostedProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
         raise NotImplementedError
-    
+
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
 
@@ -19,25 +19,25 @@ class SelfHostedProviderBase(ProviderAbstract):
 
         if (req.status_code != 200):
             return False
-        
+
         content = json.loads(req.text)
         version_data = content.get(game.lower()).get(pack).get('versions')[0]
         version_data.update({'url': f'{website}{version_data.get('url')}'})
 
         return content.get(game.lower()).get(pack).get('versions')[0]
-    
+
     def download_modpack(self, updater):
         req = super().download_modpack(updater)
 
         if req.status_code != 200:
             raise Exception('Invalid response from SelfHosted (modpack)')
-    
+
     def extract_modpack(self, updater, game, pack):
         return super().extract_modpack(updater, game, pack)
-    
+
     def get_modpack_modlist(self, updater):
         raise NotImplementedError
-    
+
     def initial_modpack_install(self, updater):
         raise NotImplementedError
 
@@ -59,5 +59,5 @@ class SelfHostedMinecraftProvider(SelfHostedProviderBase):
     def move_custom_mods(self, updater, mod_index):
         instance_path = updater.install_path
         mods_dir = os.path.join(instance_path, 'mods')
-                
+
         super().move_custom_mods(mods_dir, updater, mod_index)

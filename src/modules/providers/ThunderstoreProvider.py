@@ -28,7 +28,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
             os.remove(plugin_zip)
         else:
             raise Exception(plugin)
-        
+
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
@@ -41,7 +41,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
         if req.status_code != 200:
             return False
-        
+
         content = json.loads(req.text)
 
         return {
@@ -49,7 +49,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
             'version': content['latest']['version_number'],
             'url': content['latest']['download_url']
         }
-    
+
 
     def download_modpack(self, updater):
         req = super().download_modpack(updater)
@@ -60,11 +60,11 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
     def extract_modpack(self, updater, game, pack):
         return super().extract_modpack(updater, game, pack)
-    
+
 
     def get_modpack_modlist(self, updater):
         raise NotImplementedError
-    
+
 
     def initial_modpack_install(self, updater):
         raise NotImplementedError

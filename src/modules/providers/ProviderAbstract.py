@@ -10,7 +10,7 @@ class ProviderAbstract(ABC):
     @abstractmethod
     def download_mod(self, updater, mod_data, local_paths, destination):
         raise NotImplementedError
-    
+
     @abstractmethod
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore = []):
         log, tmp = [
@@ -37,12 +37,12 @@ class ProviderAbstract(ABC):
                     os.path.join(mods_dir, mod),
                     os.path.join(destination, mod)
                 )
-    
+
     # Modpack specific methods
     @abstractmethod
     def get_latest_modpack_version(self):
         raise NotImplementedError
-    
+
     @abstractmethod
     def download_modpack(self, updater):
         log, tmp, version = [
@@ -59,9 +59,9 @@ class ProviderAbstract(ABC):
         if req.status_code == 200:
             with open(os.path.join(tmp, 'update.zip'), 'wb') as file:
                 file.write(req.content)
-            
+
         return req
-    
+
     @abstractmethod
     def extract_modpack(self, updater, game, pack):
         log, tmp = [
@@ -87,7 +87,7 @@ class ProviderAbstract(ABC):
     @abstractmethod
     def get_modpack_modlist(self, updater):
         raise NotImplementedError
-    
+
     @abstractmethod
     def initial_modpack_install(self, updater):
         raise NotImplementedError

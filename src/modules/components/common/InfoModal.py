@@ -19,7 +19,7 @@ def create(ctk, text, buttons, title, max_width = 1000, justify="center"):
     for index, btn in enumerate(buttons):
         def callback_factory(button):
             return lambda: button.get('command')(modal)
-        
+
         button = ctk.CTkButton(
             master=modal,
             text=btn.get('text'),

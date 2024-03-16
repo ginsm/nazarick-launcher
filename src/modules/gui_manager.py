@@ -97,7 +97,7 @@ def reload_frame(ctk, app, pool, name, cover_frame = None):
     # Destroy and rebuild frame
     if found:
         games = game_list.LIST
-        
+
         for game in games:
             if game.get('name') == name:
                 # Rebuild the frame
@@ -169,6 +169,6 @@ def resize(app):
         # Store new width/height in memory
         window_width = app.winfo_width()
         window_height = app.winfo_height()
-        
+
         # Store geometry in persistent database
         state_manager.set_state({'geometry': f'{window_width}x{window_height}'})

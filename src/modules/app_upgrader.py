@@ -70,7 +70,7 @@ def _update_1_4_1(state):
             'minecraft': 'Settings',
             'valheim': 'Settings'
         }})
-        
+
     return state
 
 

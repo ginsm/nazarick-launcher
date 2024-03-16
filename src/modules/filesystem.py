@@ -77,7 +77,7 @@ def can_delete_path(base_path, path, whitelist = []):
     # Variables
     path_abs = os.path.abspath(path)
     result = False
-                
+
     # Determine if the path is within the base path
     if not path_is_relative(base_path, path_abs):
         return False

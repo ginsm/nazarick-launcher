@@ -15,7 +15,7 @@ def main():
     # Initialize the store
     state_manager.init(tufup.DATA_DIR.as_posix())
     initial_state = state_manager.get_state()
-    
+
     # Upgrade the app (converts old version conventions to newer ones)
     app_upgrader.run()
 

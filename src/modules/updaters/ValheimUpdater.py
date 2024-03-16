@@ -43,7 +43,7 @@ class ValheimUpdater(AbstractGameUpdater):
         # Used by super.run_executable
         self.exe_name = 'valheim.exe'
         self.command = ['cmd', '/c', 'start', 'steam://run/892970']
-        
+
 
     def install_update(self):
         # Set up BepInEx
@@ -75,7 +75,7 @@ class ValheimUpdater(AbstractGameUpdater):
                             # Note: If a config needs to be replaced, add it to the modpack's launcher.json purge list.
                             if os.path.exists(config_path_loc):
                                 continue
-                        
+
                             if not os.path.exists(loc_root):
                                 os.makedirs(loc_root)
 
@@ -113,7 +113,7 @@ class ValheimUpdater(AbstractGameUpdater):
                     ))
 
                 wait(futures)
-            
+
                 # Remove BepInEx directory
                 shutil.rmtree(os.path.join(plugins_tmp, plugin))
                 break

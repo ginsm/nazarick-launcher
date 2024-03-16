@@ -11,7 +11,7 @@ class ModrinthProviderBase(ProviderAbstract):
 
         if updater.check_local_mod_paths(local_paths, destination, mod_name):
             return
-        
+
         if not mod_download_url:
             raise Exception(mod_name)
 
@@ -23,7 +23,7 @@ class ModrinthProviderBase(ProviderAbstract):
                 file.write(req.content)
         else:
             raise Exception(mod_name)
-        
+
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         return super().move_custom_mods(mods_dir, updater, mod_index, ignore)
@@ -35,7 +35,7 @@ class ModrinthProviderBase(ProviderAbstract):
 
     def download_modpack(self, updater):
         raise NotImplementedError
-        
+
 
     def extract_modpack(self, updater, game, pack):
         raise NotImplementedError
@@ -72,7 +72,7 @@ class ModrinthMinecraftProvider(ModrinthProviderBase):
         for mod in files:
             filename = os.path.split(mod.get('path'))[1]
             mod.update(name=filename)
-            
+
         return files
 
 

@@ -55,7 +55,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 def handle_key_press(ctk, entry, name, app):
     stored = state_manager.get_pack_state()[name]
     value = entry.get()
-    
+
     if (stored != value):
         state_manager.set_pack_state({name: value})
         if system_check.check_access(value) == system_check.NEED_ADMIN:
@@ -113,7 +113,7 @@ def warn_admin_required(ctk, path, app):
         modal.destroy()
 
     border_color = ThemeManager.theme.get('CTkCheckBox').get('border_color')
-    
+
     InfoModal.create(
         ctk,
         text=f'The following path requires administrative privileges:\n\n"{path}"\n\nDo you want to elevate the launcher?',
