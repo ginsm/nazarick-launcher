@@ -24,7 +24,7 @@ def create(ctk, master, game):
 
     # Create textbox logger in logs
     if not logs.get(name):
-        logs[name] = [[message, ''] for message in broadcasts]
+        logs[name] = [[message, '', True] for message in broadcasts]
         
     # Create LogBoxLogger
     LogBox = TextboxLogger(textbox, name)
@@ -32,8 +32,8 @@ def create(ctk, master, game):
     # Restore previous logs
     if len(logs.get(name)):
         for stored_log in logs.get(name):
-            message, tag = stored_log
-            LogBox.log(message, tag=tag, store_message=False)
+            message, tag, broadcast = stored_log
+            LogBox.log(message, tag=tag, store_message=False, broadcast=broadcast)
 
     return LogBox
 
@@ -67,4 +67,4 @@ class TextboxLogger():
                 broadcasts.append(message)
 
         if store_message:
-            logs[self.name].append([message, tag])
+            logs[self.name].append([message, tag, broadcast])
