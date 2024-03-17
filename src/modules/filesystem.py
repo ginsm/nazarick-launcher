@@ -1,7 +1,6 @@
 import os
 import shutil
 
-
 def move_files(source, target, overwrite=True):
     # Iterate over directory's files
     for file_ in os.listdir(source):
@@ -37,11 +36,11 @@ def move_files(source, target, overwrite=True):
                 shutil.move(file_path, target_path)
 
 
-def delete_path(base_path, path, whitelist, log):
+def delete_path(base_path, path, whitelist, logger):
     if can_delete_path(base_path, path, whitelist):
         rm_func = shutil.rmtree if os.path.isdir(path) else os.remove
         rm_func(path)
-        log(f'(R) {path.replace(base_path, "")[1:]}')
+        logger.info(f'(R) {path.replace(base_path, "")[1:]}')
 
 
 def overwrite(source, target):

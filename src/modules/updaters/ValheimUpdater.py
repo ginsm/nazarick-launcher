@@ -53,7 +53,7 @@ class ValheimUpdater(AbstractGameUpdater):
         install_tmp = os.path.join(self.temp_path, 'install')
 
         # Iterate over install directory
-        self.log('Installing the modpack to the specified install path.')
+        self.logger.info('Installing the modpack to the specified install path.')
         for file_ in os.listdir(install_tmp):
             file_path_loc = os.path.join(self.install_path, file_)
             file_path_tmp = os.path.join(install_tmp, file_)
@@ -96,7 +96,7 @@ class ValheimUpdater(AbstractGameUpdater):
         # Make install directory
         os.makedirs(install_tmp, exist_ok=True)
 
-        self.log('Setting up BepInEx.')
+        self.logger.info('Setting up BepInEx.')
 
         # Move BepInEx into install directory
         for plugin in os.listdir(plugins_tmp):

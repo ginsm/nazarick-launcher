@@ -1,12 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor
-import os, webbrowser
+import os, webbrowser, logging
 import customtkinter as ctk
 from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
 from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list
 from modules.components import AppWindow
 from modules.components.common import InfoModal
-from modules.logging import logger
+from modules.logging import app_logging
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 def main():
     # Store the mod's path in environment
@@ -14,7 +16,7 @@ def main():
     os.environ['nazpath'] = BASE_DIR
 
     # Initialize the logger
-    logger.init()
+    app_logging.init()
 
     # Initialize the store
     state_manager.init(tufup.DATA_DIR.as_posix())
@@ -67,7 +69,7 @@ def main():
     app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize
 
     # Finished launching
-    gui_manager.broadcast(f'The app has finished initializing ({constants.APP_VERSION}).')
+    logger.info(f'The app has finished initializing ({constants.APP_VERSION}).', extra={'broadcast': True})
 
     # Main loop
     app.mainloop()

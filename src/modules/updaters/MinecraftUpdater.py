@@ -1,7 +1,7 @@
 from concurrent.futures import wait
 import os
 import shutil
-from modules import filesystem, state_manager
+from modules import constants, filesystem, state_manager
 from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 
@@ -59,7 +59,7 @@ class MinecraftUpdater(AbstractGameUpdater):
         mods_tmp = os.path.join(self.temp_path, 'overrides', 'mods')
         custommods_tmp = os.path.join(self.temp_path, 'custommods')
 
-        self.log('Installing the modpack to specified destination.')
+        self.logger.info('Installing the modpack to specified destination.')
 
         # Move user added mods to the tmp path
         if os.path.exists(custommods_tmp):

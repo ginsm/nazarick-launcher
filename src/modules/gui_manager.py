@@ -51,15 +51,6 @@ def raise_selected_frame(frames):
             AppSideBar.color_buttons(name)
 
 
-def broadcast(message):
-    global generated_frames
-
-    for data in generated_frames:
-        textbox = data['textbox']
-        if textbox:
-            textbox.log(message, broadcast=True)
-
-
 def reload_widgets(ctk, app, pool, state, cover_frame = None):
     global generated_frames
 

@@ -13,12 +13,12 @@ class ProviderAbstract(ABC):
 
     @abstractmethod
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore = []):
-        log, tmp = [
-            updater.log,
+        logger, tmp = [
+            updater.logger,
             updater.temp_path
         ]
 
-        log('Moving user added mods.')
+        logger.info('Moving user added mods.')
 
         destination = os.path.join(tmp, 'custommods')
 
@@ -32,7 +32,7 @@ class ProviderAbstract(ABC):
 
         for mod in mods:
             if mod not in mod_index and mod not in ignore:
-                log(f'(M) {mod}')
+                logger.info(f'(M) {mod}')
                 shutil.move(
                     os.path.join(mods_dir, mod),
                     os.path.join(destination, mod)
@@ -45,13 +45,13 @@ class ProviderAbstract(ABC):
 
     @abstractmethod
     def download_modpack(self, updater):
-        log, tmp, version = [
-            updater.log,
+        logger, tmp, version = [
+            updater.logger,
             updater.temp_path,
             updater.version
         ]
 
-        log(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
+        logger.info(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
 
         # Download the file as .zip
         req = requests.get(version.get('url'), allow_redirects=True)
@@ -64,8 +64,8 @@ class ProviderAbstract(ABC):
 
     @abstractmethod
     def extract_modpack(self, updater, game, pack):
-        log, tmp = [
-            updater.log,
+        logger, tmp = [
+            updater.logger,
             updater.temp_path
         ]
 
@@ -74,7 +74,7 @@ class ProviderAbstract(ABC):
         if not os.path.exists(zip_file):
             return
 
-        log('Extracting the modpack zip.')
+        logger.info('Extracting the modpack zip.')
 
         with zipfile.ZipFile(zip_file, 'r') as ref:
             ref.extractall(tmp)

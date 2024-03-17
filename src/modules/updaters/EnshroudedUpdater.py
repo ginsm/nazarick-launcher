@@ -1,5 +1,6 @@
+import logging
 from typing import override
-from modules import utility
+from modules import constants, utility
 from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 # Enshrouded doesn't have mod support yet; this updater simply launches the game.
@@ -12,13 +13,13 @@ class EnshroudedUpdater(AbstractGameUpdater):
     def start(self):
         self.initialize()
 
-        self.log('')
-        self.log(f'Beginning process at {utility.get_time()}.')
-        self.log(f'This game doesn\'t require updates as it\'s vanilla only currently.')
+        self.logger.info('')
+        self.logger.info(f'Beginning process at {utility.get_time()}.')
+        self.logger.info(f'This game doesn\'t require updates as it\'s vanilla only currently.')
 
         self.run_executable()
 
-        self.log(f'Finished process at {utility.get_time()}.')
+        self.logger.info(f'Finished process at {utility.get_time()}.')
 
     def install_update(self):
         raise NotImplementedError

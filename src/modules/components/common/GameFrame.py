@@ -1,5 +1,6 @@
+import logging
 from modules import gui_manager, state_manager
-from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, LogBox, ProgressBar
+from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, ProgressBar
 from modules.components.common.UpdateButton import UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
@@ -69,12 +70,13 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     changebox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Logs Tab ---- #
-    logbox = LogBox.create(
+    logbox = logging.getHandlerByName('logbox').get_logbox(
         ctk=ctk,
-        master=tabs.tab('Logs'),
-        game=name
+        parent=tabs.tab('Logs'),
+        game=name.lower(),
+        pack=state_manager.get_selected_pack(name)
     )
-    logbox.textbox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
+    logbox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
     if modpacks:
