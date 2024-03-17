@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import wait
 import json
+import logging
 import os
 import shutil
 import subprocess
 import traceback
-
 from modules import constants, filesystem, gui_manager, state_manager, system_check, utility
 from modules.components.common import ChangesBox
 
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 class AbstractGameUpdater(ABC):
     def __init__(self, ctk, app, pool, widgets, modpack):
@@ -176,12 +178,17 @@ class AbstractGameUpdater(ABC):
             except Exception as e:
                 self.widgets.get('tabs').set('Logs')
                 self.log(f'{e}; terminating update process.', 'error')
+                logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__}")
+                logger.debug(f"ModProvider: {self.modprovider.__class__.__name__}")
+                logger.debug(f"CWD: {os.getcwd()}")
+                logger.debug(f"STATE: {self.options}")
                 traceback.print_exc()
 
         # Warn the user if self.version couldn't be retrieved
         elif not self.version:
             self.widgets.get('tabs').set('Logs')
             self.log('Invalid response from the modpack\'s provider; skipping update process.', 'error')
+            logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__}")
 
         # If self.version exists, the failure was internet_connection; warn the user.
         else:
@@ -273,7 +280,7 @@ class AbstractGameUpdater(ABC):
 
                 # If modpack version and name are the same, you're on the latest version
                 if name == self.version.get('name') and ver == self.version.get('version'):
-                    self.log(f'You are already on the latest version: {name} ({ver}).')
+                    self.log(f'You are already on the latest version: {name} ({ver}) for {self.game}.')
                     return True
         else:
             # Run the function that handles existing files on initial install
