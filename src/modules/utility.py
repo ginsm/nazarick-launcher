@@ -12,4 +12,4 @@ def get_modpack_data(game, modpack):
             for pack in game_dict.get('modpacks'):
                 if pack.get('name').lower() == modpack.lower():
                     return pack
-    return None
+    return {}
