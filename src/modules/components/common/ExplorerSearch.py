@@ -18,7 +18,7 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(0, 5), pady=(0, 5), sticky='ew')
-    entry.bind(sequence='<KeyRelease>', command=lambda _ : handle_key_press(ctk, entry, name, app))
+    entry.bind(sequence='<KeyRelease>', command=lambda event : handle_key_press(ctk, entry, name, app, event))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables
@@ -51,10 +51,13 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 
 
 # Helper Functions
-@debounce(1)
-def handle_key_press(ctk, entry, name, app):
+@debounce(0.5)
+def handle_key_press(ctk, entry, name, app, event):
     stored = state_manager.get_pack_state()[name]
     value = entry.get()
+
+    if event.keysym == 'Return':
+        app.focus()
 
     if (stored != value):
         state_manager.set_pack_state({name: value})
