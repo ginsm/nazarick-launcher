@@ -1,3 +1,7 @@
+from modules.logging.handlers import LogboxHandler
+from modules.logging.filters import NoBroadcastFilter
+from modules import constants
+
 CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -26,7 +30,7 @@ CONFIG = {
         },
         'stdout': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'level': 'DEBUG',
+            'level': 'INFO' if constants.APP_BUNDLED else 'DEBUG',
             'formatter': 'simple',
             'filename': 'logs/launcher.log',
             'maxBytes': 10485760,
