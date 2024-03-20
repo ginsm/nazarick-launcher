@@ -8,7 +8,7 @@ def setup_logging():
     root = constants.APP_BASE_DIR
 
     # Create logs directory
-    os.makedirs(os.path.join(root, 'logs'), exist_ok=True)
+    os.makedirs(os.path.join(root.parent if constants.APP_BUNDLED else root, 'logs'), exist_ok=True)
 
     # Load config
     logging.config.dictConfig(logging_config.CONFIG)
