@@ -15,12 +15,12 @@ def main():
     BASE_DIR = os.path.abspath(constants.APP_BASE_DIR)
     os.environ['nazpath'] = BASE_DIR
 
-    # Initialize the logger
-    app_logging.init()
-
     # Initialize the store
     state_manager.init(tufup.DATA_DIR.as_posix())
     initial_state = state_manager.get_state()
+
+    # Initialize the logger
+    app_logging.init()
 
     # Upgrade the app (converts old version conventions to newer ones)
     app_upgrader.run()

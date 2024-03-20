@@ -1,5 +1,6 @@
 import os
 from modules import gui_manager, state_manager, theme_list
+from modules.logging import app_logging
 from customtkinter.windows.widgets.theme import ThemeManager
 
 from modules.components.common import CoverFrame
@@ -105,7 +106,7 @@ def create(ctk, parent, pool, state):
     debug_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Run in debug mode',
-        command=lambda: state_manager.set_menu_option('debug', options),
+        command=lambda: set_debug(options),
         variable=options['debug'],
         onvalue=True,
         offvalue=False,
@@ -137,6 +138,11 @@ def create(ctk, parent, pool, state):
     debug_checkbox.grid(row=13, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     return frame
+
+
+def set_debug(options):
+    state_manager.set_menu_option('debug', options)
+    app_logging.set_file_handler_level('DEBUG' if options['debug'].get() else 'INFO')
 
 
 def set_mode(ctk, app, options, pool):

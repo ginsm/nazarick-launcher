@@ -11,7 +11,7 @@ def setup_logging():
     os.makedirs(os.path.join(root.parent if constants.APP_BUNDLED else root, 'logs'), exist_ok=True)
 
     # Load config
-    logging.config.dictConfig(logging_config.CONFIG)
+    logging.config.dictConfig(logging_config.get_config())
 
     # Create a queue handler
     queue_handler = logging.getHandlerByName('queue_handler')
@@ -33,3 +33,8 @@ def init():
     # Block other loggers from showing up
     for module in logger_blocklist:
         logging.getLogger(module).setLevel(logging.WARNING)
+
+
+def set_file_handler_level(level):
+    handler = logging.getHandlerByName('stdout')
+    handler.setLevel(level)
