@@ -25,12 +25,10 @@ def run_operation():
             print('Usage: python repository.py <operation> [arguments]\nOperations: bundle [required], init, sign')
 
 # SETTINGS
-# Path to directory containing current module
-TUFUP_DIR = pathlib.Path(__file__).resolve().parent
-
-# For development
-TUFUP_DIR = TUFUP_DIR / 'tufup'
-DIST_DIR = TUFUP_DIR / 'pyinstaller' / 'dist'
+# Paths to tufup and bundled app
+BASE_DIR = pathlib.Path(__file__).resolve().parent
+TUFUP_DIR = BASE_DIR / 'tufup'
+BUNDLE_DIR = BASE_DIR / 'pyinstaller' / 'dist'
 
 # Local repo path and keys path (would normally be offline)
 KEYS_DIR = TUFUP_DIR / DEFAULT_KEYS_DIR_NAME
@@ -85,9 +83,9 @@ def bundle(arguments):
     # Create archive from latest pyinstaller bundle (assuming we have already
     # created a pyinstaller bundle, and there is only one).
     try:
-        bundle_dirs = [path for path in DIST_DIR.iterdir() if path.is_dir()]
+        bundle_dirs = [path for path in BUNDLE_DIR.iterdir() if path.is_dir()]
     except FileNotFoundError:
-        sys.exit(f'Directory not found: {DIST_DIR}\nDid you run pyinstaller?')
+        sys.exit(f'Directory not found: {BUNDLE_DIR}\nDid you run pyinstaller?')
     if len(bundle_dirs) != 1:
         sys.exit(f'Expected one bundle, found {len(bundle_dirs)}.')
     bundle_dir = bundle_dirs[0]
