@@ -2,10 +2,10 @@ python -m PyInstaller^
  --clean^
  --noconfirm^
  --icon=nazaricklauncher.ico^
- --distpath temp/dist^
- --workpath temp/build^
+ --distpath dist^
+ --workpath build^
  --add-data %UserProfile%\AppData\Roaming\Python\Python312\site-packages\customtkinter:customkinter\^
- --add-data temp/repository/metadata/root.json:.^
+ --add-data ../tufup/repository/metadata/root.json:.^
  --add-data ../src/assets:assets/^
  --add-data ../src/.env:.^
  --add-binary "nazaricklauncher.ico;."^
