@@ -1,6 +1,8 @@
+import os
 import sys
 import pathlib
 import copy
+import tarfile
 from tufup.repo import (
     Repository,
     DEFAULT_KEY_MAP, 
@@ -80,6 +82,15 @@ def init(_):
     print("Done.")
 
 def bundle(arguments):
+    # Create a backup of the old repository
+    backup_path = TUFUP_DIR / 'repository-backup.tar.gz'
+
+    if os.path.exists(backup_path):
+        os.remove(backup_path)
+
+    with tarfile.open(backup_path, mode='w:gz') as archive:
+        archive.add(REPO_DIR, recursive=True)
+
     # Create archive from latest pyinstaller bundle (assuming we have already
     # created a pyinstaller bundle, and there is only one).
     try:
