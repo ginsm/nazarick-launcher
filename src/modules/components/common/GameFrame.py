@@ -89,7 +89,8 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
                 label=setting.get('label'),
                 placeholder=setting.get('placeholder'),
                 name=setting.get('name'),
-                find=setting.get('type')
+                find=setting.get('type'),
+                elevate_check=setting.get('elevate_check')
             )
             entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
             gui_manager.add_lockable([*entry[:-1]])

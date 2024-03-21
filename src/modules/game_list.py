@@ -17,12 +17,14 @@ LIST = [
                 'type': 'directory',
                 'label': 'Instance Path',
                 'placeholder': 'Enter the path to your Minecraft instance.',
+                'elevate_check': True
             },
             {
                 'name': 'executable',
                 'type': 'file',
                 'label': "Launcher's Executable Path",
-                'placeholder': "Enter the path to your launcher's executable."
+                'placeholder': "Enter the path to your launcher's executable.",
+                'elevate_check': False
             }
         ],
         'modpacks': [
@@ -61,6 +63,7 @@ LIST = [
                 'type': 'directory',
                 'label': 'Install Path',
                 'placeholder': 'Enter the path to your Valheim install.',
+                'elevate_check': True
             },
         ],
         'modpacks': [
@@ -87,6 +90,7 @@ LIST = [
                 'type': 'directory',
                 'label': 'Install Path',
                 'placeholder': 'Enter the path to your Enshrouded install.',
+                'elevate_check': True
             }
         ],
         'updater': EnshroudedUpdater,

@@ -8,7 +8,7 @@ from modules import state_manager, system_check, constants
 from modules.decorators.debounce import debounce
 from modules.components.common import InfoModal
 
-def create(ctk, master, app, label, placeholder, name, find, game=''):
+def create(ctk, master, app, label, placeholder, name, find, game='', elevate_check = True):
     frame = ctk.CTkFrame(master=master, fg_color='transparent', border_width=0)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_rowconfigure(0, weight=1)
@@ -18,7 +18,8 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(0, 5), pady=(0, 5), sticky='ew')
-    entry.bind(sequence='<KeyRelease>', command=lambda event : handle_key_press(ctk, entry, name, app, event))
+    entry.bind(sequence='<KeyRelease>', command=lambda event : handle_key_press(ctk, entry, name, app, event, elevate_check))
+    entry.bind(sequence='<FocusOut>', command=lambda _: store_input(ctk, entry, name, app, elevate_check))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables
@@ -51,17 +52,21 @@ def create(ctk, master, app, label, placeholder, name, find, game=''):
 
 
 # Helper Functions
-@debounce(0.5)
-def handle_key_press(ctk, entry, name, app, event):
+@debounce(0.1)
+def handle_key_press(ctk, entry, name, app, event, elevate_check):
+    if event.keysym == 'Return' or event.keysym ==  'Escape':
+        store_input(ctk, entry, name, app, elevate_check)
+        app.focus()
+
+
+def store_input(ctk, entry, name, app, elevate_check=True):
     stored = state_manager.get_pack_state()[name]
     value = entry.get()
 
-    if event.keysym == 'Return':
-        app.focus()
-
     if (stored != value):
         state_manager.set_pack_state({name: value})
-        if system_check.check_access(value) == system_check.NEED_ADMIN:
+
+        if elevate_check and system_check.check_access(value) == system_check.NEED_ADMIN:
             warn_admin_required(ctk, value, app)
 
 
