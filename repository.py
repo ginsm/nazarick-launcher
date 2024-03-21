@@ -26,18 +26,18 @@ def run_operation():
 
 # SETTINGS
 # Path to directory containing current module
-BASE_DIR = pathlib.Path(__file__).resolve().parent
+TUFUP_DIR = pathlib.Path(__file__).resolve().parent
 
 # For development
-DEV_DIR = BASE_DIR / 'pyinstaller' / 'temp'
-DIST_DIR = DEV_DIR / 'dist'
+TUFUP_DIR = TUFUP_DIR / 'tufup'
+DIST_DIR = TUFUP_DIR / 'pyinstaller' / 'dist'
 
 # Local repo path and keys path (would normally be offline)
-KEYS_DIR = BASE_DIR / DEFAULT_KEYS_DIR_NAME
+KEYS_DIR = TUFUP_DIR / DEFAULT_KEYS_DIR_NAME
 ONLINE_DIR = KEYS_DIR / 'online_secrets'
 OFFLINE_DIR_1 = KEYS_DIR / 'offline_secrets_1'
 OFFLINE_DIR_2 = KEYS_DIR / 'offline_secrets_2'
-REPO_DIR = DEV_DIR / DEFAULT_REPO_DIR_NAME
+REPO_DIR = TUFUP_DIR / DEFAULT_REPO_DIR_NAME
 
 # Key settings
 EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=14, timestamp=14)
