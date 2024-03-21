@@ -2,7 +2,7 @@ from concurrent.futures import wait
 import os
 import shutil
 from modules import state_manager
-from modules.filesystem import overwrite
+from modules.filesystem import overwrite_path
 from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 
@@ -81,9 +81,9 @@ class ValheimUpdater(AbstractGameUpdater):
 
                             shutil.move(config_path_tmp, config_path_loc)
                     else:
-                        overwrite(bf_path_tmp, bf_path_loc)
+                        overwrite_path(bf_path_tmp, bf_path_loc)
             else:
-                overwrite(file_path_tmp, file_path_loc)
+                overwrite_path(file_path_tmp, file_path_loc)
 
 
     def setup_bepinex(self):

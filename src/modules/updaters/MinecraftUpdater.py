@@ -94,4 +94,4 @@ class MinecraftUpdater(AbstractGameUpdater):
             case 'mods' | 'scripts' | 'packmenu' | 'patchouli_books':
                 filesystem.move_files(override_path, destination)
             case _:
-                filesystem.move_files(override_path, destination, overwrite=False)
+                filesystem.move_files(override_path, destination, walk=True, overwrite=False)

@@ -43,7 +43,7 @@ def delete_path(base_path, path, whitelist, logger):
         logger.info(f'(R) {path.replace(base_path, "")[1:]}')
 
 
-def overwrite(source, target):
+def overwrite_path(source, target):
     target_root, _ = os.path.split(target)
     rm_func = shutil.rmtree if os.path.isdir(target) else os.remove
 
