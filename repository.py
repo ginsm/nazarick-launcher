@@ -12,16 +12,17 @@ from src.modules.constants import APP_NAME, APP_VERSION
 def run_operation():
     # Get operation and run accompanying function
     operation = sys.argv[1] if len(sys.argv) > 1 else ''
+    arguments = sys.argv[2:]
 
     match operation:
         case 'bundle':
-            bundle()
+            bundle(arguments)
         case 'init':
-            init()
+            init(arguments)
         case 'sign':
-            sign()
+            sign(arguments)
         case _:
-            print('Usage: python repository.py <operation>\nOperations: bundle, init, sign')
+            print('Usage: python repository.py <operation> [arguments]\nOperations: bundle [required], init, sign')
 
 # SETTINGS
 # Path to directory containing current module
@@ -46,7 +47,7 @@ KEY_MAP['root'].append('root_two') # use two keys for root
 ENCRYPTED_KEYS=['root', 'root_two', 'targets']
 
 # OPERATIONS
-def init():
+def init(_):
     # Create repository instance
     repo = Repository(
         app_name=APP_NAME,
@@ -80,7 +81,7 @@ def init():
 
     print("Done.")
 
-def bundle():
+def bundle(arguments):
     # Create archive from latest pyinstaller bundle (assuming we have already
     # created a pyinstaller bundle, and there is only one).
     try:
@@ -96,13 +97,22 @@ def bundle():
     # has already been initialized)
     repo = Repository.from_config()
 
+    # Configure the bundle
+    config = {
+        'new_version': APP_VERSION,
+        'new_bundle_dir': bundle_dir
+    }
+
+    if '--required' in arguments or '-r' in arguments:
+        config.update({'required': True})
+
     # Add new app bundle to repository
-    repo.add_bundle(new_version=APP_VERSION, new_bundle_dir=bundle_dir)
+    repo.add_bundle(**config)
     repo.publish_changes(private_key_dirs=[OFFLINE_DIR_1, ONLINE_DIR])
 
     print('Done.')
 
-def sign():
+def sign(_):
     # Initialize repo from config
     repo = Repository.from_config()
 
