@@ -1,7 +1,7 @@
 from concurrent.futures import wait
 import os
 import shutil
-from modules import constants, filesystem, state_manager
+from modules import filesystem, state_manager
 from modules.updaters.AbstractGameUpdater import AbstractGameUpdater
 
 
@@ -46,7 +46,7 @@ class MinecraftUpdater(AbstractGameUpdater):
         self.temp_mods_path = os.path.join(self.temp_path, 'overrides', 'mods')
         self.local_paths = [
             os.path.join(self.install_path, 'mods'),
-            os.path.join(self.install_path, 'mods-old'),
+            os.path.join(self.install_path, 'instance-backup', 'mods'),
             self.temp_mods_path
         ]
 
