@@ -85,11 +85,15 @@ class AbstractGameUpdater(ABC):
             ModpackProvider = providers.get('modpack')()
             self.modprovider = providers.get('mods')()
         except Exception as e:
+            # Print exception
             self.logger.error('Unable to initialize provider:')
             self.logger.error(f'{e}')
             self.logger.info('Terminating update process.')
             traceback.print_exc()
-            gui_manager.lock(False)
+
+            # Set cancel to true so nothing runs in finalize except unlocking and sending logs
+            self.cancel = True
+            self.finalize()
             return
 
         # Get progress bar and divide 25% of progress bar by amount of tasks
@@ -199,6 +203,7 @@ class AbstractGameUpdater(ABC):
                 logger.debug(f"CWD: {os.getcwd()}")
                 logger.debug(f"STATE: {self.options}")
                 traceback.print_exc()
+                self.cancel = True
 
         # Warn the user if self.version couldn't be retrieved
         elif not self.version:
