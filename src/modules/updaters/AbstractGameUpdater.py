@@ -426,7 +426,7 @@ class AbstractGameUpdater(ABC):
                 # Move local files
                 if not os.path.exists(destination):
                     self.logger.info(f'(M) {filename}')
-                    shutil.move(local_file_path, destination)
+                    shutil.copy(local_file_path, destination)
                     found = True
                     break
 
