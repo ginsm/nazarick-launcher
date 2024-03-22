@@ -102,7 +102,8 @@ def create(ctk, parent, pool, state):
         offvalue=False,
         width=200
     )
-    # Debug Enabled
+
+    # Debugging
     debug_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Run in debug mode',
