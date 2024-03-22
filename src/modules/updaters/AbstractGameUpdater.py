@@ -323,7 +323,7 @@ class AbstractGameUpdater(ABC):
                     for f in purge:
                         path = os.path.join(self.install_path, f)
                         futures.append(
-                            self.pool.submit(filesystem.delete_path, self.install_path, path, self.purge_whitelist, self.logger)
+                            self.pool.submit(filesystem.safe_purge, self.install_path, path, self.purge_whitelist, self.logger)
                         )
 
                     wait(futures)

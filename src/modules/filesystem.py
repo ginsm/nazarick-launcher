@@ -36,7 +36,13 @@ def move_files(source, target, overwrite=True):
                 shutil.move(file_path, target_path)
 
 
-def delete_path(base_path, path, whitelist, logger):
+def safe_delete(path, base_path, whitelist, logger):
+    """
+    This function removes a path based on several criteria:
+    - The path is relative to the base path.
+    - The path is not the base path itself.
+    - The path is contained within the given whitelist; or the whitelist is empty.
+    """
     if can_delete_path(base_path, path, whitelist):
         rm_func = shutil.rmtree if os.path.isdir(path) else os.remove
         rm_func(path)
@@ -69,13 +75,16 @@ def path_is_relative(base, path):
     return True
 
 
-def can_delete_path(base_path, path, whitelist = []):
+def can_delete_path(base_path, path, whitelist = []) -> bool:
     """
-        Ensures that the given path is within a whitelisted directory inside the instance path and that the path exists.\n\n
+        This function is a helper function to safe_delete. It checks whether the following
+        three criterias are met:
+        - The path is relative to the base path.
+        - The path is not the base path itself.
+        - The path is contained within the given whitelist; or the whitelist is empty.
     """
     # Variables
     path_abs = os.path.abspath(path)
-    result = False
 
     # Determine if the path is within the base path
     if not path_is_relative(base_path, path_abs):
@@ -90,10 +99,10 @@ def can_delete_path(base_path, path, whitelist = []):
     for dir_ in whitelist:
         base_whitelist_path = os.path.join(base_path, dir_)
         if path_is_relative(base_whitelist_path, path_abs) and base_whitelist_path != path_abs:
-            result = True
+            return True
 
-    # 
-    if len(whitelist) == 0:
-        result = True
+    # Allow any path within the base path if whitelist length is 0
+    if path_is_relative(base_path, path_abs) and len(whitelist) == 0:
+        return True
 
-    return result
+    return False
