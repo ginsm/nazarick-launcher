@@ -21,18 +21,21 @@ class AbstractGameUpdater(ABC):
         self.modpack = modpack
         self.widgets = widgets
         self.root = os.environ.get('nazpath')
-        self.options = state_manager.get_state()
         self.cancel = False
         self.initial_install = True
+
+        # These get set each time the updater runs (in self.start)
+        self.options = {}
+        self.update_button = None
+        self.temp_nazarick_json_path = ''
+        self.logger = None
 
         # These get initialized later on in each game updater
         self.game = ''
         self.temp_path = ''
         self.install_path = ''
         self.nazarick_json_path = ''
-        self.temp_nazarick_json_path = ''
         self.user_input_checks = []
-        self.logger = ''
         self.purge_whitelist = []
         self.temp_mods_path = ''
         self.local_paths = []
@@ -56,9 +59,15 @@ class AbstractGameUpdater(ABC):
     def start(self, update_button):
         # Run the game-specific initialize method (see __init__ for unitialized variables)
         self.initialize()
+
+        # These variables each rely on data from outside the updaters or need to be set
+        # each time the updaters run.
+        self.options = state_manager.get_state()
         self.update_button = update_button
         self.temp_nazarick_json_path = os.path.join(self.temp_path, 'nazarick.json')
-        self.logger = logging.getLogger(f'{constants.LOGGER_NAME}.{self.game.lower()}.{self.modpack.get('name').lower()}')
+        self.logger = logging.getLogger(
+            f'{constants.LOGGER_NAME}.{self.game.lower()}.{self.modpack.get('name').lower()}'
+        )
 
         # Begin logging and lock gui
         self.logger.info('')
