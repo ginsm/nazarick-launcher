@@ -9,9 +9,9 @@ from modules.logging.filters import NoBroadcastFilter
 def get_config():
     std_out_level = 'INFO'
 
-    if state_manager.get_state('debug'):
+    if state_manager.get_state('debug')[0]:
         std_out_level = 'DEBUG'
-    
+
     return {
         'version': 1,
         'disable_existing_loggers': False,
