@@ -1,13 +1,21 @@
 import os
 import shutil
 
-def move_files(source, target, overwrite=True):
+def move_files(source, target, walk=False, overwrite=True):
+    """
+    Moves a file to a target destination. The behavior can be changed based
+    on the `walk` and `overwrite` parameters.
+
+    `walk`: Walk through the directory, checking whether each file should be
+    moved.
+    `overwrite`: Overwrite existing files (destructive).
+    """
     # Iterate over directory's files
     for file_ in os.listdir(source):
         file_path = os.path.join(source, file_)
 
         # Iterate through directories if overwrite is false
-        if not overwrite and os.path.isdir(file_path):
+        if walk and os.path.isdir(file_path):
             for root, _, files in os.walk(file_path):
                 for name in files:
                     root_path = os.path.join(root, name)
@@ -20,11 +28,11 @@ def move_files(source, target, overwrite=True):
                     target_root, _ = os.path.split(target_path)
                     os.makedirs(target_root, exist_ok=True)
 
-                    # Move file if path doesn't exist or overwrite enabled
-                    if not os.path.exists(target_path):
+                    # Move file if path doesn't exist or overwrite is enabled
+                    if not os.path.exists(target_path) or overwrite:
                         shutil.move(root_path, target_path)
 
-        # Attempt to move top-level files (if they don't already exist)
+        # Attempt to move top-level files
         else:
             target_path = os.path.join(target, file_)
             os.makedirs(os.path.split(target_path)[0], exist_ok=True)
@@ -50,20 +58,28 @@ def safe_delete(path, base_path, whitelist, logger):
 
 
 def overwrite_path(source, target):
-    target_root, _ = os.path.split(target)
-    rm_func = shutil.rmtree if os.path.isdir(target) else os.remove
+    """
+    Overwrites the given target path, with the contents of the source path, if
+    the source path exists.
+    """
+    if os.path.exists(source):
+        target_root, _ = os.path.split(target)
+        rm_func = shutil.rmtree if os.path.isdir(target) else os.remove
 
-    if os.path.exists(target):
-        rm_func(target)
+        if os.path.exists(target):
+            rm_func(target)
 
-    if not os.path.exists(target_root):
-        os.makedirs(target_root)
+        if not os.path.exists(target_root):
+            os.makedirs(target_root)
 
-    shutil.move(source, target)
+        shutil.move(source, target)
 
 
 # ---- HELPER FUNCTIONS ---- #
-def path_is_relative(base, path):
+def path_is_relative(base, path) -> bool:
+    """
+    Ensures that the given path is nested inside the base path.
+    """
     # Get the absolute paths
     base_path = os.path.abspath(base)
     abs_path = os.path.abspath(path)
