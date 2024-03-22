@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from modules import constants
+from modules import constants, filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
 
 
@@ -42,19 +42,29 @@ class SelfHostedProviderBase(ProviderAbstract):
         raise NotImplementedError
 
 
-
 class SelfHostedMinecraftProvider(SelfHostedProviderBase):
     def initial_modpack_install(self, updater):
-        inst_path = updater.install_path
-        configpath = os.path.join(inst_path, 'config')
-        modspath = os.path.join(inst_path, 'mods')
+        destination = os.path.join(updater.install_path, 'instance-backup')
+        overrides_path = os.path.join(updater.temp_path, 'overrides')
+        overrides = {'mods', 'config'}
+        existing_files = False
 
-        def move_existing_files(path):
-            if os.path.exists(path):
-                os.rename(path, f'{path}-old')
+        if os.path.exists(overrides_path):
+            files = os.listdir(overrides_path)
+            for f in files:
+                overrides.add(f)
 
-        move_existing_files(configpath)
-        move_existing_files(modspath)
+        # Move any conflicting overrides to `instance-backup`
+        for override in overrides:
+            source = os.path.join(updater.install_path, override)
+            target = os.path.join(destination, override)
+            if os.path.exists(source):
+                filesystem.move_files(source, target, overwrite=True)
+                existing_files = True
+
+        if existing_files:
+            updater.logger.info("Moved existing instance files into 'instance-backup' folder.")
+
 
     def move_custom_mods(self, updater, mod_index):
         instance_path = updater.install_path

@@ -23,6 +23,7 @@ class AbstractGameUpdater(ABC):
         self.root = os.environ.get('nazpath')
         self.options = state_manager.get_state()
         self.cancel = False
+        self.initial_install = True
 
         # These get initialized later on in each game updater
         self.game = ''
@@ -112,7 +113,7 @@ class AbstractGameUpdater(ABC):
         if internet_connection and self.version:
             try:
                 # Skips update process if they're already on the latest version
-                if self.on_latest_version(ModpackProvider.initial_modpack_install):
+                if self.on_latest_version():
                     progressbar.add_percent(1 - (task_percent * 2))
                     self.finalize(task_percent)
                     return
@@ -140,6 +141,11 @@ class AbstractGameUpdater(ABC):
                 if not self.cancel:
                     ModpackProvider.extract_modpack(self, self.game, self.modpack.get('name'))
                     progressbar.add_percent(task_percent)
+
+                # handle initial install
+                if not self.cancel and self.initial_install:
+                    self.logger.info('Preparing for initial modpack install.')
+                    ModpackProvider.initial_modpack_install(self)
 
                 # Purge any files as instructed from modpack archive
                 if not self.cancel:
@@ -270,7 +276,7 @@ class AbstractGameUpdater(ABC):
         return {}
 
 
-    def on_latest_version(self, initial_install_fn = None):
+    def on_latest_version(self):
         # Switch from old nuver to nazarick.json format
         self.convert_to_new_version_format()
 
@@ -284,10 +290,7 @@ class AbstractGameUpdater(ABC):
                     self.logger.info(f'You are already on the latest version: {name} ({ver}) for {self.game}.')
                     return True
         else:
-            # Run the function that handles existing files on initial install
-            if initial_install_fn:
-                self.logger.info('Preparing instance for initial install.')
-                initial_install_fn(self)
+            self.initial_install = True
 
         return False
 
