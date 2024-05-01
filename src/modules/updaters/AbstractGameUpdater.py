@@ -98,7 +98,7 @@ class AbstractGameUpdater(ABC):
 
         # Get progress bar and divide 25% of progress bar by amount of tasks
         progressbar = self.widgets.get('progressbar')
-        task_percent = 0.25 / 11 # tasks are 25% of the progress, mod download is 75%
+        task_percent = 0.25 / 13 # tasks are 25% of the progress, mod download is 75%
 
         # Print each error present for user input and end the update process.
         errors = self.user_input_has_errors()
@@ -130,6 +130,11 @@ class AbstractGameUpdater(ABC):
                     progressbar.add_percent(1 - (task_percent * 2))
                     self.finalize(task_percent)
                     return
+
+                # Run pre update hook
+                if not self.cancel:
+                    ModpackProvider.pre_update(self)
+                    progressbar.add_percent(task_percent)
 
                 # Clean up temp directory
                 if not self.cancel:
@@ -192,6 +197,11 @@ class AbstractGameUpdater(ABC):
                 # Clean up after the update
                 if not self.cancel:
                     self.clean_update_directory()
+                    progressbar.add_percent(task_percent)
+
+                # Run post update hook
+                if not self.cancel:
+                    ModpackProvider.post_update(self)
                     progressbar.add_percent(task_percent)
 
             # Handle update process failing
