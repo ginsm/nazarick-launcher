@@ -89,5 +89,5 @@ class ProviderAbstract(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         raise NotImplementedError

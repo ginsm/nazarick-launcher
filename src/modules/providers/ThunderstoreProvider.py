@@ -66,7 +66,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
         raise NotImplementedError
 
 
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         raise NotImplementedError
 
 
@@ -87,5 +87,5 @@ class ThunderstoreValheimProvider(ThunderstoreProviderBase):
         return dependencies
 
 
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         pass

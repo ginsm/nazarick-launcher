@@ -38,12 +38,13 @@ class SelfHostedProviderBase(ProviderAbstract):
     def get_modpack_modlist(self, updater):
         raise NotImplementedError
 
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         raise NotImplementedError
 
 
+
 class SelfHostedMinecraftProvider(SelfHostedProviderBase):
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         destination = os.path.join(updater.install_path, 'instance-backup')
         overrides_path = os.path.join(updater.temp_path, 'overrides')
         overrides = {'mods', 'config'}

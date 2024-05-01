@@ -158,7 +158,7 @@ class AbstractGameUpdater(ABC):
                 # handle initial install
                 if not self.cancel and self.initial_install:
                     self.logger.info('Preparing for initial modpack install.')
-                    ModpackProvider.initial_modpack_install(self)
+                    ModpackProvider.initial_install(self)
 
                 # Purge any files as instructed from modpack archive
                 if not self.cancel:

@@ -76,7 +76,7 @@ class CurseForgeProviderBase(ProviderAbstract):
             return json.loads(contents).get('files')
 
 
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         pass
 
 
@@ -120,7 +120,7 @@ class CurseForgeProviderBase(ProviderAbstract):
 
 
 class CurseForgeMinecraftProvider(CurseForgeProviderBase):
-    def initial_modpack_install(self, updater):
+    def initial_install(self, updater):
         destination = os.path.join(updater.install_path, 'instance-backup')
         overrides_path = os.path.join(updater.temp_path, 'overrides')
         overrides = {'mods', 'config'}
