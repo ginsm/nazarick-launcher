@@ -72,3 +72,15 @@ class SelfHostedMinecraftProvider(SelfHostedProviderBase):
         mods_dir = os.path.join(instance_path, 'mods')
 
         super().move_custom_mods(mods_dir, updater, mod_index)
+
+
+
+class SelfHostedFallout76Provider(SelfHostedProviderBase):
+    def initial_install(self, updater):
+        pass
+
+    def download_mod(self, updater, mod_data, local_paths, destination):
+        pass
+
+    def get_modpack_modlist(self, updater):
+        pass
