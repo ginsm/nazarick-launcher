@@ -6,12 +6,6 @@ import zipfile
 import requests
 
 class ProviderAbstract(ABC):
-    def pre_update(self, updater):
-        pass
-
-    def post_update(self, updater):
-        pass
-
     # Mod specific methods
     @abstractmethod
     def download_mod(self, updater, mod_data, local_paths, destination):

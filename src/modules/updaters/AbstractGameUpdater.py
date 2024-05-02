@@ -53,6 +53,13 @@ class AbstractGameUpdater(ABC):
     @abstractmethod
     def install_update(self):
         raise NotImplementedError
+    
+    # ---- HOOKS ---- #
+    def pre_update(self):
+        pass
+
+    def post_update(self):
+        pass
 
 
     # ---- COMMON METHODS ---- #
@@ -133,7 +140,7 @@ class AbstractGameUpdater(ABC):
 
                 # Run pre update hook
                 if not self.cancel:
-                    ModpackProvider.pre_update(self)
+                    self.pre_update()
                     progressbar.add_percent(task_percent)
 
                 # Clean up temp directory
@@ -201,7 +208,7 @@ class AbstractGameUpdater(ABC):
 
                 # Run post update hook
                 if not self.cancel:
-                    ModpackProvider.post_update(self)
+                    self.post_update()
                     progressbar.add_percent(task_percent)
 
             # Handle update process failing
