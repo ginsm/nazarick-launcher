@@ -76,11 +76,17 @@ class SelfHostedMinecraftProvider(SelfHostedProviderBase):
 
 
 class SelfHostedFallout76Provider(SelfHostedProviderBase):
+    def get_modpack_modlist(self, updater):
+        manifest_json_path = os.path.join(updater.temp_path, 'manifest.json')
+        
+        with open(manifest_json_path, 'r') as file:
+            contents = file.read()
+            return json.loads(contents)
+
+
     def initial_install(self, updater):
         pass
 
-    def download_mod(self, updater, mod_data, local_paths, destination):
-        pass
 
-    def get_modpack_modlist(self, updater):
+    def download_mod(self, updater, mod_data, local_paths, destination):
         pass
