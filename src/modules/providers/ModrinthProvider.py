@@ -77,15 +77,17 @@ class ModrinthMinecraftProvider(ModrinthProviderBase):
 
     def get_modpack_modlist(self, updater):
         modrinth_json_path = os.path.join(updater.temp_path, 'modrinth.index.json')
-        content = open(modrinth_json_path, 'r').read()
-        files = json.loads(content).get('files')
 
-        for mod in files:
-            filename = os.path.split(mod.get('path'))[1]
-            mod.update(name=filename)
+        with open(modrinth_json_path, 'r') as file:
+            content = file.read()
+            files = json.loads(content).get('files')
 
-        return files
+            for mod in files:
+                filename = os.path.split(mod.get('path'))[1]
+                mod.update(name=filename)
 
+            return files
+        
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
