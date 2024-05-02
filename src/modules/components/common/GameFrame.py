@@ -79,7 +79,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     logbox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
-    if modpacks:
+    if settings:
         for index, setting in enumerate(settings):
             entry = ExplorerSearch.create(
                 ctk=ctk,
@@ -95,7 +95,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
             entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
             gui_manager.add_lockable([*entry[:-1]])
     else:
-        label = ctk.CTkLabel(tabs.tab('Settings'), text="This game doesn't require setup.")
+        label = ctk.CTkLabel(tabs.tab('Settings'), text="This game has no settings.")
         label.grid(row=0, columnspan=2, pady=6, padx=(10, 6), sticky='w')
 
     # ---- Progress Bar ---- #

@@ -3,6 +3,7 @@ from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
 from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
 from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
 from modules.updaters.EnshroudedUpdater import EnshroudedUpdater
+from modules.updaters.Fallout76Updater import Fallout76Updater
 from modules.updaters.MinecraftUpdater import MinecraftUpdater
 from modules.updaters.ValheimUpdater import ValheimUpdater
 
@@ -84,15 +85,29 @@ LIST = [
     # Enshrouded
     {
         'name': 'Enshrouded',
+        'settings': [],
+        'updater': EnshroudedUpdater,
+    },
+
+    # Fallout 76
+    {
+        'name': 'Fallout76',
         'settings': [
             {
                 'name': 'install',
                 'type': 'directory',
                 'label': 'Install Path',
-                'placeholder': 'Enter the path to your Enshrouded install.',
+                'placeholder': 'Enter the path to your Fallout 76 install.',
                 'elevate_check': True
+            },
+            {
+                'name': 'documents',
+                'type': 'directory',
+                'label': 'Documents Path',
+                'placeholder': 'Enter the path to your Documents folder.',
+                'elevate_check': False
             }
         ],
-        'updater': EnshroudedUpdater,
-    }
+        'updater': Fallout76Updater
+    },
 ]
