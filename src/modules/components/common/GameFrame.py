@@ -1,6 +1,6 @@
 import logging
 from modules import gui_manager, state_manager
-from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, ProgressBar
+from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, GameSettings, ProgressBar
 from modules.components.common.UpdateButton import UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
@@ -79,24 +79,13 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
     logbox.grid(row=0, columnspan=2, pady=5, padx=5, sticky='nsew')
 
     # ---- Settings Tab ---- #
-    if settings:
-        for index, setting in enumerate(settings):
-            entry = ExplorerSearch.create(
-                ctk=ctk,
-                master=tabs.tab('Settings'),
-                game=name.lower(),
-                app=app,
-                label=setting.get('label'),
-                placeholder=setting.get('placeholder'),
-                name=setting.get('name'),
-                find=setting.get('type'),
-                elevate_check=setting.get('elevate_check')
-            )
-            entry[-1].grid(row=index, columnspan=2, pady=(2, 6), padx=(10, 6), sticky='ew')
-            gui_manager.add_lockable([*entry[:-1]])
-    else:
-        label = ctk.CTkLabel(tabs.tab('Settings'), text="This game has no settings.")
-        label.grid(row=0, columnspan=2, pady=6, padx=(10, 6), sticky='w')
+    GameSettings.create(
+        ctk=ctk,
+        parent=tabs.tab('Settings'),
+        game=name,
+        app=app,
+        settings=settings
+    )
 
     # ---- Progress Bar ---- #
     progress_frame = ctk.CTkFrame( master=frame, fg_color='transparent', border_width=0)
