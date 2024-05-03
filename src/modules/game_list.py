@@ -1,6 +1,6 @@
 from modules.providers.CurseForgeProvider import CurseForgeMinecraftProvider
 from modules.providers.ModrinthProvider import ModrinthMinecraftProvider
-from modules.providers.SelfHostedProvider import SelfHostedMinecraftProvider
+from modules.providers.SelfHostedProvider import SelfHostedFallout76Provider, SelfHostedMinecraftProvider
 from modules.providers.ThunderstoreProvider import ThunderstoreValheimProvider
 from modules.updaters.EnshroudedUpdater import EnshroudedUpdater
 from modules.updaters.Fallout76Updater import Fallout76Updater
@@ -105,7 +105,31 @@ LIST = [
                 'type': 'directory',
                 'label': 'Documents Path',
                 'placeholder': 'Enter the path to your Documents folder.',
-                'elevate_check': False
+                'elevate_check': True
+            },
+            {
+                'name': 'platform',
+                'type': 'dropdown',
+                'label': 'Game Platform',
+                'choices': ['Steam', 'Microsoft Store']
+            }
+        ],
+        'modpacks': [
+            {
+                'name': 'ReShade',
+                'providers': {
+                    'modpack': SelfHostedFallout76Provider,
+                    'mod': SelfHostedFallout76Provider
+                },
+                'project': 'ReShade'
+            },
+            {
+                'name': 'No ReShade',
+                'providers': {
+                    'modpack': SelfHostedFallout76Provider,
+                    'mod': SelfHostedFallout76Provider
+                },
+                'project': 'No ReShade'
             }
         ],
         'updater': Fallout76Updater
