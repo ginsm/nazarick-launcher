@@ -70,7 +70,7 @@ def overwrite_path(source, target):
             rm_func(target)
 
         if not os.path.exists(target_root):
-            os.makedirs(target_root)
+            os.makedirs(target_root, exist_ok=True)
 
         shutil.move(source, target)
 
