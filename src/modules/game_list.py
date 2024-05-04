@@ -119,7 +119,7 @@ LIST = [
                 'name': 'ReShade',
                 'providers': {
                     'modpack': SelfHostedFallout76Provider,
-                    'mod': SelfHostedFallout76Provider
+                    'mods': SelfHostedFallout76Provider
                 },
                 'project': 'ReShade'
             },
@@ -127,7 +127,7 @@ LIST = [
                 'name': 'No ReShade',
                 'providers': {
                     'modpack': SelfHostedFallout76Provider,
-                    'mod': SelfHostedFallout76Provider
+                    'mods': SelfHostedFallout76Provider
                 },
                 'project': 'No ReShade'
             }
