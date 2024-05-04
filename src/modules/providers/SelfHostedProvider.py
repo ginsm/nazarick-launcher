@@ -9,8 +9,10 @@ class SelfHostedProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
         raise NotImplementedError
 
+
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
         raise NotImplementedError
+
 
     def get_latest_modpack_version(self, game, modpack):
         website = constants.SELFHOSTED_WEBSITE
@@ -26,17 +28,21 @@ class SelfHostedProviderBase(ProviderAbstract):
 
         return content.get(game.lower()).get(pack).get('versions')[0]
 
+
     def download_modpack(self, updater):
         req = super().download_modpack(updater)
 
         if req.status_code != 200:
             raise Exception('Invalid response from SelfHosted (modpack)')
 
+
     def extract_modpack(self, updater, game, pack):
         return super().extract_modpack(updater, game, pack)
 
+
     def get_modpack_modlist(self, updater):
         raise NotImplementedError
+
 
     def initial_install(self, updater):
         raise NotImplementedError
