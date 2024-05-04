@@ -23,6 +23,7 @@ class AbstractGameUpdater(ABC):
         self.root = os.environ.get('nazpath')
         self.cancel = False
         self.initial_install = True
+        self.downloads_mods = True
 
         # These get set each time the updater runs (in self.start)
         self.options = {}
@@ -409,34 +410,49 @@ class AbstractGameUpdater(ABC):
         self.logger.info('Retrieving modpack dependencies.')
 
         mods = self.modprovider.get_modpack_modlist(self)
-        task_percent = 0.75 / len(mods)
-        futures = []
 
-        # Ensure destination exists
-        os.makedirs(destination, exist_ok=True)
+        # Handle downloading mods
+        if self.downloads_mods:
+            task_percent = 0.75 / len(mods)
+            futures = []
 
-        for mod in mods:
-            futures.append(
-                self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
-            )
+            # Ensure destination exists
+            os.makedirs(destination, exist_ok=True)
 
-        result = wait(futures)
+            for mod in mods:
+                futures.append(
+                    self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
+                )
 
-        # Handle any mods that couldn't be downloaded
-        notdownloaded = []
+            result = wait(futures)
 
-        for task in list(result.done):
-            if task.exception():
-                notdownloaded.apend(task.exception())
+            # Handle any mods that couldn't be downloaded
+            notdownloaded = []
 
-        if notdownloaded:
-            self.logger.warning('The launcher was unable to download the following mods:')
-            for mod in notdownloaded:
-                self.logger.warning(f'- {mod}')
-            self.logger.warning('You will need to download the files manually.')
+            for task in list(result.done):
+                if task.exception():
+                    notdownloaded.apend(task.exception())
+
+            if notdownloaded:
+                self.logger.warning('The launcher was unable to download the following mods:')
+                for mod in notdownloaded:
+                    self.logger.warning(f'- {mod}')
+                self.logger.warning('You will need to download the files manually.')
+        else:
+            progress_bar = self.widgets.get('progressbar')
+            progress_bar.add_percent(0.75)
 
         os.chdir(self.temp_path)
 
+        return self.resolve_mod_index(mods, destination)
+    
+
+    def resolve_mod_index(self, mods, destination):
+        """
+            This method allows for each updater to override what the mod_index contains
+            per updater. For example, some games may want a list of mods found in the
+            mod folder while others may want the stored mod list in the modpack itself.
+        """
         return os.listdir(destination)
 
 
