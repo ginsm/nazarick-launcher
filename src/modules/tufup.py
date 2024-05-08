@@ -1,7 +1,6 @@
 import sys, pathlib, os, shutil
 from modules import constants
 from tufup.client import Client
-from tufup.utils.platform_specific import ON_MAC, ON_WINDOWS
 
 # Set rootpath
 INSTALL_DIR = constants.APP_BASE_DIR.parent
@@ -13,9 +12,9 @@ DEV_DIR = constants.APP_BASE_DIR.parent / 'pyinstaller' / 'temp'
 LOCAL_METADATA_DIR = constants.APP_BASE_DIR if constants.APP_BUNDLED else DEV_DIR / 'repository' / 'metadata'
 
 # Get and set storage path
-if ON_WINDOWS:
+if constants.ON_WINDOWS:
     PER_USER_DATA_DIR = pathlib.Path(os.getenv('LOCALAPPDATA'))
-elif ON_MAC:
+elif constants.ON_MAC:
     PER_USER_DATA_DIR = pathlib.Path.home() / 'Library'
 else:
     raise NotImplementedError('Unsupported platform')
