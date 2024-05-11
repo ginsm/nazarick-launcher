@@ -1,6 +1,6 @@
 import logging
 from modules import gui_manager, state_manager
-from modules.components.common import ChangesBox, CoverFrame, ExplorerSearch, GameSettings, ProgressBar
+from modules.components.common import ChangesBox, CoverFrame, GameSettings, ProgressBar
 from modules.components.common.UpdateButton import UpdateButton
 from customtkinter.windows.widgets.theme import ThemeManager
 
