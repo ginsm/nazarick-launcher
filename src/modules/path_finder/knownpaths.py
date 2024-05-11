@@ -140,11 +140,11 @@ def get_path(folderid, user_handle=UserHandle.common):
     _CoTaskMemFree(pPath)
     return path
 
-
 if __name__ == '__main__':
     if len(sys.argv) < 2 or sys.argv[1] in ['-?', '/?']:
         print('python knownpaths.py FOLDERID {current|common}')
         sys.exit(0)
+
 
     try:
         folderid = getattr(FOLDERID, sys.argv[1])
