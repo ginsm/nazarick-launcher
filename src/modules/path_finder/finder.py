@@ -72,19 +72,16 @@ def run_powershell_command(command):
     return path.stdout.strip()
 
 
-def get_win_folder(folder_id):
+def get_win_folder(folder):
+    """ Leverages the knownpath wrapper to locate 'special' Windows folders.
+     
+    See the 'FOLDERID' class in knownpaths.py for list of folders."""
     if constants.ON_WINDOWS:
-        import modules.path_finder.windows_paths as win_paths
-
-        # Search the environment via PowerShell. This provides more accurate results.
-        # Run "[enum]::GetNames( [System.Environment+SpecialFolder] )" in PowerShell to
-        # see available folder locations.
-        try: 
-            return run_powershell_command(f'[Environment]::GetFolderPath("{folder_id}")')
-        # Fallback to searching the FOLDERID class for the folder id and using get_path
-        except:
-            folder_id = getattr(win_paths.FOLDERID, folder_id)
-            return win_paths.get_path(folder_id)
+        import modules.path_finder.knownpaths as win_paths
+        # Get ID from FOLDERID class if folder is a string
+        if type(folder) is str:
+            folder = getattr(win_paths.FOLDERID, folder)
+        return win_paths.get_path(folder, win_paths.UserHandle.current)
 
 
 def get_appid_from_startmenu(name):
@@ -96,7 +93,7 @@ def get_appid_from_startmenu(name):
 
 def handle_knownfile_appids(appid):
     if constants.ON_WINDOWS:
-        import modules.path_finder.windows_paths as win_paths
+        import modules.path_finder.knownpaths as win_paths
         str_id = appid[0:appid.find("}") + 1]
         guid = UUID(str_id)
         return appid.replace(str_id, win_paths.get_path(guid))
@@ -121,7 +118,7 @@ def handle_storeapp_appids(appid):
 
 
 # ---- Main Functionality ---- #
-def get_appid_convention(string):
+def get_appid_convention(appid):
     """ Determines the AppID convention. 
     
     Conventions: `path`, `application`, `steam`, `knownfile`, and `storeapp`. """
@@ -135,7 +132,7 @@ def get_appid_convention(string):
     }
 
     for pattern, name in conventions.items():
-        if re.match(pattern, string):
+        if re.match(pattern, appid):
             return name
     return None
 
