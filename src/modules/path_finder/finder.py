@@ -17,6 +17,16 @@ def get_steam_path():
         return steam_path
 
 
+def get_steam_game_installdir(library, game_id):
+    manifest_path = os.path.join(library.get('path'), 'steamapps', f'appmanifest_{game_id}.acf')
+
+    # Parse manifest to find the game's install directory
+    with open(manifest_path, 'r') as fp:
+        install_dir = vdf.loads(fp.read()).get('AppState').get('installdir')
+    
+    return install_dir
+
+
 def get_steam_game_path(game_id):
     steam_path = get_steam_path()
     libraries_path = os.path.join(steam_path, 'steamapps', 'libraryfolders.vdf')
@@ -31,11 +41,7 @@ def get_steam_game_path(game_id):
         library = libraries_data[library_id]
 
         if game_id in library.get('apps'):
-            manifest_path = os.path.join(library.get('path'), 'steamapps', f'appmanifest_{game_id}.acf')
-
-            # Parse manifest to find the game's install directory
-            with open(manifest_path, 'r') as fp:
-                install_dir = vdf.loads(fp.read()).get('AppState').get('installdir')
+            install_dir = get_steam_game_installdir(library, game_id)
 
             # Create path to install directory
             game_path = os.path.join(library.get('path'), 'steamapps', 'common', install_dir)
@@ -44,8 +50,8 @@ def get_steam_game_path(game_id):
             if os.path.exists(game_path):
                 return game_path
 
-    # Return false if not found
-    return False
+    # Return None if not found
+    return None
 
 
 # ---- Windows Specific ---- #
