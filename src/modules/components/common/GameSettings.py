@@ -1,8 +1,9 @@
 from modules import gui_manager, state_manager
 from modules.components.common import ExplorerSearch
+from modules.path_finder.autodetect import autodetect_settings
 
 
-def create(ctk, parent, game, app, settings):
+def create(ctk, parent, game, app, pool, settings):
     game_state = state_manager.get_pack_state(game)
 
     if settings:
@@ -51,6 +52,14 @@ def create(ctk, parent, game, app, settings):
                 # Invalid setting type
                 case _:
                     raise Exception(f"Invalid setting type provided for {game}'s '{setting.get('name')}' setting: {setting.get('type')}.")
+                
+        autodetect = ctk.CTkButton(
+            master=parent,
+            text='Auto Detect',
+            command=autodetect_settings(ctk, app, game, settings, pool)
+        )
+
+        autodetect.grid(row=len(settings), columnspan=2, pady=12, padx=(10, 6), sticky='w')
 
     else:
         label = ctk.CTkLabel(parent, text="This game has no settings.")

@@ -84,6 +84,7 @@ def create(ctk, app, pool, name, settings, updater, modpacks = False):
         parent=tabs.tab('Settings'),
         game=name,
         app=app,
+        pool=pool,
         settings=settings
     )
 

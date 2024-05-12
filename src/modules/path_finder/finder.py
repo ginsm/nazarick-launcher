@@ -33,7 +33,7 @@ def get_steam_game_path(game_id):
     libraries_data = vdf.parse(open(libraries_path)).get('libraryfolders')
 
     # Handle steam AppIDs
-    if game_id.startswith('steam://run'):
+    if game_id.startswith('steam://'):
         game_id = game_id.split("/")[-1]
 
     # Search for steam library containing game id
@@ -100,14 +100,17 @@ def handle_knownfile_appids(appid):
 
 
 def handle_storeapp_appids(appid):
-    appid = appid[0:appid.find('!')]
+    # Remove ! and anything after it in storeapp ids
+    if '!' in appid:
+        appid = appid[0:appid.find('!')]
+
     if constants.ON_WINDOWS:
         # The app dir typically has a version number sandwiched by the ID, i.e. for Minecraft Launcher:
         # AppID: Microsoft.4297127D64EC6_8wekyb3d8bbwe
         # Folder: Microsoft.4297127D64EC6_1.7.2.0_x64__8wekyb3d8bbwe
         split_path = appid.split('_')
         windows_apps_path = os.path.join(get_win_folder("ProgramFiles"), 'WindowsApps')
-        game_dir = False
+        game_dir = None
 
         for app_dir in os.listdir(windows_apps_path):
             # Read above; this checks for a folder containing the ID sandwiching a version number.
@@ -126,7 +129,7 @@ def get_appid_convention(appid):
         # r'^[\w]+\.[\w.]+$': 'namespace',
         r'^[A-Za-z]:\\.*\\.*\.exe$': 'path',
         r'^[A-Za-z0-9]+$': 'application',
-        r'^steam:\/\/(run|rungameid)\/\d+$': 'steam',
+        r'^steam:\/\/\d+$': 'steam',
         r'\{.*\}': 'knownfile',
         r'^.*![\w\.]+$': 'storeapp'
     }
@@ -137,9 +140,11 @@ def get_appid_convention(appid):
     return None
 
 
-def find_appid_path(appid):
+def find_appid_path(appid, convention=None):
     """ Searches for the path based on the AppID and its convention. """
-    convention = get_appid_convention(appid)
+    if not convention:
+        convention = get_appid_convention(appid)
+
     match convention:
         case 'path':
             return appid
@@ -151,5 +156,7 @@ def find_appid_path(appid):
             return handle_knownfile_appids(appid)
         case 'storeapp':
             return handle_storeapp_appids(appid)
+        case 'win_folder':
+            return get_win_folder(appid)
         case _:
             raise Exception(f'AppID type is unhandled: {appid}')
