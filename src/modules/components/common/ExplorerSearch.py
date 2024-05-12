@@ -18,8 +18,8 @@ def create(ctk, master, app, label, placeholder, name, find, game='', elevate_ch
 
     entry = ctk.CTkEntry(master=frame, placeholder_text=placeholder, height=36, border_width=0)
     entry.grid(row=2, column=0, padx=(0, 5), pady=(0, 5), sticky='ew')
-    entry.bind(sequence='<KeyRelease>', command=lambda event : handle_key_press(ctk, entry, name, app, event, elevate_check))
-    entry.bind(sequence='<FocusOut>', command=lambda _: store_input(ctk, entry, name, app, elevate_check))
+    entry.bind(sequence='<KeyRelease>', command=lambda event : handle_key_press(ctk, entry, game, name, app, event, elevate_check))
+    entry.bind(sequence='<FocusOut>', command=lambda _: store_input(ctk, entry, game, name, app, elevate_check))
     ToolTip(entry, msg=placeholder, delay=0.01, follow=True)
 
     # Button variables
@@ -53,14 +53,14 @@ def create(ctk, master, app, label, placeholder, name, find, game='', elevate_ch
 
 # Helper Functions
 @debounce(0.1)
-def handle_key_press(ctk, entry, name, app, event, elevate_check):
+def handle_key_press(ctk, entry, game, name, app, event, elevate_check):
     if event.keysym == 'Return' or event.keysym ==  'Escape':
-        store_input(ctk, entry, name, app, elevate_check)
+        store_input(ctk, entry, game, name, app, elevate_check)
         app.focus()
 
 
-def store_input(ctk, entry, name, app, elevate_check=True):
-    stored = state_manager.get_pack_state()[name]
+def store_input(ctk, entry, game, name, app, elevate_check=True):
+    stored = state_manager.get_pack_state(game)[name]
     value = entry.get()
 
     if (stored != value):
