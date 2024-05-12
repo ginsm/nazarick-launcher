@@ -28,7 +28,7 @@ LIST = [
                 'elevate_check': False,
                 'storeapp': {
                     'search': 'Minecraft Launcher',
-                    'game_id': 'Microsoft.4297127D64EC6_8wekyb3d8bbwe',
+                    'ID': 'Microsoft.4297127D64EC6_8wekyb3d8bbwe',
                     'exe': 'Minecraft.exe'
                 }
             }
@@ -71,7 +71,7 @@ LIST = [
                 'placeholder': 'Enter the path to your Valheim install.',
                 'elevate_check': True,
                 'steam': {
-                    'game_id': 892970
+                    'ID': '892970'
                 }
             },
         ],
@@ -108,11 +108,11 @@ LIST = [
                 'placeholder': 'Enter the path to your Fallout 76 install.',
                 'elevate_check': True,
                 'steam': {
-                    'game_id': 1151340
+                    'ID': '1151340'
                 },
                 'storeapp': {
                     'search': 'Fallout 76',
-                    'game_id': 'BethesdaSoftworks.Fallout76-PC_3275kfvn8vcwc',
+                    'ID': 'BethesdaSoftworks.Fallout76-PC_3275kfvn8vcwc',
                     'exe': 'Fallout76.exe'
                 },
             },
@@ -122,7 +122,9 @@ LIST = [
                 'label': 'Documents Path',
                 'placeholder': 'Enter the path to your Documents folder.',
                 'elevate_check': True,
-                'win_folder': 'Documents'
+                'win_folder': {
+                    'ID': 'Documents'   
+                }
             },
             {
                 'name': 'platform',
