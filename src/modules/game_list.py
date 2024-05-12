@@ -25,7 +25,12 @@ LIST = [
                 'type': 'file',
                 'label': "Launcher's Executable Path",
                 'placeholder': "Enter the path to your launcher's executable.",
-                'elevate_check': False
+                'elevate_check': False,
+                'storeapp': {
+                    'search': 'Minecraft Launcher',
+                    'game_id': 'Microsoft.4297127D64EC6_8wekyb3d8bbwe',
+                    'exe': 'Minecraft.exe'
+                }
             }
         ],
         'modpacks': [
@@ -64,7 +69,10 @@ LIST = [
                 'type': 'directory',
                 'label': 'Install Path',
                 'placeholder': 'Enter the path to your Valheim install.',
-                'elevate_check': True
+                'elevate_check': True,
+                'steam': {
+                    'game_id': 892970
+                }
             },
         ],
         'modpacks': [
@@ -98,14 +106,23 @@ LIST = [
                 'type': 'directory',
                 'label': 'Install Path',
                 'placeholder': 'Enter the path to your Fallout 76 install.',
-                'elevate_check': True
+                'elevate_check': True,
+                'steam': {
+                    'game_id': 1151340
+                },
+                'storeapp': {
+                    'search': 'Fallout 76',
+                    'game_id': 'BethesdaSoftworks.Fallout76-PC_3275kfvn8vcwc',
+                    'exe': 'Fallout76.exe'
+                },
             },
             {
                 'name': 'documents',
                 'type': 'directory',
                 'label': 'Documents Path',
                 'placeholder': 'Enter the path to your Documents folder.',
-                'elevate_check': True
+                'elevate_check': True,
+                'win_folder': 'Documents'
             },
             {
                 'name': 'platform',
