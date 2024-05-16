@@ -1,6 +1,7 @@
 from modules import gui_manager, state_manager
 from modules.components.common import ExplorerSearch
 from modules.path_finder.autodetect import autodetect_settings
+from tktooltip import ToolTip
 
 
 def create(ctk, parent, game, app, pool, settings):
@@ -59,7 +60,8 @@ def create(ctk, parent, game, app, pool, settings):
             command=autodetect_settings(ctk, app, game, settings, pool)
         )
 
-        autodetect.grid(row=len(settings), columnspan=2, pady=12, padx=(10, 6), sticky='w')
+        autodetect.grid(row=len(settings), columnspan=2, pady=16, padx=(10, 6), sticky='w')
+        ToolTip(autodetect, msg=f'Auto detect unset setting paths.', delay=0.01, follow=True)
 
     else:
         label = ctk.CTkLabel(parent, text="This game has no settings.")
