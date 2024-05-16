@@ -35,7 +35,7 @@ def create(ctk, parent, game):
     # Create the HTML frame
     html_frame = HtmlFrame(master=changes, messages_enabled=False, vertical_scrollbar=False)
     html_frame.on_link_click(webbrowser.open)
-    html_frame.grid(row=0, column=0, padx=12, pady=(10, 6), sticky='nsew')
+    html_frame.grid(row=0, column=0, padx=(12, 0), pady=(10, 6), sticky='nsew')
 
     # Load changelog
     load_changelog(ctk, changes, game, html_frame)
@@ -60,7 +60,7 @@ def load_changelog(ctk, changes, game, html_frame):
                 master=changes,
                 command=lambda scroll_type, location, units=None: scroll(html_frame, scrollbar, location, scroll_type, units)
             )
-            scrollbar.grid(row=0, column=1, pady=12, padx=12, sticky='ns')
+            scrollbar.grid(row=0, column=1, pady=12, padx=(0, 12), sticky='ns')
             scrollbar.set(*html_frame.yview()) # Set initial value
 
             # Event handling (scrolling)
