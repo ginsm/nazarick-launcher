@@ -103,7 +103,7 @@ def handle_knownfile_appids(appid):
         import modules.path_finder.knownpaths as win_paths
         str_id = appid[0:appid.find("}") + 1]
         guid = UUID(str_id)
-        return appid.replace(str_id, win_paths.get_path(guid))
+        return appid.replace(str_id, win_paths.get_path(guid, win_paths.UserHandle.current))
 
 
 def handle_storeapp_appids(appid):
