@@ -107,10 +107,6 @@ def handle_knownfile_appids(appid):
 
 
 def handle_storeapp_appids(appid):
-    # Remove ! and anything after it in storeapp ids
-    if '!' in appid:
-        appid = appid[0:appid.find('!')]
-
     if constants.ON_WINDOWS:
         # The app dir typically has a version number sandwiched by the ID, i.e. for Minecraft Launcher:
         # AppID: Microsoft.4297127D64EC6_8wekyb3d8bbwe
@@ -144,18 +140,34 @@ def get_appid_convention(appid):
     for pattern, name in conventions.items():
         if re.match(pattern, appid):
             return name
+
     return None
+
+
+def normalize_appid(appid, convention):
+    match convention:
+        case 'steam':
+            if appid.startswith('steam://'):
+                return appid.split("/")[-1]
+        case 'storeapp':
+            if '!' in appid:
+                return appid[0:appid.find('!')]
+    
+    return appid
 
 
 def find_appid_path(appid, convention=None):
     """ Searches for the path based on the AppID and its convention. """
+    if not appid:
+        raise Exception('The provided AppID was empty.')
+
     if not convention:
         convention = get_appid_convention(appid)
 
+    appid = normalize_appid(appid, convention)
+
     match convention:
-        case 'path':
-            return appid
-        case 'application':
+        case 'path' | 'application':
             return appid
         case 'steam':
             return get_steam_game_path(appid)
@@ -166,4 +178,4 @@ def find_appid_path(appid, convention=None):
         case 'win_folder':
             return get_win_folder(appid)
         case _:
-            raise Exception(f'AppID type is unhandled: {appid}')
+            raise Exception(f'AppID type is unhandled by find_appid_path: {appid}')
