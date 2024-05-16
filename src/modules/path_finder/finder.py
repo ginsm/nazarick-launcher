@@ -10,21 +10,36 @@ from modules import constants
 def get_steam_path():
     # Finds the path on Windows by checking registry
     if constants.ON_WINDOWS:
-        import winreg
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\\Valve\\Steam')
-        steam_path = winreg.QueryValueEx(key, "SteamPath")[0]
-        winreg.CloseKey(key)
+        # Attempt to find the path via the start menu
+        steam_appid = get_appid_from_startmenu("Steam")
+        if steam_appid:
+            steam_path = find_appid_path(steam_appid)
+
+        # Otherwise check the registery
+        else:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\\Valve\\Steam')
+            steam_path = winreg.QueryValueEx(key, "SteamPath")[0]
+            winreg.CloseKey(key)
+
+        # Remove steam.exe from steam_path if present
+        if 'steam.exe' in steam_path:
+            steam_path = steam_path.replace('steam.exe', '')
+
         return steam_path
 
 
-def get_steam_game_installdir(library, game_id):
-    manifest_path = os.path.join(library.get('path'), 'steamapps', f'appmanifest_{game_id}.acf')
+def get_steam_game_installdir(library_path, game_id):
+    manifest_path = os.path.join(library_path, 'steamapps', f'appmanifest_{game_id}.acf')
 
     # Parse manifest to find the game's install directory
-    with open(manifest_path, 'r') as fp:
-        install_dir = vdf.loads(fp.read()).get('AppState').get('installdir')
+    if os.path.exists(manifest_path):
+        with open(manifest_path, 'r') as fp:
+            install_dir = vdf.loads(fp.read()).get('AppState').get('installdir')
+        
+        return install_dir
     
-    return install_dir
+    return None
 
 
 def get_steam_game_path(game_id):
@@ -32,25 +47,17 @@ def get_steam_game_path(game_id):
     libraries_path = os.path.join(steam_path, 'steamapps', 'libraryfolders.vdf')
     libraries_data = vdf.parse(open(libraries_path)).get('libraryfolders')
 
-    # Handle steam AppIDs
-    if game_id.startswith('steam://'):
-        game_id = game_id.split("/")[-1]
-
-    # Search for steam library containing game id
     for library_id in libraries_data:
-        library = libraries_data[library_id]
+        library = libraries_data.get(library_id)
+        library_path = library.get('path')
+        install_dir = get_steam_game_installdir(library_path, game_id)
 
-        if game_id in library.get('apps'):
-            install_dir = get_steam_game_installdir(library, game_id)
+        if install_dir:
+            game_path = os.path.join(library_path, 'steamapps', 'common', install_dir)
 
-            # Create path to install directory
-            game_path = os.path.join(library.get('path'), 'steamapps', 'common', install_dir)
-
-            # Check if game path exists and return it
             if os.path.exists(game_path):
                 return game_path
 
-    # Return None if not found
     return None
 
 
