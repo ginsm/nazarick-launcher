@@ -10,21 +10,21 @@ from modules import constants
 def get_steam_path():
     # Finds the path on Windows by checking registry
     if constants.ON_WINDOWS:
-        # Attempt to find the path via the start menu
-        steam_appid = get_appid_from_startmenu("Steam")
-        if steam_appid:
-            steam_path = find_appid_path(steam_appid)
-
-        # Otherwise check the registery
-        else:
+        steam_path = None
+        try:
+            # Check the registery for steam's path
             import winreg
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\\Valve\\Steam')
             steam_path = winreg.QueryValueEx(key, "SteamPath")[0]
             winreg.CloseKey(key)
-
-        # Remove steam.exe from steam_path if present
-        if 'steam.exe' in steam_path:
-            steam_path = steam_path.replace('steam.exe', '')
+        except:
+            # Otherwise attempt to find the path via the start menu
+            steam_appid = get_appid_from_startmenu("Steam")
+            if steam_appid:
+                steam_path = find_appid_path(steam_appid)
+                if steam_path:
+                    # Remove any instance of 'steam.exe' from steam_path
+                    steam_path = steam_path.lower().replace('steam.exe', '')
 
         return steam_path
 
@@ -44,6 +44,10 @@ def get_steam_game_installdir(library_path, game_id):
 
 def get_steam_game_path(game_id):
     steam_path = get_steam_path()
+
+    if not steam_path:
+        raise Exception("Could not find steam path.")
+
     libraries_path = os.path.join(steam_path, 'steamapps', 'libraryfolders.vdf')
     libraries_data = vdf.parse(open(libraries_path)).get('libraryfolders')
 
