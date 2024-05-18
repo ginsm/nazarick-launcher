@@ -140,7 +140,7 @@ LIST = [
                     'modpack': SelfHostedFallout76Provider,
                     'mods': SelfHostedFallout76Provider
                 },
-                'project': 'ReShade'
+                'project': 'Quality'
             },
             {
                 'name': 'Performance',
@@ -148,7 +148,7 @@ LIST = [
                     'modpack': SelfHostedFallout76Provider,
                     'mods': SelfHostedFallout76Provider
                 },
-                'project': 'No ReShade'
+                'project': 'Performance'
             }
         ],
         'updater': Fallout76Updater
