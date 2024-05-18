@@ -182,4 +182,4 @@ def find_appid_path(appid, convention=None):
         case 'win_folder':
             return get_win_folder(appid)
         case _:
-            raise Exception(f'AppID type is unhandled by find_appid_path: {appid}')
+            raise Exception(f'AppID type ({convention}) is unhandled by find_appid_path: {appid}')
