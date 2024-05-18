@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import platform
 
 # App info
-APP_VERSION = '1.4.8'
+APP_VERSION = '1.4.9'
 APP_NAME = 'Nazarick_Launcher'
 APP_BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 LOGGER_NAME = 'Nazarick'
