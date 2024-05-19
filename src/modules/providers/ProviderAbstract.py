@@ -45,14 +45,12 @@ class ProviderAbstract(ABC):
 
     @abstractmethod
     def download_modpack(self, updater):
-        logger, tmp, version, widgets = [
+        logger, tmp, version, progress_bar = [
             updater.logger,
             updater.temp_path,
             updater.version,
-            updater.widgets
+            updater.widgets.get('progressbar')
         ]
-
-        progress_bar = widgets.get('progressbar')
 
         logger.info(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
 
@@ -67,9 +65,11 @@ class ProviderAbstract(ABC):
                     file.write(req.content)
                 else:
                     total_length = int(total_length)
-                    for data in req.iter_content(chunk_size=int(total_length / 30)):
+                    chunk_size = int(total_length / 60)
+                    logger.debug(f'Downloading {total_length} bytes with a chunk size of {chunk_size}.')
+                    for data in req.iter_content(chunk_size=chunk_size):
                         file.write(data)
-                        progress_bar.add_percent(0.01)
+                        progress_bar.add_percent(0.005)
 
         return req
 
