@@ -45,20 +45,31 @@ class ProviderAbstract(ABC):
 
     @abstractmethod
     def download_modpack(self, updater):
-        logger, tmp, version = [
+        logger, tmp, version, widgets = [
             updater.logger,
             updater.temp_path,
-            updater.version
+            updater.version,
+            updater.widgets
         ]
+
+        progress_bar = widgets.get('progressbar')
 
         logger.info(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
 
         # Download the file as .zip
-        req = requests.get(version.get('url'), allow_redirects=True)
+        req = requests.get(version.get('url'), stream=True, allow_redirects=True)
 
         if req.status_code == 200:
             with open(os.path.join(tmp, 'update.zip'), 'wb') as file:
-                file.write(req.content)
+                total_length = req.headers.get('content-length')
+
+                if total_length is None:
+                    file.write(req.content)
+                else:
+                    total_length = int(total_length)
+                    for data in req.iter_content(chunk_size=int(total_length / 30)):
+                        file.write(data)
+                        progress_bar.add_percent(0.01)
 
         return req
 

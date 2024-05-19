@@ -106,7 +106,7 @@ class AbstractGameUpdater(ABC):
 
         # Get progress bar and divide 25% of progress bar by amount of tasks
         progressbar = self.widgets.get('progressbar')
-        task_percent = 0.25 / 13 # tasks are 25% of the progress, mod download is 75%
+        task_percent = 0.2 / 12 # tasks are 25% of the progress, mod download is 75%
 
         # Print each error present for user input and end the update process.
         errors = self.user_input_has_errors()
@@ -125,8 +125,10 @@ class AbstractGameUpdater(ABC):
         # Check for internet
         internet_connection = system_check.check_internet()
 
+        
         if internet_connection:
             self.version = ModpackProvider.get_latest_modpack_version(self.game, self.modpack)
+
 
         # This is ran after each task (aside from retrieve_mods)
         progressbar.add_percent(task_percent)
@@ -161,7 +163,6 @@ class AbstractGameUpdater(ABC):
                     # the temp_path, the modpack has already been downloaded.
                     if not len(os.listdir(self.temp_path)) > 1:
                         ModpackProvider.download_modpack(self)
-                    progressbar.add_percent(task_percent)
 
                 # Unzip update to temp directory
                 if not self.cancel:
@@ -259,7 +260,7 @@ class AbstractGameUpdater(ABC):
 
 
     def user_input_has_errors(self):
-        self.logger.info('Validating the provided executable and instance paths.')
+        self.logger.info('Validating game settings.')
 
         # Errors are appended to the list, returned, and logged in the start method
         errors = []
@@ -413,7 +414,7 @@ class AbstractGameUpdater(ABC):
 
         # Handle downloading mods
         if self.downloads_mods:
-            task_percent = 0.75 / len(mods)
+            task_percent = 0.5 / len(mods)
             futures = []
 
             # Ensure destination exists
@@ -440,7 +441,7 @@ class AbstractGameUpdater(ABC):
                 self.logger.warning('You will need to download the files manually.')
         else:
             progress_bar = self.widgets.get('progressbar')
-            progress_bar.add_percent(0.75)
+            progress_bar.add_percent(0.5)
 
         os.chdir(self.temp_path)
 
