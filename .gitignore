@@ -12,6 +12,7 @@ keystore
 .tufup-repo-config
 src/assets/Valheim
 src/assets/Minecraft
+src/assets/Fallout76
 .env
 logs
 tufup
