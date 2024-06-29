@@ -22,7 +22,7 @@ class AbstractGameUpdater(ABC):
         self.widgets = widgets
         self.root = os.environ.get('nazpath')
         self.cancel = False
-        self.initial_install = True
+        self.initial_install = False
         self.downloads_mods = True
 
         # These get set each time the updater runs (in self.start)
