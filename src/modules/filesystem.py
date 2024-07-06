@@ -11,37 +11,42 @@ def move_files(source, target, walk=False, overwrite=True):
     `overwrite`: Overwrite existing files (destructive).
     """
     # Iterate over directory's files
-    for file_ in os.listdir(source):
-        file_path = os.path.join(source, file_)
+    if os.path.isdir(source) and walk:
+        for file_ in os.listdir(source):
+            file_path = os.path.join(source, file_)
 
-        # Iterate through directories if overwrite is false
-        if walk and os.path.isdir(file_path):
-            for root, _, files in os.walk(file_path):
-                for name in files:
-                    root_path = os.path.join(root, name)
+            # Iterate through directories if overwrite is false
+            if os.path.isdir(file_path):
+                for root, _, files in os.walk(file_path):
+                    for name in files:
+                        root_path = os.path.join(root, name)
 
-                    # Get target path
-                    path_without_source = root_path.replace(source, '')[1:]
-                    target_path = os.path.join(target, path_without_source)
+                        # Get target path
+                        path_without_source = root_path.replace(source, '')[1:]
+                        target_path = os.path.join(target, path_without_source)
 
-                    # Ensure target root exists
-                    target_root, _ = os.path.split(target_path)
-                    os.makedirs(target_root, exist_ok=True)
+                        # Ensure target root exists
+                        target_root, _ = os.path.split(target_path)
+                        os.makedirs(target_root, exist_ok=True)
 
-                    # Move file if path doesn't exist or overwrite is enabled
-                    if not os.path.exists(target_path) or overwrite:
-                        shutil.move(root_path, target_path)
+                        # Move file if path doesn't exist or overwrite is enabled
+                        if not os.path.exists(target_path) or overwrite:
+                            shutil.move(root_path, target_path)
 
-        # Attempt to move top-level files
-        else:
-            target_path = os.path.join(target, file_)
-            os.makedirs(os.path.split(target_path)[0], exist_ok=True)
+    # Attempt to move top-level files
+    else:
+        if os.path.exists(target) and overwrite:
+            overwrite_path(source, target)
 
-            if overwrite and os.path.isdir(target_path):
-                shutil.rmtree(target_path)
+        if not os.path.exists(target):
+            # Create the root dir
+            target_root, _ = os.path.split(target)
+            os.makedirs(target_root, exist_ok=True)
 
-            if overwrite or not os.path.exists(target_path):
-                shutil.move(file_path, target_path)
+            # Move the source to the target location
+            shutil.move(source, target)
+        
+        
 
 
 def safe_delete(path, base_path, whitelist, logger):
