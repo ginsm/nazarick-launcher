@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 def move_files(source, target, walk=False, overwrite=True):
     """
     Moves a file to a target destination. The behavior can be changed based
@@ -22,7 +23,7 @@ def move_files(source, target, walk=False, overwrite=True):
                         root_path = os.path.join(root, name)
 
                         # Get target path
-                        path_without_source = root_path.replace(source, '')[1:]
+                        path_without_source = root_path.replace(source, "")[1:]
                         target_path = os.path.join(target, path_without_source)
 
                         # Ensure target root exists
@@ -32,6 +33,21 @@ def move_files(source, target, walk=False, overwrite=True):
                         # Move file if path doesn't exist or overwrite is enabled
                         if not os.path.exists(target_path) or overwrite:
                             shutil.move(root_path, target_path)
+
+            # Move files outside of nested directories
+            else:
+                target_path = os.path.join(target, file_)
+
+                if os.path.exists(target_path) and overwrite:
+                    overwrite_path(file_path, target_path)
+
+                if not os.path.exists(target_path):
+                    # Create the root dir
+                    target_root, _ = os.path.split(target_path)
+                    os.makedirs(target_root, exist_ok=True)
+
+                    # Move the source to the target location
+                    shutil.move(file_path, target_path)
 
     # Attempt to move top-level files
     else:
@@ -45,8 +61,6 @@ def move_files(source, target, walk=False, overwrite=True):
 
             # Move the source to the target location
             shutil.move(source, target)
-        
-        
 
 
 def safe_delete(path, base_path, whitelist, logger):
@@ -96,13 +110,13 @@ def path_is_relative(base, path) -> bool:
     return True
 
 
-def can_delete_path(base_path, path, whitelist = []) -> bool:
+def can_delete_path(base_path, path, whitelist=[]) -> bool:
     """
-        This function is a helper function to safe_delete. It checks whether the following
-        three criterias are met:
-        - The path is relative to the base path.
-        - The path is not the base path itself.
-        - The path is contained within the given whitelist; or the whitelist is empty.
+    This function is a helper function to safe_delete. It checks whether the following
+    three criterias are met:
+    - The path is relative to the base path.
+    - The path is not the base path itself.
+    - The path is contained within the given whitelist; or the whitelist is empty.
     """
     # Variables
     path_abs = os.path.abspath(path)
@@ -119,7 +133,10 @@ def can_delete_path(base_path, path, whitelist = []) -> bool:
     # while ensuring the target isn't the directory itself.
     for dir_ in whitelist:
         base_whitelist_path = os.path.join(base_path, dir_)
-        if path_is_relative(base_whitelist_path, path_abs) and base_whitelist_path != path_abs:
+        if (
+            path_is_relative(base_whitelist_path, path_abs)
+            and base_whitelist_path != path_abs
+        ):
             return True
 
     # Allow any path within the base path if whitelist length is 0
