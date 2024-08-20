@@ -40,7 +40,7 @@ OFFLINE_DIR_2 = KEYS_DIR / 'offline_secrets_2'
 REPO_DIR = TUFUP_DIR / DEFAULT_REPO_DIR_NAME
 
 # Key settings
-EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=14, timestamp=14)
+EXPIRATION_DAYS = dict(root=365, targets=100, snapshot=30, timestamp=30)
 THRESHOLDS = dict(root=2, targets=1, snapshot=1, timestamp=1)
 KEY_MAP = copy.deepcopy(DEFAULT_KEY_MAP)
 KEY_MAP['root'].append('root_two') # use two keys for root
