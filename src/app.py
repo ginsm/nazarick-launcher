@@ -1,11 +1,9 @@
 from concurrent.futures import ThreadPoolExecutor
-import os, webbrowser, logging
+import os, logging
 import customtkinter as ctk
-from customtkinter.windows.widgets.theme import ThemeManager
 from elevate import elevate
 from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list
 from modules.components import AppWindow
-from modules.components.common import InfoModal
 from modules.logging import app_logging
 
 logger = logging.getLogger(constants.LOGGER_NAME)
@@ -53,17 +51,8 @@ def main():
     gui_manager.create_gui(ctk, app, pool, initial_state)
 
     # Handle tufup running into issues
-    if tufup_status == tufup.INIT_FAILED:
-        border_color = ThemeManager.theme.get('CTkCheckBox').get('border_color')
-        InfoModal.create(
-            ctk=ctk,
-            title='Error: Update Failed',
-            text='The launcher tried to update itself but ran into issues. As such, the launcher may not function properly.\n\nYou can either try to use the launcher without updating or download the most recent version and update it manually.',
-            max_width=350,
-            buttons=[
-                {'text': 'Cancel', 'command': lambda modal: modal.destroy()},
-                {'text': 'Download', 'command': lambda _: webbrowser.open('https://github.com/ginsm/nazarick-launcher/releases/latest/download/Nazarick.Launcher.zip'), 'border': border_color}
-            ])
+    if tufup_status != tufup.INIT_SUCCESS:
+        tufup.handle_error(ctk, tufup_status)
 
     # UI Event Handlers
     app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize

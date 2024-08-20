@@ -1,6 +1,12 @@
-import sys, pathlib, os, shutil
+import sys, pathlib, os, shutil, logging, webbrowser
 from modules import constants
+from customtkinter.windows.widgets.theme import ThemeManager
 from tufup.client import Client
+from tuf.api.exceptions import ExpiredMetadataError
+
+from modules.components.common import InfoModal
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 # Set rootpath
 INSTALL_DIR = constants.APP_BASE_DIR.parent
@@ -89,5 +95,28 @@ def init(initial_state):
 
         return INIT_SUCCESS
     except Exception as e:
-        print(e)
-        return INIT_FAILED
+        return e
+
+def handle_error(ctk, error):
+    if isinstance(error, ExpiredMetadataError):
+        logger.warning("Tufup: " + str(error))
+    else:
+        border_color = ThemeManager.theme.get("CTkCheckBox").get("border_color")
+        InfoModal.create(
+            ctk=ctk,
+            title="Error: Update Failed",
+            text="The launcher tried to update itself but ran into issues. As such, the launcher may not function properly.\n\nYou can either try to use the launcher without updating or download the most recent version and update it manually.",
+            max_width=350,
+            buttons=[
+                {"text": "Cancel", "command": lambda modal: modal.destroy()},
+                {
+                    "text": "Download",
+                    "command": lambda _: webbrowser.open(
+                        "https://github.com/ginsm/nazarick-launcher/releases/latest/download/Nazarick.Launcher.zip"
+                    ),
+                    "border": border_color,
+                },
+            ],
+        )
+
+    pass
