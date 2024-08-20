@@ -124,11 +124,9 @@ class AbstractGameUpdater(ABC):
 
         # Check for internet
         internet_connection = system_check.check_internet()
-
         
         if internet_connection:
             self.version = ModpackProvider.get_latest_modpack_version(self.game, self.modpack)
-
 
         # This is ran after each task (aside from retrieve_mods)
         progressbar.add_percent(task_percent)
