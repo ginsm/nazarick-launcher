@@ -21,8 +21,9 @@ class SelfHostedProviderBase(ProviderAbstract):
 
         if (req.status_code != 200):
             return False
-
+        
         content = json.loads(req.text)
+        content = {k.lower(): v for k, v in content.items()} # Ensure manifest keys are lowercase as well
         version_data = content.get(game.lower()).get(pack).get('versions')[0]
         version_data.update({'url': f'{website}{version_data.get('url')}'})
 
