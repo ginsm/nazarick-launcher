@@ -56,6 +56,17 @@ LIST = [
                 'file': 'latest',
                 'game_version': '1.18.2'
             },
+            {
+                'name': 'nazarick-smp',
+                'providers': {
+                    'modpack': SelfHostedMinecraftProvider,
+                    'mods': ModrinthMinecraftProvider
+                },
+                'type': 'modrinth',
+                'project': 'mccp',
+                'file': 'latest',
+                'game_version': '1.21.8'
+            },
         ],
         'updater': MinecraftUpdater,
     },
