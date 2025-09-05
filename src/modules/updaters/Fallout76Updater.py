@@ -51,14 +51,20 @@ class Fallout76Updater(AbstractGameUpdater):
             self.command = ['cmd', '/c', 'start', os.path.join(self.install_path, self.exe_name)]
 
 
+    # Uninstall modpack each update; this is because there's no way to tell the version for each
+    # mod. It's easier to just remove all the mods and move the new ones there.
     def pre_update(self):
+        self.uninstall_modpack()
+
+
+    def uninstall_modpack(self):
         if os.path.exists(self.nazarick_json_path):
+            # Remove any installed mods
             with open(self.nazarick_json_path, 'r') as file:
                 # Get mod index
                 contents = json.loads(file.read())
                 mods = contents.get('mod_index')
 
-                # Remove previously installed mods
                 if mods:
                     self.logger.info('Removing previously installed mods.')
                     for mod in mods:
@@ -73,6 +79,18 @@ class Fallout76Updater(AbstractGameUpdater):
                                 logger=self.logger
                             )
                             self.logger.debug(f'(R) {mod}')
+
+            # Remove Fallout76Custom.ini
+            custom_ini_dir = os.path.join(self.documents_path, 'My Games', 'Fallout 76')
+            custom_ini_path = os.path.join(custom_ini_dir, 'Fallout76Custom.ini')
+
+            if os.path.exists(custom_ini_path):
+                filesystem.safe_delete(
+                    path=custom_ini_path,
+                    base_path=custom_ini_dir,
+                    whitelist=[],
+                    logger=self.logger
+                )
 
 
     def resolve_mod_index(self, mods, _):
