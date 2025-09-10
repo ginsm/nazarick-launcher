@@ -1,7 +1,9 @@
 import os
+
 from modules import gui_manager, state_manager, theme_list
 from modules.logging import app_logging
 from customtkinter.windows.widgets.theme import ThemeManager
+from tktooltip import ToolTip
 
 from modules.components.common import CoverFrame
 
@@ -14,6 +16,7 @@ def create(ctk, parent, pool, state):
         'theme': ctk.StringVar(value=state.get('theme') or 'blue'),
         'autoclose': ctk.BooleanVar(value=state.get('autoclose') or False),
         'autorestart': ctk.BooleanVar(value=state.get('autorestart') or False),
+        'elevated': ctk.BooleanVar(value=state.get('elevated') or False),
         'threadamount': ctk.IntVar(value=state.get('threadamount') or 4),
         'logging': ctk.BooleanVar(value=state.get('logging') or True),
         'debug': ctk.BooleanVar(value=state.get('debug') or False)
@@ -50,9 +53,6 @@ def create(ctk, parent, pool, state):
     functionality_label = ctk.CTkLabel(master=frame, text="Functionality")
     functionality_label.cget('font').configure(size=h2_size)
 
-    # Automation
-    automation_label = ctk.CTkLabel(master=frame, text="Automation")
-
     # Auto Close
     autoclose_checkbox = ctk.CTkCheckBox(
         master=frame,
@@ -74,6 +74,18 @@ def create(ctk, parent, pool, state):
         offvalue=False,
         width=200
     )
+
+    # Elevated launcher
+    elevated_checkbox = ctk.CTkCheckBox(
+        master=frame,
+        text='Run launcher as admin',
+        command=lambda: state_manager.set_menu_option('elevated', options),
+        variable=options['elevated'],
+        onvalue=True,
+        offvalue=False,
+        width=200
+    )
+    ToolTip(elevated_checkbox, msg=f'Restart your launcher for this to take affect.', delay=0.01, follow=True)
 
     # Amount of Threads
     if (os.cpu_count() > 4):
@@ -128,9 +140,9 @@ def create(ctk, parent, pool, state):
     theme_dropdown.grid(row=4, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     functionality_label.grid(row=5, column=0, padx=padx, pady=pady_h2, sticky='w')
-    automation_label.grid(row=6, column=0, padx=padx, pady=pady_h3, sticky='w')
-    autoclose_checkbox.grid(row=7, column=0, padx=padx, pady=pady_widget, sticky='w')
-    autorestart_checkbox.grid(row=8, column=0, padx=padx, pady=pady_widget, sticky='w')
+    autoclose_checkbox.grid(row=6, column=0, padx=padx, pady=(6, 5), sticky='w')
+    autorestart_checkbox.grid(row=7, column=0, padx=padx, pady=pady_widget, sticky='w')
+    elevated_checkbox.grid(row=8, column=0, padx=padx, pady=pady_widget, sticky='w')
     thread_label.grid(row=9, column=0, padx=padx, pady=pady_h3, sticky='w')
     thread_slider.grid(row=10, column=0, padx=padx, pady=pady_widget, sticky='w')
 
@@ -139,7 +151,6 @@ def create(ctk, parent, pool, state):
     debug_checkbox.grid(row=13, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     return frame
-
 
 def set_debug(options):
     state_manager.set_menu_option('debug', options)

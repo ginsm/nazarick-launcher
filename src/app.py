@@ -25,7 +25,7 @@ def main():
 
     # Check if launcher needs to be elevated
     game_paths = state_manager.get_game_paths()
-    if system_check.elevation_needed(game_paths):
+    if system_check.elevation_needed(game_paths) or state_manager.get_state().get("elevated"):
         elevate(show_console=False)
 
     # Set appearance
