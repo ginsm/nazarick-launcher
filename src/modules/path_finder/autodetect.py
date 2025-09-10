@@ -6,6 +6,7 @@ from modules.path_finder import finder
 PLATFORM_CONVENTION = {
     'Steam': 'steam',
     'Microsoft Store': 'storeapp',
+    'Epic Games': 'epic',
     'win_folder': 'win_folder'
 }
 PLATFORM_CONVENTIONS = list(PLATFORM_CONVENTION.keys())
@@ -48,7 +49,7 @@ def detect_install_path(pack_state, setting, settings):
     platform = pack_state.get('platform')
 
     if platform:
-        # Remove platform from list and insert it at the beginning
+        # Remove platform from list and insert it at the beginning so it's checked first
         platforms.remove(platform)
         platforms.insert(0, platform)
 

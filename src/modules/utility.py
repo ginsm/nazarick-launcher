@@ -23,3 +23,10 @@ def running_as_admin():
             return False
     else:
         return os.geteuid() == 0
+    
+
+def normalize_dir(path):
+    """ Normalizes the path and returns it if it's safe """
+    if not path: return None
+    p = os.path.normpath(path.strip().strip('"'))
+    return p if os.path.isdir(p) else None
