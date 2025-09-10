@@ -1,10 +1,11 @@
 from datetime import datetime
-from modules import game_list
+import os
+from modules import constants, game_list
+import ctypes
 
 
 def get_time():
     return datetime.now().strftime('%m/%d/%Y %H:%M:%S')
-
 
 def get_modpack_data(game, modpack):
     for game_dict in game_list.LIST:
@@ -13,3 +14,12 @@ def get_modpack_data(game, modpack):
                 if pack.get('name').lower() == modpack.lower():
                     return pack
     return {}
+
+def running_as_admin():
+    if constants.ON_WINDOWS:
+        try:
+            return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        except Exception:
+            return False
+    else:
+        return os.geteuid() == 0

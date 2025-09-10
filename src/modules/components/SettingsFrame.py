@@ -4,11 +4,13 @@ from modules import gui_manager, state_manager, theme_list
 from modules.logging import app_logging
 from customtkinter.windows.widgets.theme import ThemeManager
 from tktooltip import ToolTip
+import elevate
 
 from modules.components.common import CoverFrame
+from modules.utility import running_as_admin
 
-def create(ctk, parent, pool, state):
-    frame = ctk.CTkFrame(master=parent, corner_radius=0, border_width=0)
+def create(ctk, app, pool, state):
+    frame = ctk.CTkFrame(master=app, corner_radius=0, border_width=0)
     h2_size=24
 
     options = {
@@ -31,7 +33,7 @@ def create(ctk, parent, pool, state):
     mode_dropdown = ctk.CTkOptionMenu(
         master=frame, 
         values=['System', 'Dark', 'Light'],
-        command=lambda _: set_mode(ctk, parent, options, pool),
+        command=lambda _: set_mode(ctk, app, options, pool),
         variable=options['mode'],
         width=200,
     )
@@ -43,11 +45,10 @@ def create(ctk, parent, pool, state):
     theme_dropdown = ctk.CTkOptionMenu(
         master=frame,
         values=list(map(lambda theme: theme['title'], themes)),
-        command=lambda theme: set_theme(ctk, parent, theme_list.get_theme_from_title(theme), options, pool),
+        command=lambda theme: set_theme(ctk, app, theme_list.get_theme_from_title(theme), options, pool),
         variable=options['theme'],
         width=200
     )
-
 
     # ---- Functionality ---- #
     functionality_label = ctk.CTkLabel(master=frame, text="Functionality")
@@ -78,8 +79,8 @@ def create(ctk, parent, pool, state):
     # Elevated launcher
     elevated_checkbox = ctk.CTkCheckBox(
         master=frame,
-        text='Run launcher as admin',
-        command=lambda: state_manager.set_menu_option('elevated', options),
+        text='Run launcher as Administrator',
+        command=lambda: set_elevated(options, app),
         variable=options['elevated'],
         onvalue=True,
         offvalue=False,
@@ -98,7 +99,6 @@ def create(ctk, parent, pool, state):
             command=lambda value: set_thread_count(options, ctk.IntVar(value=int(value)), thread_label)
         )
         thread_slider.set(options['threadamount'].get())
-
 
     # ---- Developer---- #
     developer_label = ctk.CTkLabel(master=frame, text="Developer")
@@ -125,7 +125,6 @@ def create(ctk, parent, pool, state):
         offvalue=False,
         width=200
     )
-
 
     # Position widgets
     padx = 25
@@ -190,6 +189,13 @@ def set_theme(ctk, app, theme, options, pool):
     # Delete the cover frame
     cover_frame.destroy()
 
+
+def set_elevated(options, app):
+    state_manager.set_menu_option('elevated', options)
+    if options.get("elevated").get() and not running_as_admin():
+        app.destroy()
+        app.quit()
+        elevate.elevate(show_console=False)
 
 
 def set_thread_count(options, value, label):
