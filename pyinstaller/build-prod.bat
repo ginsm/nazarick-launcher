@@ -4,7 +4,7 @@ python -m PyInstaller^
  --icon=nazaricklauncher.ico^
  --distpath dist^
  --workpath build^
- --add-data %UserProfile%\AppData\Roaming\Python\Python312\site-packages\customtkinter:customkinter\^
+ --add-data %LocalAppData%\Programs\Python\Python312\Lib\site-packages\customtkinter:customkinter\^
  --add-data ../tufup/repository/metadata/root.json:.^
  --add-data ../src/assets:assets/^
  --add-data ../src/.env:.^
@@ -14,6 +14,6 @@ python -m PyInstaller^
  --windowed^
  --noconsole^
  --name "Nazarick Launcher"^
- F:\Projects\Active\nazarick-launcher\src\app.py
+ E:\Projects\Active\nazarick-launcher\src\app.py
 
 pause

@@ -46,6 +46,17 @@ LIST = [
                 'game_version': '1.20.1'
             },
             {
+                'name': 'Nazarick Crossplay',
+                'providers': {
+                    'modpack': SelfHostedMinecraftProvider,
+                    'mods': ModrinthMinecraftProvider
+                },
+                'type': 'modrinth',
+                'project': 'mccp',
+                'file': 'latest',
+                'game_version': '1.21.8'
+            },
+            {
                 'name': 'Vault Hunters',
                 'providers': {
                     'modpack': SelfHostedMinecraftProvider,
@@ -55,17 +66,6 @@ LIST = [
                 'project': 'Vault Hunters',
                 'file': 'latest',
                 'game_version': '1.18.2'
-            },
-            {
-                'name': 'nazarick-smp',
-                'providers': {
-                    'modpack': SelfHostedMinecraftProvider,
-                    'mods': ModrinthMinecraftProvider
-                },
-                'type': 'modrinth',
-                'project': 'mccp',
-                'file': 'latest',
-                'game_version': '1.21.8'
             },
         ],
         'updater': MinecraftUpdater,
