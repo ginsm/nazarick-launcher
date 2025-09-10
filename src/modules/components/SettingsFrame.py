@@ -86,7 +86,6 @@ def create(ctk, app, pool, state):
         offvalue=False,
         width=200
     )
-    ToolTip(elevated_checkbox, msg=f'Restart your launcher for this to take affect.', delay=0.01, follow=True)
 
     # Amount of Threads
     if (os.cpu_count() > 4):
