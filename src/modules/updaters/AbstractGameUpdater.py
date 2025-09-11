@@ -69,74 +69,61 @@ class AbstractGameUpdater(ABC):
         self.initialize()
 
         # These variables each rely on data from outside the updaters or need to be set
-        # each time the updaters run.
+        # each time an updater runs (in the respective updater).
         self.options = state_manager.get_state()
         self.update_button = update_button
         self.temp_nazarick_json_path = os.path.join(self.temp_path, 'nazarick.json')
         self.logger = logging.getLogger(
-            f'{constants.LOGGER_NAME}.{self.game.lower()}.{self.modpack.get('name').lower()}'
+            f"{constants.LOGGER_NAME}.{self.game.lower()}.{self.modpack.get('name').lower()}"
         )
 
         # Begin logging and lock gui
         self.logger.info('')
         self.logger.info(f'Beginning update process at {utility.get_time()}.')
-
         self.logger.info(f'Locking user input.')
         gui_manager.lock(True)
 
-        # Unlock this update process' button
-        update_button.configure(state='normal')
+        # Defaults in case of failures in the try branch
+        task_percent = 0.0
+        ModpackProvider = None
+        mod_index = []
 
-        # Initialize providers
-        providers = self.modpack.get('providers')
         try:
+            # Unlock this update process' button so user can cancel
+            update_button.configure(state='normal')
+
+            # Initialize providers
+            providers = self.modpack.get('providers')
             ModpackProvider = providers.get('modpack')()
             self.modprovider = providers.get('mods')()
-        except Exception as e:
-            # Print exception
-            self.logger.error('Unable to initialize provider:')
-            self.logger.error(f'{e}')
-            self.logger.info('Terminating update process.')
-            traceback.print_exc()
 
-            # Set cancel to true so nothing runs in finalize except unlocking and sending logs
-            self.cancel = True
-            self.finalize()
-            return
+            # Get progress bar and divide 25% of progress bar by amount of tasks
+            progressbar = self.widgets.get('progressbar')
+            task_percent = 0.2 / 12 # (tasks are 20%, modpack download is 30%, and mods are 50%)
 
-        # Get progress bar and divide 25% of progress bar by amount of tasks
-        progressbar = self.widgets.get('progressbar')
-        task_percent = 0.2 / 12 # tasks are 25% of the progress, mod download is 75%
+            # Print each error present for user input and end the update process.
+            errors = self.user_input_has_errors()
 
-        # Print each error present for user input and end the update process.
-        errors = self.user_input_has_errors()
+            if errors:
+                self.widgets.get('tabs').set('Logs')
+                for error in errors:
+                    self.logger.error(f'{error}')
+                self.cancel = True
+                return
 
-        if errors:
-            self.widgets.get('tabs').set('Logs')
-            for error in errors:
-                self.logger.error(f'{error}')
+            # Check for internet
+            internet_connection = system_check.check_internet()
+            
+            if internet_connection:
+                self.version = ModpackProvider.get_latest_modpack_version(self.game, self.modpack)
 
-            self.logger.info(f'Unlocking user input.')
-            gui_manager.lock(False)
+            # This is ran after each task (aside from retrieve_mods)
+            progressbar.add_percent(task_percent)
 
-            self.logger.info(f'Finished process at {utility.get_time()}.')
-            return
-
-        # Check for internet
-        internet_connection = system_check.check_internet()
-        
-        if internet_connection:
-            self.version = ModpackProvider.get_latest_modpack_version(self.game, self.modpack)
-
-        # This is ran after each task (aside from retrieve_mods)
-        progressbar.add_percent(task_percent)
-
-        if internet_connection and self.version:
-            try:
+            if internet_connection and self.version:
                 # Skips update process if they're already on the latest version
                 if self.on_latest_version():
                     progressbar.add_percent(1 - (task_percent * 2))
-                    self.finalize(task_percent)
                     return
 
                 # Run pre update hook
@@ -211,30 +198,30 @@ class AbstractGameUpdater(ABC):
                     self.post_update()
                     progressbar.add_percent(task_percent)
 
-            # Handle update process failing
-            except Exception as e:
+            # Warn the user if self.version couldn't be retrieved
+            elif not self.version:
                 self.widgets.get('tabs').set('Logs')
-                self.logger.error(f'{e}; terminating update process.')
-                logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__}")
-                logger.debug(f"ModProvider: {self.modprovider.__class__.__name__}")
-                logger.debug(f"CWD: {os.getcwd()}")
-                logger.debug(f"STATE: {self.options}")
-                traceback.print_exc()
+                self.logger.error('Invalid response from the modpack\'s provider; skipping update process.')
+                self.logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__ if ModpackProvider else 'uninitialized'}")
                 self.cancel = True
 
-        # Warn the user if self.version couldn't be retrieved
-        elif not self.version:
+            # If self.version exists, the failure was internet_connection; warn the user.
+            else:
+                self.widgets.get('tabs').set('Logs')
+                self.logger.warning('No internet connection; skipping update process.')
+                self.cancel = True
+        except Exception as e:
             self.widgets.get('tabs').set('Logs')
-            self.logger.error('Invalid response from the modpack\'s provider; skipping update process.')
-            logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__}")
-
-        # If self.version exists, the failure was internet_connection; warn the user.
-        else:
-            self.widgets.get('tabs').set('Logs')
-            self.logger.warning('No internet connection; skipping update process.')
-
-        # Finish up the update process.
-        self.finalize(task_percent)
+            self.logger.error(f'{e}; terminating update process.')
+            self.logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__ if ModpackProvider else 'uninitialized'}")
+            self.logger.debug(f"ModProvider: {self.modprovider.__class__.__name__ if getattr(self, 'modprovider', None) else 'uninitialized'}")
+            self.logger.debug(f"CWD: {os.getcwd()}")
+            self.logger.debug(f"STATE: {self.options}")
+            traceback.print_exc()
+            self.cancel = True
+        finally:
+            # Finish up the update process.
+            self.finalize(task_percent)
 
 
     def finalize(self, task_percent):
@@ -430,7 +417,7 @@ class AbstractGameUpdater(ABC):
 
             for task in list(result.done):
                 if task.exception():
-                    notdownloaded.apend(task.exception())
+                    notdownloaded.append(task.exception())
 
             if notdownloaded:
                 self.logger.warning('The launcher was unable to download the following mods:')
