@@ -55,7 +55,7 @@ class ProviderAbstract(ABC):
         logger.info(f'Downloading latest version: {version['name']} ({version['version']}) for {updater.game}.')
 
         # Download the file as .zip
-        req = requests.get(version.get('url'), stream=True, allow_redirects=True, timeout=15)
+        req = requests.get(version.get('url'), stream=True, allow_redirects=True, timeout=(10,45))
 
         if req.status_code == 200:
             with open(os.path.join(tmp, 'update.zip'), 'wb') as file:

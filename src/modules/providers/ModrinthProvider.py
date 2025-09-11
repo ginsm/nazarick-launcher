@@ -16,7 +16,7 @@ class ModrinthProviderBase(ProviderAbstract):
         if not mod_download_url:
             raise Exception(mod_name)
 
-        req = requests.get(mod_download_url, allow_redirects=True, timeout=15)
+        req = requests.get(mod_download_url, allow_redirects=True, timeout=(10,45))
 
         if req.status_code == 200:
             updater.logger.info(f'(D) {mod_name}')
