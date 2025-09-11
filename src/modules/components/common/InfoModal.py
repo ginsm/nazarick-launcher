@@ -1,4 +1,4 @@
-def create(ctk, text, buttons, title, max_width = 1000, justify="center"):
+def create(ctk, text, buttons, title, max_width = 1000, justify="center", parent=None):
     modal = ctk.CTkToplevel()
     modal.title(title)
     modal.grid_rowconfigure(0, weight=1)
@@ -38,3 +38,27 @@ def create(ctk, text, buttons, title, max_width = 1000, justify="center"):
             button_padx = 5
 
         button.grid(row=1, column=index, padx=button_padx, pady=pady, sticky="we")
+
+    modal.update_idletasks()  # make sure geometry is calculated
+
+    if parent is None:
+        parent = modal.master
+
+    # Get parent window position and size
+    parent_x = parent.winfo_x()
+    parent_y = parent.winfo_y()
+    parent_width = parent.winfo_width()
+    parent_height = parent.winfo_height()
+
+    # Get modal size
+    modal_width = modal.winfo_width()
+    modal_height = modal.winfo_height()
+
+    # Calculate centered position
+    x = parent_x + (parent_width // 2) - (modal_width // 2)
+    y = parent_y + (parent_height // 2) - (modal_height // 2)
+
+    # Apply geometry
+    modal.geometry(f"+{x}+{y}")
+
+    return modal

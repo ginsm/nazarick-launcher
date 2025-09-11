@@ -1,11 +1,12 @@
 from datetime import datetime
-import os
 from modules import constants, game_list
-import ctypes
+from elevate import elevate
+import os, ctypes
 
 
 def get_time():
     return datetime.now().strftime('%m/%d/%Y %H:%M:%S')
+
 
 def get_modpack_data(game, modpack):
     for game_dict in game_list.LIST:
@@ -14,6 +15,7 @@ def get_modpack_data(game, modpack):
                 if pack.get('name').lower() == modpack.lower():
                     return pack
     return {}
+
 
 def running_as_admin():
     if constants.ON_WINDOWS:
@@ -30,3 +32,9 @@ def normalize_dir(path):
     if not path: return None
     p = os.path.normpath(path.strip().strip('"'))
     return p if os.path.isdir(p) else None
+
+
+def elevate_launcher(app):
+    app.destroy()
+    app.quit()
+    elevate(show_console=False)

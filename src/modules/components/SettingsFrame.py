@@ -1,10 +1,9 @@
 import os
 
 from modules import gui_manager, state_manager, theme_list
+from modules.components import ElevationModal
 from modules.logging import app_logging
 from customtkinter.windows.widgets.theme import ThemeManager
-from tktooltip import ToolTip
-import elevate
 
 from modules.components.common import CoverFrame
 from modules.utility import running_as_admin
@@ -80,7 +79,7 @@ def create(ctk, app, pool, state):
     elevated_checkbox = ctk.CTkCheckBox(
         master=frame,
         text='Run launcher as Administrator',
-        command=lambda: set_elevated(options, app),
+        command=lambda: set_elevated(ctk, options, app),
         variable=options['elevated'],
         onvalue=True,
         offvalue=False,
@@ -189,12 +188,14 @@ def set_theme(ctk, app, theme, options, pool):
     cover_frame.destroy()
 
 
-def set_elevated(options, app):
+def set_elevated(ctk, options, app):
     state_manager.set_menu_option('elevated', options)
-    if options.get("elevated").get() and not running_as_admin():
-        app.destroy()
-        app.quit()
-        elevate.elevate(show_console=False)
+    if options.get("elevated").get():
+        ElevationModal.create(
+            ctk=ctk,
+            text='Do you want to elevate the launcher to administrator now?',
+            app=app
+        )
 
 
 def set_thread_count(options, value, label):
