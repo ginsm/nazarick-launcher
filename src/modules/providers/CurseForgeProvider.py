@@ -16,7 +16,7 @@ class CurseForgeProviderBase(ProviderAbstract):
         if not mod_data.get('url'):
             raise Exception(mod_name)
 
-        req = requests.get(mod_data.get('url'), allow_redirects=True)
+        req = requests.get(mod_data.get('url'), allow_redirects=True, timeout=15)
 
         if req.status_code == 200:
             updater.logger.info(f'(D) {mod_name}')
@@ -62,7 +62,7 @@ class CurseForgeProviderBase(ProviderAbstract):
         req = super().download_modpack(updater)
 
         if req.status_code != 200:
-            raise Exception(f'Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.')
+            raise Exception(f"Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.")
 
 
     def extract_modpack(self, updater, game, pack):
@@ -91,7 +91,7 @@ class CurseForgeProviderBase(ProviderAbstract):
         req = requests.get(f'https://api.curseforge.com/v1/mods/{mod_id}/files/{file_id}', headers={
             'Accept': 'application/json',
             'x-api-key': constants.CURSEFORGE_API_KEY
-        }, timeout=10)
+        }, timeout=15)
 
         # Get file url and name and return
         if req.status_code == 200:
@@ -107,7 +107,7 @@ class CurseForgeProviderBase(ProviderAbstract):
 
     def get_latest_version_file(self, project_id, game_version):
             # Get project data
-            req = requests(f'https://api.curseforge.com/v1/mods/{project_id}')
+            req = requests.get(f'https://api.curseforge.com/v1/mods/{project_id}', timeout=15)
             if req.status_code != 200:
                 return False
 

@@ -12,7 +12,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
         plugin_dest = os.path.join(destination, plugin)
         plugin_zip = plugin_dest + '.zip'
 
-        req = requests.get(plugin_url, allow_redirects=True)
+        req = requests.get(plugin_url, allow_redirects=True, timeout=15)
 
         if updater.check_local_mod_paths(local_paths, destination, plugin):
             return
@@ -37,7 +37,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
     # The second parameter of the abstract method, game, is unused, as denoted by _.
     def get_latest_modpack_version(self, _, modpack):
         package = modpack.get('project') # see game_list.py
-        req = requests.get(f'https://thunderstore.io/api/experimental/package/{package}')
+        req = requests.get(f'https://thunderstore.io/api/experimental/package/{package}', timeout=15)
 
         if req.status_code != 200:
             return False
@@ -55,7 +55,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
         req = super().download_modpack(updater)
 
         if req.status_code != 200:
-            raise Exception(f'Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.')
+            raise Exception(f"Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.")
 
 
     def extract_modpack(self, updater, game, pack):

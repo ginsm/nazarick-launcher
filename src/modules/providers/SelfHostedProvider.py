@@ -17,7 +17,7 @@ class SelfHostedProviderBase(ProviderAbstract):
     def get_latest_modpack_version(self, game, modpack):
         website = constants.SELFHOSTED_WEBSITE
         pack = modpack.get('project')
-        req = requests.get(f'{website}/modpacks/manifest.json')
+        req = requests.get(f'{website}/modpacks/manifest.json', timeout=15)
 
         if (req.status_code != 200):
             return False
