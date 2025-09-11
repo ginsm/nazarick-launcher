@@ -1,12 +1,9 @@
 import os
 
 from modules import gui_manager, state_manager, theme_list
-from modules.components import ElevationModal
+from modules.components.common import ElevationModal, CoverFrame
 from modules.logging import app_logging
 from customtkinter.windows.widgets.theme import ThemeManager
-
-from modules.components.common import CoverFrame
-from modules.utility import running_as_admin
 
 def create(ctk, app, pool, state):
     frame = ctk.CTkFrame(master=app, corner_radius=0, border_width=0)

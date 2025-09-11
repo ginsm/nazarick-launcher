@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tktooltip import ToolTip
 from customtkinter.windows.widgets.theme import ThemeManager
 from modules import state_manager, system_check, constants, utility
-from modules.components import ElevationModal
+from modules.components.common import ElevationModal
 from modules.decorators.debounce import debounce
 from modules.components.common import InfoModal
 
