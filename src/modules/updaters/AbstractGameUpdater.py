@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import traceback
-from modules import constants, filesystem, gui_manager, state_manager, system_check, utility
+from modules import constants, filesystem, gui_manager, state_manager, system_check, utility, network
 from modules.components.common import ChangesBox
 
 
@@ -24,6 +24,7 @@ class AbstractGameUpdater(ABC):
         self.cancel = False
         self.initial_install = False
         self.downloads_mods = True
+        self.session = None
 
         # These get set each time the updater runs (in self.start)
         self.options = {}
@@ -44,6 +45,11 @@ class AbstractGameUpdater(ABC):
         self.command = []
         self.modprovider = None
         self.version = None
+
+        # This is set by game updaters that need their mods unzipped
+        self.unzip_mods = False
+        self.unzip_into_subdir = False # uses the archive name for subdir
+
 
 
     # ---- ABSTRACT METHODS ---- #    
@@ -87,6 +93,9 @@ class AbstractGameUpdater(ABC):
         task_percent = 0.0
         ModpackProvider = None
         mod_index = []
+
+        # Create network session
+        self.session = network.make_session(pool_maxsize=constants.MAX_WORKER_AMOUNT + 2)
 
         try:
             # Unlock this update process' button so user can cancel
@@ -225,10 +234,18 @@ class AbstractGameUpdater(ABC):
 
 
     def finalize(self, task_percent):
+        # Close the networking session
+        try:
+            session = getattr(self, "session", None)
+            if session:
+                session.close()
+        except Exception:
+            pass
+
+        # Finish update and either close app or unlock GUI
         progressbar = self.widgets.get('progressbar')
 
-        self.logger.info(f'Unlocking user input.')
-        gui_manager.lock(False)
+        self.logger.info(f'Finished process at {utility.get_time()}.')
 
         if not self.cancel:
             self.run_executable()
@@ -237,8 +254,10 @@ class AbstractGameUpdater(ABC):
         if not self.cancel:
             self.auto_close_app()
 
+        self.logger.info(f'Unlocking user input.')
+        gui_manager.lock(False)
+
         # Reset values
-        self.logger.info(f'Finished process at {utility.get_time()}.')
         progressbar.reset_percent()
         self.update_button.configure(text='Play')
         self.cancel = False
@@ -395,38 +414,37 @@ class AbstractGameUpdater(ABC):
     def retrieve_mods(self, destination, local_paths):
         self.logger.info('Retrieving modpack dependencies.')
 
-        mods = self.modprovider.get_modpack_modlist(self)
-
-        # Handle downloading mods
-        if self.downloads_mods:
-            task_percent = 0.5 / len(mods)
-            futures = []
-
-            # Ensure destination exists
-            os.makedirs(destination, exist_ok=True)
-
-            for mod in mods:
-                futures.append(
-                    self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
-                )
-
-            result = wait(futures)
-
-            # Handle any mods that couldn't be downloaded
-            notdownloaded = []
-
-            for task in list(result.done):
-                if task.exception():
-                    notdownloaded.append(task.exception())
-
-            if notdownloaded:
-                self.logger.warning('The launcher was unable to download the following mods:')
-                for mod in notdownloaded:
-                    self.logger.warning(f'- {mod}')
-                self.logger.warning('You will need to download the files manually.')
-        else:
+        if not self.downloads_mods:
             progress_bar = self.widgets.get('progressbar')
             progress_bar.add_percent(0.5)
+            return []
+
+        mods = self.modprovider.get_modpack_modlist(self)
+        task_percent = 0.5 / len(mods)
+        futures = []
+
+        # Ensure destination exists
+        os.makedirs(destination, exist_ok=True)
+
+        for mod in mods:
+            futures.append(
+                self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
+            )
+
+        result = wait(futures)
+
+        # Handle any mods that couldn't be downloaded
+        notdownloaded = []
+
+        for task in list(result.done):
+            if task.exception():
+                notdownloaded.append(task.exception())
+
+        if notdownloaded:
+            self.logger.warning('The launcher was unable to download the following mods:')
+            for mod in notdownloaded:
+                self.logger.warning(f'- {mod}')
+            self.logger.warning('You will need to download the files manually.')
 
         os.chdir(self.temp_path)
 

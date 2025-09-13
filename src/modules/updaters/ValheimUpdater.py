@@ -44,6 +44,10 @@ class ValheimUpdater(AbstractGameUpdater):
         self.exe_name = 'valheim.exe'
         self.command = ['cmd', '/c', 'start', 'steam://run/892970']
 
+        # Used by super.download_mod
+        self.unzip_mods = True
+        self.unzip_into_subdir = True
+
 
     def install_update(self):
         # Set up BepInEx
