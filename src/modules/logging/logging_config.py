@@ -2,7 +2,7 @@ from modules import state_manager
 
 # These are imported here so that pyinstaller bundles them
 from modules.logging.handlers import LogboxHandler
-from modules.logging.filters import NoBroadcastFilter
+from modules.logging.filters import NoBroadcastFilter, OnlyDebugFilter
 
 # This is a function as the config relies on state_manager's database having
 # been created.
@@ -23,7 +23,10 @@ def get_config():
         },
         'filters': {
             'no_broadcasts': {
-                'class': 'modules.logging.filters.NoBroadcastFilter.Filter'
+                '()': NoBroadcastFilter.NoBroadcastFilter
+            },
+            'only_debug': {
+                '()': OnlyDebugFilter.OnlyDebugFilter
             }
         },
         'handlers': {
@@ -39,6 +42,13 @@ def get_config():
                 'stream': 'ext://sys.stderr'
             },
             'stdout': {
+                'class': 'logging.StreamHandler',
+                'level': std_out_level,  # <-- DEBUG if state_manager says so
+                'formatter': 'simple',
+                'stream': 'ext://sys.stdout',
+                'filters': ['only_debug']
+            },
+            'file': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'level': std_out_level,
                 'formatter': 'simple',
@@ -49,7 +59,7 @@ def get_config():
             },
             'queue_handler': {
                 'class': 'logging.handlers.QueueHandler',
-                'handlers': ['stderr', 'stdout', 'logbox'],
+                'handlers': ['stderr', 'stdout', 'logbox', 'file'],
                 'respect_handler_level': True
             }
         },
