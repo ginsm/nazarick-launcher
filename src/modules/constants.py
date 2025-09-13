@@ -9,6 +9,10 @@ APP_BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 LOGGER_NAME = 'Nazarick'
 MAX_WORKER_AMOUNT=4
 
+# Networking
+DOWNLOAD_TIMEOUTS = (20, 45) # connection timeout, read timeout
+MAX_CONNECTIONS_PER_HOST=4
+
 # Platform
 ON_MAC = platform.system() == "Darwin"
 ON_WINDOWS = platform.system() == "Windows"
