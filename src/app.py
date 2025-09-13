@@ -2,8 +2,9 @@ from concurrent.futures import ThreadPoolExecutor
 import os, logging
 import customtkinter as ctk
 from elevate import elevate
-from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list
+from modules import app_upgrader, gui_manager, state_manager, system_check, tufup, constants, theme_list, utility, constants
 from modules.components import AppWindow
+from modules.decorators.debounce import debounce
 from modules.logging import app_logging
 
 logger = logging.getLogger(constants.LOGGER_NAME)
@@ -13,7 +14,7 @@ def main():
     BASE_DIR = os.path.abspath(constants.APP_BASE_DIR)
     os.environ['nazpath'] = BASE_DIR
 
-    # Initialize the store
+    # Initialize the store and get the initial state
     state_manager.init(tufup.DATA_DIR.as_posix())
     initial_state = state_manager.get_state()
 
@@ -54,13 +55,32 @@ def main():
         tufup.handle_error(ctk, tufup_status)
 
     # UI Event Handlers
-    app.bind('<Configure>', lambda _ : gui_manager.resize(app)) # Handles saving the window size upon resize
+    # Handles saving the window size upon resize
+    app.bind('<Configure>', lambda _ : gui_manager.resize(app))
+    # Handles the following keybind events:
+    # ctrl + shift + r = respawn launcher
+    app.bind('<KeyPress>', handle_key_event)
 
     # Finished launching
     logger.info(f'The app has finished initializing ({constants.APP_VERSION}).', extra={'broadcast': True})
 
     # Main loop
     app.mainloop()
+
+@debounce(0.5)
+def handle_key_event(event):
+    keysym = event.keysym
+    modifiers = {
+        "shift": event.state == 9,
+        "control": event.state == 12,
+        "alt": event.state == 131080,
+        "shift+control": event.state == 13,
+        "shift+alt": event.state == 131081,
+        "all": event.state == 131085
+    }
+
+    if (modifiers["control"] or modifiers["shift+control"]) and keysym.lower() == "r":
+        utility.respawn_launcher()
 
 
 # Run the script
