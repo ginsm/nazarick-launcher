@@ -40,8 +40,7 @@ def main():
         tufup_status = tufup.INIT_SUCCESS
 
     # Initialize the thread pool executor
-    threadamount = initial_state.get('threadamount') or 4
-    pool = ThreadPoolExecutor(max_workers=threadamount - 1)
+    pool = ThreadPoolExecutor(max_workers=constants.MAX_WORKER_AMOUNT)
 
     # Create the top level component
     app = AppWindow.create(ctk, initial_state, BASE_DIR, constants.APP_NAME)

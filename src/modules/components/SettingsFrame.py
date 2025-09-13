@@ -1,5 +1,3 @@
-import os
-
 from modules import gui_manager, state_manager, theme_list
 from modules.components.common import ElevationModal, CoverFrame
 from modules.logging import app_logging
@@ -50,28 +48,6 @@ def create(ctk, app, pool, state):
     functionality_label = ctk.CTkLabel(master=frame, text="Functionality")
     functionality_label.cget('font').configure(size=h2_size)
 
-    # Auto Close
-    autoclose_checkbox = ctk.CTkCheckBox(
-        master=frame,
-        text='Close after launching game',
-        command=lambda: state_manager.set_menu_option('autoclose', options),
-        variable=options['autoclose'],
-        onvalue=True,
-        offvalue=False,
-        width=200
-    )
-
-    # Auto Restart
-    autorestart_checkbox = ctk.CTkCheckBox(
-        master=frame,
-        text='Restart after updating the launcher',
-        command=lambda: state_manager.set_menu_option('autorestart', options),
-        variable=options['autorestart'],
-        onvalue=True,
-        offvalue=False,
-        width=200
-    )
-
     # Elevated launcher
     elevated_checkbox = ctk.CTkCheckBox(
         master=frame,
@@ -83,17 +59,28 @@ def create(ctk, app, pool, state):
         width=200
     )
 
-    # Amount of Threads
-    if (os.cpu_count() > 4):
-        thread_label = ctk.CTkLabel(master=frame, text=f"Thread Amount: {options['threadamount'].get()}/{os.cpu_count()}")
-        thread_slider = ctk.CTkSlider(
-            master=frame,
-            from_=4,
-            to=os.cpu_count(),
-            number_of_steps=os.cpu_count() - 4,
-            command=lambda value: set_thread_count(options, ctk.IntVar(value=int(value)), thread_label)
-        )
-        thread_slider.set(options['threadamount'].get())
+    # Auto Close
+    autoclose_checkbox = ctk.CTkCheckBox(
+        master=frame,
+        text='Close after launching game',
+        command=lambda: state_manager.set_menu_option('autoclose', options),
+        variable=options['autoclose'],
+        onvalue=True,
+        offvalue=False,
+        width=200
+    )
+
+
+    # Auto Restart
+    autorestart_checkbox = ctk.CTkCheckBox(
+        master=frame,
+        text='Restart after updating the launcher',
+        command=lambda: state_manager.set_menu_option('autorestart', options),
+        variable=options['autorestart'],
+        onvalue=True,
+        offvalue=False,
+        width=200
+    )
 
     # ---- Developer---- #
     developer_label = ctk.CTkLabel(master=frame, text="Developer")
@@ -134,15 +121,13 @@ def create(ctk, app, pool, state):
     theme_dropdown.grid(row=4, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     functionality_label.grid(row=5, column=0, padx=padx, pady=pady_h2, sticky='w')
-    autoclose_checkbox.grid(row=6, column=0, padx=padx, pady=(6, 5), sticky='w')
-    autorestart_checkbox.grid(row=7, column=0, padx=padx, pady=pady_widget, sticky='w')
-    elevated_checkbox.grid(row=8, column=0, padx=padx, pady=pady_widget, sticky='w')
-    thread_label.grid(row=9, column=0, padx=padx, pady=pady_h3, sticky='w')
-    thread_slider.grid(row=10, column=0, padx=padx, pady=pady_widget, sticky='w')
+    elevated_checkbox.grid(row=6, column=0, padx=padx, pady=pady_widget, sticky='w')
+    autoclose_checkbox.grid(row=7, column=0, padx=padx, pady=(6, 5), sticky='w')
+    autorestart_checkbox.grid(row=8, column=0, padx=padx, pady=pady_widget, sticky='w')
 
-    developer_label.grid(row=11, column=0, padx=padx, pady=pady_h2, sticky='w')
-    logging_checkbox.grid(row=12, column=0, padx=padx, pady=pady_widget, sticky='w')
-    debug_checkbox.grid(row=13, column=0, padx=padx, pady=pady_widget, sticky='w')
+    developer_label.grid(row=9, column=0, padx=padx, pady=pady_h2, sticky='w')
+    logging_checkbox.grid(row=10, column=0, padx=padx, pady=pady_widget, sticky='w')
+    debug_checkbox.grid(row=11, column=0, padx=padx, pady=pady_widget, sticky='w')
 
     return frame
 
@@ -193,9 +178,3 @@ def set_elevated(ctk, options, app):
             text='Do you want to elevate the launcher to administrator now?',
             app=app
         )
-
-
-def set_thread_count(options, value, label):
-    options['threadamount'] = value
-    label.configure(text=f"Thread Amount: {value.get()}/{os.cpu_count()}")
-    state_manager.set_menu_option('threadamount', options)

@@ -7,6 +7,7 @@ APP_VERSION = '1.4.14'
 APP_NAME = 'Nazarick_Launcher'
 APP_BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 LOGGER_NAME = 'Nazarick'
+MAX_WORKER_AMOUNT=4
 
 # Platform
 ON_MAC = platform.system() == "Darwin"
