@@ -1,6 +1,4 @@
-import json
-import os
-import requests
+import json, os, requests
 from modules import constants, filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
 
@@ -17,7 +15,7 @@ class SelfHostedProviderBase(ProviderAbstract):
     def get_latest_modpack_version(self, game, modpack):
         website = constants.SELFHOSTED_WEBSITE
         pack = modpack.get('project')
-        req = requests.get(f'{website}/modpacks/manifest.json', timeout=(10,45))
+        req = requests.get(f'{website}/modpacks/manifest.json', timeout=constants.DOWNLOAD_TIMEOUTS)
 
         if (req.status_code != 200):
             return False
@@ -31,9 +29,9 @@ class SelfHostedProviderBase(ProviderAbstract):
 
 
     def download_modpack(self, updater):
-        req = super().download_modpack(updater)
+        result = super().download_modpack(updater)
 
-        if req.status_code != 200:
+        if result is not True:
             raise Exception('Invalid response from SelfHosted (modpack)')
 
 

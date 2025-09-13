@@ -1,29 +1,18 @@
 import json
 import os
-import requests
-from modules import filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
 
 class ModrinthProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
         mod_download_url = mod_data.get('downloads')[0] if mod_data.get('downloads') else None
         mod_name = mod_data.get('name')
-        destination = os.path.join(destination, mod_name)
-
-        if updater.check_local_mod_paths(local_paths, destination, mod_name):
-            return
-
-        if not mod_download_url:
-            raise Exception(mod_name)
-
-        req = requests.get(mod_download_url, allow_redirects=True, timeout=(10,45))
-
-        if req.status_code == 200:
-            updater.logger.info(f'(D) {mod_name}')
-            with open(destination, 'wb') as file:
-                file.write(req.content)
-        else:
-            raise Exception(mod_name)
+        
+        normalized_mod_data = {
+            "mod_download_url": mod_download_url,
+            "mod_name": mod_name
+        }
+        
+        super().download_mod(updater, normalized_mod_data, local_paths, destination)
 
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):

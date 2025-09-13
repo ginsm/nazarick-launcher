@@ -1,33 +1,19 @@
-import json
-import os
-import zipfile
-import requests
+import json, os, requests
+from modules import constants
 from modules.providers.ProviderAbstract import ProviderAbstract
 
 
 class ThunderstoreProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
-        plugin = mod_data
-        plugin_url = f"https://thunderstore.io/package/download/{plugin.replace('-', '/')}"
-        plugin_dest = os.path.join(destination, plugin)
-        plugin_zip = plugin_dest + '.zip'
+        mod_name = mod_data # the mod_data is just the name of the plugin (including version)
+        mod_download_url = f"https://thunderstore.io/package/download/{mod_name.replace('-', '/')}"
 
-        req = requests.get(plugin_url, allow_redirects=True, timeout=(10,45))
+        normalized_mod_data = {
+            "mod_name": mod_name + ".zip",
+            "mod_download_url": mod_download_url
+        }
 
-        if updater.check_local_mod_paths(local_paths, destination, plugin):
-            return
-
-        if req.status_code == 200:
-            updater.logger.info(f'(D) {plugin}')
-            with open(plugin_zip, 'wb') as file:
-                file.write(req.content)
-
-            with zipfile.ZipFile(plugin_zip, 'r') as ref:
-                ref.extractall(plugin_dest)
-
-            os.remove(plugin_zip)
-        else:
-            raise Exception(plugin)
+        super().download_mod(updater, normalized_mod_data, local_paths, destination)
 
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
@@ -37,7 +23,7 @@ class ThunderstoreProviderBase(ProviderAbstract):
     # The second parameter of the abstract method, game, is unused, as denoted by _.
     def get_latest_modpack_version(self, _, modpack):
         package = modpack.get('project') # see game_list.py
-        req = requests.get(f'https://thunderstore.io/api/experimental/package/{package}', timeout=(10,45))
+        req = requests.get(f'https://thunderstore.io/api/experimental/package/{package}', timeout=constants.DOWNLOAD_TIMEOUTS)
 
         if req.status_code != 200:
             return False
@@ -52,9 +38,9 @@ class ThunderstoreProviderBase(ProviderAbstract):
 
 
     def download_modpack(self, updater):
-        req = super().download_modpack(updater)
+        result = super().download_modpack(updater)
 
-        if req.status_code != 200:
+        if result is not True:
             raise Exception(f"Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.")
 
 

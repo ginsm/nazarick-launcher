@@ -1,6 +1,4 @@
-import json
-import os
-import requests
+import json, os, requests
 from modules import constants, filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
 
@@ -8,22 +6,13 @@ class CurseForgeProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
         mod_data = self.get_download_info(mod_data)
         mod_name = mod_data.get('file')
-        destination = os.path.join(destination, mod_name)
-
-        if updater.check_local_mod_paths(local_paths, destination, mod_name):
-            return
-
-        if not mod_data.get('url'):
-            raise Exception(mod_name)
-
-        req = requests.get(mod_data.get('url'), allow_redirects=True, timeout=(10,45))
-
-        if req.status_code == 200:
-            updater.logger.info(f'(D) {mod_name}')
-            with open(destination, 'wb') as file:
-                file.write(req.content)
-        else:
-            raise Exception(mod_name)
+        
+        normalized_mod_data = {
+            "mod_download_url": mod_data.get('url'),
+            "mod_name": mod_name
+        }
+        
+        super().download_mod(updater, normalized_mod_data, local_paths, destination)
 
 
     def move_custom_mods(self, mods_dir, updater, mod_index, ignore=[]):
@@ -59,9 +48,9 @@ class CurseForgeProviderBase(ProviderAbstract):
 
 
     def download_modpack(self, updater):
-        req = super().download_modpack(updater)
+        result = super().download_modpack(updater)
 
-        if req.status_code != 200:
+        if result is not True:
             raise Exception(f"Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.")
 
 
@@ -91,7 +80,7 @@ class CurseForgeProviderBase(ProviderAbstract):
         req = requests.get(f'https://api.curseforge.com/v1/mods/{mod_id}/files/{file_id}', headers={
             'Accept': 'application/json',
             'x-api-key': constants.CURSEFORGE_API_KEY
-        }, timeout=(10,45))
+        }, timeout=constants.DOWNLOAD_TIMEOUTS)
 
         # Get file url and name and return
         if req.status_code == 200:
@@ -107,7 +96,7 @@ class CurseForgeProviderBase(ProviderAbstract):
 
     def get_latest_version_file(self, project_id, game_version):
             # Get project data
-            req = requests.get(f'https://api.curseforge.com/v1/mods/{project_id}', timeout=(10,45))
+            req = requests.get(f'https://api.curseforge.com/v1/mods/{project_id}', timeout=constants.DOWNLOAD_TIMEOUTS)
             if req.status_code != 200:
                 return False
 
