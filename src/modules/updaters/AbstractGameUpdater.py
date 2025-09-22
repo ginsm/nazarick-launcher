@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from concurrent.futures import wait
+from concurrent.futures import as_completed
 import json
 import logging
 import os
@@ -219,14 +219,14 @@ class AbstractGameUpdater(ABC):
                 self.widgets.get('tabs').set('Logs')
                 self.logger.warning('No internet connection; skipping update process.')
                 self.cancel = True
-        except Exception as e:
+        except Exception:
             self.widgets.get('tabs').set('Logs')
-            self.logger.error(f'{e}; terminating update process.')
+            self.logger.exception("Stack Trace:")
+            self.logger.error(f'Updater crashed; terminating update process. Check log file.')
             self.logger.debug(f"ModpackProvider: {ModpackProvider.__class__.__name__ if ModpackProvider else 'uninitialized'}")
             self.logger.debug(f"ModProvider: {self.modprovider.__class__.__name__ if getattr(self, 'modprovider', None) else 'uninitialized'}")
             self.logger.debug(f"CWD: {os.getcwd()}")
             self.logger.debug(f"STATE: {self.options}")
-            traceback.print_exc()
             self.cancel = True
         finally:
             # Finish up the update process.
@@ -366,8 +366,12 @@ class AbstractGameUpdater(ABC):
                             self.pool.submit(filesystem.safe_delete, path, self.install_path, self.purge_whitelist, self.logger)
                         )
 
-                    wait(futures)
-
+                    for future in as_completed(futures):
+                        try:
+                            future.result()
+                        except Exception as e:
+                            print(e)
+                            pass
 
     def extract_modpack_changelog(self, game, pack):
         changelog_temp_path = os.path.join(self.temp_path, 'CHANGELOG.md')
@@ -422,29 +426,36 @@ class AbstractGameUpdater(ABC):
         mods = self.modprovider.get_modpack_modlist(self)
         task_percent = 0.5 / len(mods)
         futures = []
+        future_to_mod = {}
 
         # Ensure destination exists
         os.makedirs(destination, exist_ok=True)
 
         for mod in mods:
-            futures.append(
-                self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
-            )
+            future = self.pool.submit(self.retrieve, mod, local_paths, destination, task_percent)
+            futures.append(future)
+            future_to_mod[future] = mod
 
-        result = wait(futures)
-
-        # Handle any mods that couldn't be downloaded
+        # Handle any mods that couldn't be downloaded, logging any failed retrievals
         notdownloaded = []
+        for f in as_completed(futures):
+            try:
+                f.result()
+            except Exception as e:
+                mod = future_to_mod.get(f)
+                self.logger.exception(f"Failed to retrieve mod: {mod}")
+                notdownloaded.append({'mod': mod, 'error': e})
 
-        for task in list(result.done):
-            if task.exception():
-                notdownloaded.append(task.exception())
-
-        if notdownloaded:
-            self.logger.warning('The launcher was unable to download the following mods:')
-            for mod in notdownloaded:
-                self.logger.warning(f'- {mod}')
-            self.logger.warning('You will need to download the files manually.')
+        #  Abort update early if 20% of the mods fail to download
+        if not self.cancel: # Do not alert if the download was canceled by user
+            if len(notdownloaded) / max(len(mods), 1) > 0.20:
+                self.logger.error("Too many mods failed to download. Aborting update process.")
+                self.cancel = True  
+            elif notdownloaded:
+                self.logger.warning('The launcher was unable to download the following mods:')
+                for result in notdownloaded:
+                    self.logger.warning(f"- {result['mod']}")
+                self.logger.warning('You will need to download the files manually.')
 
         os.chdir(self.temp_path)
 

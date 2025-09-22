@@ -1,4 +1,4 @@
-import logging
+import logging, copy
 from operator import itemgetter
 
 from modules import constants
@@ -115,16 +115,27 @@ class LogboxSender:
             self.write_to_logbox(record.name, record.levelname, record.message)
 
 
-
 class Handler(logging.Handler):
     def __init__(self) -> None:
         self.sender = LogboxSender()
-        logging.Handler.__init__(self=self)
-
+        super().__init__()
 
     def get_logbox(self, ctk, parent, game, pack):
         return self.sender.get_logbox(ctk, parent, game, pack)
-    
 
-    def emit(self, record) -> None:
-        self.sender.write_record(record)
+    def emit(self, record: logging.LogRecord):
+        if record.exc_info or record.stack_info:
+            return
+
+        msg = record.getMessage()
+
+        trace_message = "Traceback (most recent call last)"
+        if trace_message in msg:
+            msg = msg.split(trace_message)[0].strip()
+
+        if msg.startswith("Stack Trace:"):
+            return
+        
+        rec = copy.copy(record)
+        rec.message = msg
+        self.sender.write_record(rec)
