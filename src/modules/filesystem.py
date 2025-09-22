@@ -1,5 +1,8 @@
 import os
+from pathlib import Path
 import shutil
+
+from modules import constants, utility
 
 
 def move_files(source, target, walk=False, overwrite=True):
@@ -95,19 +98,12 @@ def overwrite_path(source, target):
 
 
 # ---- HELPER FUNCTIONS ---- #
-def path_is_relative(base, path) -> bool:
-    """
-    Ensures that the given path is nested inside the base path.
-    """
-    # Get the absolute paths
-    base_path = os.path.abspath(base)
-    abs_path = os.path.abspath(path)
-
-    # Determine if the path is within the base path
-    base_len = len(base_path)
-    if abs_path[0:base_len] != base_path:
+def path_is_relative(base: str, child: str) -> bool:
+    try:
+        Path(child).resolve().relative_to(Path(base).resolve())
+        return True
+    except Exception:
         return False
-    return True
 
 
 def can_delete_path(base_path, path, whitelist=[]) -> bool:
@@ -144,3 +140,34 @@ def can_delete_path(base_path, path, whitelist=[]) -> bool:
         return True
 
     return False
+
+def safe_extract(zf, destination):
+    destination = os.path.abspath(destination)
+
+    files = zf.infolist()
+    total_uncompressed = sum(_file.file_size for _file in files)
+    total_compressed = sum(_file.compress_size for _file in files) or 1 # avoid div by 0 with default
+
+    if len(files) > constants.MAX_ENTRY_COUNT:
+        raise RuntimeError(f"Archive has too many entries: {len(files)} > {constants.MAX_ENTRY_COUNT}")
+
+    if total_uncompressed > constants.MAX_TOTAL_UNCOMPRESSED:
+        tuf = utility.formatted_bytes(total_uncompressed)
+        raise RuntimeError(f"Archive uncompressed size too large: {tuf}")
+    
+    if (total_uncompressed / total_compressed) > constants.MAX_COMPRESSION_RATIO:
+        tuf = utility.formatted_bytes(total_uncompressed)
+        tcf = utility.formatted_bytes(total_compressed)
+        raise RuntimeError(f"Suspicious compression ratio: {tuf} /{tcf} > {constants.MAX_COMPRESSION_RATIO}")
+
+    for _file in files:
+        dest = os.path.abspath(os.path.join(destination, _file.filename))
+
+        if not path_is_relative(destination, dest):
+            raise RuntimeError(f"Blocked zip path traversal: {_file.filename}")
+        
+        if _file.file_size > constants.MAX_FILE_SIZE:
+            fsf = utility.formatted_bytes(_file.file_size)
+            raise RuntimeError(f"File is too large: {_file.filename} ({fsf}).")
+        
+        zf.extract(_file, destination)

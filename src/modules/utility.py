@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 from modules import constants, game_list, state_manager
 from elevate import elevate
 import os, ctypes, sys, subprocess
@@ -59,3 +60,19 @@ def respawn_launcher():
 
     subprocess.Popen(cmd, **kwargs)
     os._exit(0)  # or sys.exit(0) after root.destroy()
+
+
+def formatted_bytes(n: int) -> str:
+    if n < 0:
+        raise ValueError("n must be non-negative")
+
+    units = ["B", "KB", "MB", "GB"]
+    i = 0
+    value = float(n)
+
+    while value >= 1024 and i < len(units) - 1:
+        value /= 1024.0
+        i += 1
+
+    # No trailing .00; keep up to 2 decimals when needed
+    return f"{math.ceil(value)}" + units[i]

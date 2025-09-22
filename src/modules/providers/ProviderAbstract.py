@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import os, shutil, zipfile
 
-from modules import constants, network
+from modules import constants, filesystem, network
 
 class ProviderAbstract(ABC):
     # Mod specific methods
@@ -51,6 +51,8 @@ class ProviderAbstract(ABC):
                     chunk = 512 * 1024
                     with open(temp_path, "wb") as f:
                         for data in r.iter_content(chunk_size=chunk):
+                            if updater.cancel:
+                                break
                             if not data:
                                 continue
                             f.write(data)
@@ -59,7 +61,6 @@ class ProviderAbstract(ABC):
             if total and written != total:
                 raise IOError(f"Incomplete download for {mod_name}: {written}/{total}")
 
-            # Atomic promote to final path
             os.replace(temp_path, destination)
 
             if updater.unzip_mods and zipfile.is_zipfile(destination):
@@ -73,7 +74,7 @@ class ProviderAbstract(ABC):
                         extract_dir = destination_dir
 
                     with zipfile.ZipFile(destination, "r") as zf:
-                        zf.extractall(extract_dir)
+                        filesystem.safe_extract(zf, extract_dir)
 
                     try:
                         os.remove(destination)
@@ -163,6 +164,8 @@ class ProviderAbstract(ABC):
 
                 with open(temp_path, "wb") as f:
                     for data in r.iter_content(chunk_size=chunk):
+                        if updater.cancel:
+                            break
                         if not data:
                             continue
                         f.write(data)
@@ -221,13 +224,22 @@ class ProviderAbstract(ABC):
 
         zip_file = os.path.join(tmp, 'update.zip')
 
+        # This doesn't mean that the zip file didn't download -- it could have been extracted already in a previous update. So, just return, 
+        # and the updater will error out if any of the necessary files are missing from the zip downstream.
         if not os.path.exists(zip_file):
+            return
+        
+        # If it did download, and it's not a zip file, proceed to cancel the update and alert the user.
+        if not zipfile.is_zipfile(zip_file):
+            updater.logger.warning("Modpack archive is not a zip file. Aborting update process.")
+            updater.logger.debug(f"Zipfile location: {zip_file}")
+            updater.cancel = True
             return
 
         logger.info('Extracting the modpack zip.')
 
-        with zipfile.ZipFile(zip_file, 'r') as ref:
-            ref.extractall(tmp)
+        with zipfile.ZipFile(zip_file, 'r') as zf:
+            filesystem.safe_extract(zf, tmp)
 
         # Remove update.zip
         os.remove(zip_file)
