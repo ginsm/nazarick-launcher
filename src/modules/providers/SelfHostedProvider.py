@@ -1,7 +1,7 @@
 import json, os, requests
 from modules import constants, filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
-
+from modules.exceptions import InvalidProviderResponseError
 
 class SelfHostedProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
@@ -31,8 +31,8 @@ class SelfHostedProviderBase(ProviderAbstract):
     def download_modpack(self, updater):
         result = super().download_modpack(updater)
 
-        if result is not True:
-            raise Exception('Invalid response from SelfHosted (modpack)')
+        if not result:
+            raise InvalidProviderResponseError('Invalid response from SelfHosted (modpack)')
 
 
     def extract_modpack(self, updater, game, pack):

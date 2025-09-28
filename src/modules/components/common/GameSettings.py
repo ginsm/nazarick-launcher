@@ -2,6 +2,7 @@ from modules import gui_manager, state_manager
 from modules.components.common import ExplorerSearch
 from modules.path_finder.autodetect import autodetect_settings
 from tktooltip import ToolTip
+from modules.exceptions import InvalidGameSettingTypeError
 
 
 def create(ctk, parent, game, app, pool, settings):
@@ -52,7 +53,7 @@ def create(ctk, parent, game, app, pool, settings):
 
                 # Invalid setting type
                 case _:
-                    raise Exception(f"Invalid setting type provided for {game}'s '{setting.get('name')}' setting: {setting.get('type')}.")
+                    raise InvalidGameSettingTypeError(f"Invalid setting type provided for {game}'s '{setting.get('name')}' setting: {setting.get('type')}.")
                 
         autodetect = ctk.CTkButton(
             master=parent,

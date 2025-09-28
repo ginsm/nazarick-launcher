@@ -1,6 +1,7 @@
 import json, os, requests
 from modules import constants, filesystem
 from modules.providers.ProviderAbstract import ProviderAbstract
+from modules.exceptions import InvalidProviderResponseError
 
 class CurseForgeProviderBase(ProviderAbstract):
     def download_mod(self, updater, mod_data, local_paths, destination):
@@ -50,8 +51,8 @@ class CurseForgeProviderBase(ProviderAbstract):
     def download_modpack(self, updater):
         result = super().download_modpack(updater)
 
-        if result is not True:
-            raise Exception(f"Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.")
+        if not result:
+            raise InvalidProviderResponseError(f"Invalid response from SelfHosted while downloading modpack: {updater.version.get('name')}.")
 
 
     def extract_modpack(self, updater, game, pack):
@@ -91,7 +92,7 @@ class CurseForgeProviderBase(ProviderAbstract):
                 'file': contents.get('fileName')
             }
         else:
-            raise Exception(f'Invalid response from CurseForge API while retrieving file data for mod {mod_id}, file {file_id}.')
+            raise InvalidProviderResponseError(f'Invalid response from CurseForge API while retrieving file data for mod {mod_id}, file {file_id}.')
 
 
     def get_latest_version_file(self, project_id, game_version):

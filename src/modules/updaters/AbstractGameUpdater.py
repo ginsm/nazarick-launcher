@@ -5,7 +5,6 @@ import logging
 import os
 import shutil
 import subprocess
-import traceback
 from modules import constants, filesystem, gui_manager, state_manager, system_check, utility, network
 from modules.components.common import ChangesBox
 

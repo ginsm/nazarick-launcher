@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os, shutil, zipfile
 
 from modules import constants, filesystem, network
+from modules.exceptions import MissingModNameError, MissingModDownloadUrlError
 
 class ProviderAbstract(ABC):
     # Mod specific methods
@@ -16,9 +17,9 @@ class ProviderAbstract(ABC):
         mod_name = os.path.basename(mod_data.get('mod_name'))
 
         if not mod_name:
-            raise Exception("missing mod name: " + mod_data)
+            raise MissingModNameError(f"missing mod name: {mod_data!r}")
         if not mod_download_url:
-            raise Exception(f"missing mod_download_url for {mod_name}")
+            raise MissingModDownloadUrlError(f"missing mod_download_url for {mod_name}: {mod_data!r}")
 
         # Add mod name to destination if missing.
         if not destination.endswith(mod_name):

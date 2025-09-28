@@ -1,6 +1,7 @@
 import json, os, requests
 from modules import constants
 from modules.providers.ProviderAbstract import ProviderAbstract
+from modules.exceptions import InvalidProviderResponseError
 
 
 class ThunderstoreProviderBase(ProviderAbstract):
@@ -40,8 +41,8 @@ class ThunderstoreProviderBase(ProviderAbstract):
     def download_modpack(self, updater):
         result = super().download_modpack(updater)
 
-        if result is not True:
-            raise Exception(f"Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.")
+        if not result:
+            raise InvalidProviderResponseError(f"Invalid from Thunderstore while downloading modpack: {updater.version.get('name')}.")
 
 
     def extract_modpack(self, updater, game, pack):

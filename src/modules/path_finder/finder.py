@@ -1,6 +1,7 @@
 import os, re, vdf, subprocess, json, glob
 from uuid import UUID
 from modules import constants, utility
+from modules.exceptions import MissingAppIDError, InvalidAppIDTypeError, MissingSteamPathError, PowerShellCommandError
 
 # ---- Epic Specific ---- #
 def find_epic_game_path(game_id):
@@ -56,7 +57,7 @@ def get_steam_game_path(game_id):
     steam_path = find_steam_path()
 
     if not steam_path:
-        raise Exception("Could not find steam path.")
+        raise MissingSteamPathError("Could not find steam path.")
 
     libraries_path = os.path.join(steam_path, 'steamapps', 'libraryfolders.vdf')
     libraries_data = vdf.parse(open(libraries_path)).get('libraryfolders')
@@ -108,7 +109,9 @@ def run_powershell_command(command):
     )
 
     if path.returncode != 0:
-        raise Exception(path.stderr)
+        raise PowerShellCommandError(
+            f"Command failed (rc={path.returncode}): {command}\nSTDERR:\n{path.stderr}"
+        )
 
     return path.stdout.strip()
 
@@ -210,7 +213,7 @@ def normalize_appid(appid, convention):
 def find_appid_path(appid, convention=None):
     """ Searches for the path based on the AppID and its convention. """
     if not appid:
-        raise Exception('The provided AppID was empty.')
+        raise MissingAppIDError('The provided AppID was empty.')
 
     if not convention:
         convention = get_appid_convention(appid)
@@ -231,4 +234,4 @@ def find_appid_path(appid, convention=None):
         case 'knownfile':
             return find_knownfile_paths(appid)
         case _:
-            raise Exception(f'AppID type ({convention}) is unhandled by find_appid_path: {appid}')
+            raise InvalidAppIDTypeError(f'AppID type ({convention}) is unhandled by find_appid_path: {appid}')
