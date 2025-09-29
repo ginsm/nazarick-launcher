@@ -60,7 +60,8 @@ def get_steam_game_path(game_id):
         raise MissingSteamPathError("Could not find steam path.")
 
     libraries_path = os.path.join(steam_path, 'steamapps', 'libraryfolders.vdf')
-    libraries_data = vdf.parse(open(libraries_path)).get('libraryfolders')
+    with open(libraries_path, 'r', encoding='utf-8') as f:
+        libraries_data = vdf.parse(f).get('libraryfolders')
 
     for library_id in libraries_data:
         library = libraries_data.get(library_id)
