@@ -37,7 +37,8 @@ class ValheimUpdater(AbstractGameUpdater):
         # Used by super.retrieve_mods
         self.temp_mods_path = os.path.join(self.temp_path, 'plugins')
         self.local_paths = [
-                os.path.join(self.install_path, 'BepInEx', 'plugins')
+                os.path.join(self.install_path, 'BepInEx', 'plugins'),
+                self.temp_mods_path
         ]
 
         # Used by super.run_executable

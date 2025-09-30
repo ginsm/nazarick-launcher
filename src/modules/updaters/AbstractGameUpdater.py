@@ -481,6 +481,7 @@ class AbstractGameUpdater(ABC):
         found = False
 
         for local_path in local_paths:
+            # Check for presence of exact file
             local_file_path = os.path.join(local_path, filename)
 
             if os.path.exists(local_file_path):
@@ -499,6 +500,27 @@ class AbstractGameUpdater(ABC):
 
                     found = True
                     break
+
+            # Check for folder with same stem (e.g. a mod that was extracted from a zip)
+            stem = os.path.splitext(filename)[0]
+            local_dir_path = os.path.join(local_path, stem)
+
+            if os.path.isdir(local_dir_path):
+                # If destination is a directory, mirror the folder inside it.
+                if os.path.isdir(destination):
+                    dest_dir = os.path.join(destination, stem)
+                    if not os.path.exists(dest_dir):
+                        self.logger.info(f'(M) {filename}')
+                        shutil.copytree(local_dir_path, dest_dir)
+                    else:
+                        self.logger.info(f'(E) {filename}')
+                else:
+                    # Destination is a file path; we can’t copy a directory there.
+                    # Still mark as found to avoid prompting for manual download.
+                    self.logger.info(f'(E) {filename}')
+
+                found = True
+                break
 
         # Change working directory to free all local paths
         os.chdir(constants.APP_BASE_DIR)
