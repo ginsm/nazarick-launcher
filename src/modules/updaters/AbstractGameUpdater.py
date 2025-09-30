@@ -506,17 +506,11 @@ class AbstractGameUpdater(ABC):
             local_dir_path = os.path.join(local_path, stem)
 
             if os.path.isdir(local_dir_path):
-                # If destination is a directory, mirror the folder inside it.
-                if os.path.isdir(destination):
-                    dest_dir = os.path.join(destination, stem)
-                    if not os.path.exists(dest_dir):
-                        self.logger.info(f'(M) {filename}')
-                        shutil.copytree(local_dir_path, dest_dir)
-                    else:
-                        self.logger.info(f'(E) {filename}')
+                dest_dir = os.path.join(destination, stem)
+                if not os.path.exists(dest_dir):
+                    self.logger.info(f'(M) {filename}')
+                    shutil.copytree(local_dir_path, dest_dir)
                 else:
-                    # Destination is a file path; we can’t copy a directory there.
-                    # Still mark as found to avoid prompting for manual download.
                     self.logger.info(f'(E) {filename}')
 
                 found = True
