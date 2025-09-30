@@ -1,8 +1,8 @@
-import os, pathlib, sys, math, platform
+import os, pathlib, sys, platform
 from dotenv import load_dotenv
 
 # App info
-APP_VERSION = '1.4.14'
+APP_VERSION = '1.4.15'
 APP_NAME = 'Nazarick_Launcher'
 APP_BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 LOGGER_NAME = 'Nazarick'
