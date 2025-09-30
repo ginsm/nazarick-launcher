@@ -59,6 +59,11 @@ class ProviderAbstract(ABC):
                             f.write(data)
                             written += len(data)
 
+            if updater.cancel:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                return
+
             if total and written != total:
                 raise IOError(f"Incomplete download for {mod_name}: {written}/{total}")
 
